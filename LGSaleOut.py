@@ -15,6 +15,7 @@ from __future__ import annotations
 import os
 import re
 import secrets
+import socket
 import tempfile
 import threading
 from dataclasses import dataclass, field
@@ -69,6 +70,23 @@ def connection_string() -> str:
 
 def db_connect() -> pyodbc.Connection:
     return pyodbc.connect(connection_string(), timeout=8)
+
+
+def local_network_ip() -> str | None:
+    """Best-effort LAN address detection without sending application data."""
+    probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        probe.connect(("8.8.8.8", 80))
+        address = probe.getsockname()[0]
+        return address if not address.startswith("127.") else None
+    except OSError:
+        try:
+            addresses = socket.gethostbyname_ex(socket.gethostname())[2]
+            return next((item for item in addresses if not item.startswith("127.")), None)
+        except OSError:
+            return None
+    finally:
+        probe.close()
 
 
 def clean_text(value: Any) -> str | None:
@@ -392,6 +410,92 @@ def health():
         return jsonify({"ok": False, "message": str(exc)}), 503
 
 
+@app.get("/api/salespeople")
+def get_salespeople():
+    """Return active salespeople that have inventory records."""
+    try:
+        with db_connect() as connection:
+            rows = connection.cursor().execute(
+                """
+                SELECT DISTINCT s.SalespersonId, s.SalespersonName
+                FROM dbo.Salesperson AS s
+                INNER JOIN dbo.InventoryMonthEnd AS i
+                    ON i.SalespersonId = s.SalespersonId
+                WHERE s.IsActive = 1
+                ORDER BY s.SalespersonName;
+                """
+            ).fetchall()
+        return jsonify({"ok": True, "items": [
+            {"id": int(row.SalespersonId), "name": row.SalespersonName}
+            for row in rows
+        ]})
+    except Exception as exc:
+        return jsonify({"ok": False, "message": str(exc)}), 503
+
+
+@app.get("/api/dealers")
+def get_dealers():
+    salesperson_id = request.args.get("salespersonId", type=int)
+    if not salesperson_id:
+        return jsonify({"ok": False, "message": "缺少 salespersonId"}), 400
+    try:
+        with db_connect() as connection:
+            rows = connection.cursor().execute(
+                """
+                SELECT DISTINCT d.DealerId, d.DealerCode, d.ShortName
+                FROM dbo.InventoryMonthEnd AS i
+                INNER JOIN dbo.Dealer AS d ON d.DealerId = i.DealerId
+                WHERE i.SalespersonId = ? AND d.IsActive = 1
+                ORDER BY d.ShortName, d.DealerCode;
+                """,
+                salesperson_id,
+            ).fetchall()
+        return jsonify({"ok": True, "items": [
+            {"id": int(row.DealerId), "code": row.DealerCode, "name": row.ShortName}
+            for row in rows
+        ]})
+    except Exception as exc:
+        return jsonify({"ok": False, "message": str(exc)}), 503
+
+
+@app.get("/api/models")
+def get_models():
+    salesperson_id = request.args.get("salespersonId", type=int)
+    dealer_id = request.args.get("dealerId", type=int)
+    if not salesperson_id or not dealer_id:
+        return jsonify({"ok": False, "message": "缺少 salespersonId 或 dealerId"}), 400
+    try:
+        with db_connect() as connection:
+            rows = connection.cursor().execute(
+                """
+                WITH LatestPeriod AS (
+                    SELECT MAX(PeriodEnd) AS PeriodEnd
+                    FROM dbo.InventoryMonthEnd
+                    WHERE DealerId = ?
+                )
+                SELECT p.ProductId, p.ModelCode, i.EndingQuantity
+                FROM dbo.InventoryMonthEnd AS i
+                INNER JOIN LatestPeriod AS lp ON lp.PeriodEnd = i.PeriodEnd
+                INNER JOIN dbo.Product AS p ON p.ProductId = i.ProductId
+                WHERE i.DealerId = ?
+                  AND i.EndingQuantity > 0
+                  AND p.IsActive = 1
+                ORDER BY p.ModelCode;
+                """,
+                dealer_id, dealer_id,
+            ).fetchall()
+        return jsonify({"ok": True, "items": [
+            {
+                "id": int(row.ProductId),
+                "modelCode": row.ModelCode,
+                "currentQuantity": int(row.EndingQuantity),
+            }
+            for row in rows
+        ]})
+    except Exception as exc:
+        return jsonify({"ok": False, "message": str(exc)}), 503
+
+
 @app.post("/api/imports/validate")
 def validate_import():
     cleanup_pending()
@@ -477,5 +581,14 @@ def file_too_large(_error):
 
 
 if __name__ == "__main__":
-    print("LGSaleOut server: http://127.0.0.1:8097")
+    lan_ip = local_network_ip()
+    print("=" * 54)
+    print(" LGSaleOut server is running")
+    print(" Computer : http://127.0.0.1:8097")
+    if lan_ip:
+        print(f" Mobile   : http://{lan_ip}:8097")
+        print(" Phone and computer must use the same Wi-Fi.")
+    else:
+        print(" Mobile   : LAN IP could not be detected")
+    print("=" * 54, flush=True)
     app.run(host="0.0.0.0", port=8097, debug=False)

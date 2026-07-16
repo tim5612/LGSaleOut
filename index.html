@@ -2,312 +2,187 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LGSaleOut 月底庫存匯入</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#102a43">
+  <title>LGSaleOut 業務回報</title>
   <style>
-    :root {
-      color-scheme: light;
-      --ink: #14213d;
-      --muted: #667085;
-      --line: #d9e0ea;
-      --paper: #ffffff;
-      --wash: #f3f6fa;
-      --brand: #0b5cab;
-      --brand-dark: #08457f;
-      --green: #087a55;
-      --amber: #9a6700;
-      --red: #b42318;
-      --shadow: 0 16px 45px rgba(20, 33, 61, .10);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      color: var(--ink);
-      background:
-        radial-gradient(circle at 8% 0%, rgba(11,92,171,.09), transparent 28rem),
-        var(--wash);
-      font-family: "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-    }
-    header {
-      height: 74px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 max(24px, calc((100vw - 1120px) / 2));
-      color: white;
-      background: var(--ink);
-    }
-    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; letter-spacing: .02em; }
-    .brand-mark { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: #fff; color: var(--brand); }
-    .db-state { display: flex; align-items: center; gap: 8px; color: #d6deea; font-size: 14px; }
-    .dot { width: 9px; height: 9px; border-radius: 99px; background: #98a2b3; }
-    .dot.ok { background: #32d583; box-shadow: 0 0 0 4px rgba(50,213,131,.16); }
-    .dot.bad { background: #f97066; }
-    main { max-width: 1120px; margin: 0 auto; padding: 48px 24px 70px; }
-    .intro { margin-bottom: 28px; }
-    h1 { margin: 0 0 8px; font-size: clamp(28px, 4vw, 42px); letter-spacing: -.035em; }
-    .intro p { margin: 0; color: var(--muted); font-size: 17px; }
-    .card { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; }
-    .step { display: grid; grid-template-columns: 44px 1fr; gap: 18px; padding: 28px; border-bottom: 1px solid var(--line); }
-    .step:last-child { border-bottom: 0; }
-    .step-number { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: white; background: var(--brand); font-weight: 700; }
-    .step h2 { margin: 3px 0 6px; font-size: 19px; }
-    .step-copy { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
-    .form-row { display: grid; grid-template-columns: minmax(0, 1fr) 190px auto; gap: 12px; align-items: end; }
-    label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 650; }
-    input[type="file"], input[type="month"] { width: 100%; height: 46px; border: 1px solid #b8c2d0; border-radius: 9px; background: #fff; padding: 9px 11px; color: var(--ink); }
-    input[type="file"]::file-selector-button { height: 28px; margin-right: 10px; border: 0; border-radius: 6px; padding: 0 12px; color: var(--brand-dark); background: #eaf2fb; font-weight: 650; cursor: pointer; }
-    button { height: 46px; border: 0; border-radius: 9px; padding: 0 22px; color: white; background: var(--brand); font-weight: 700; font-size: 15px; cursor: pointer; transition: .15s ease; }
-    button:hover:not(:disabled) { background: var(--brand-dark); transform: translateY(-1px); }
-    button:disabled { opacity: .45; cursor: not-allowed; }
-    button.secondary { color: var(--ink); background: #e9edf3; }
-    .message { display: none; margin-top: 16px; border-radius: 9px; padding: 12px 14px; font-size: 14px; }
-    .message.show { display: block; }
-    .message.error { color: var(--red); background: #fff0ee; border: 1px solid #fecdca; }
-    .message.success { color: var(--green); background: #ecfdf3; border: 1px solid #abefc6; }
-    .message.info { color: var(--brand-dark); background: #eff7ff; border: 1px solid #b2ddff; }
-    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 18px; }
-    .stat { padding: 15px; border: 1px solid var(--line); border-radius: 11px; background: #fafbfd; }
-    .stat span { display: block; color: var(--muted); font-size: 12px; }
-    .stat strong { display: block; margin-top: 5px; font-size: 22px; }
-    .details { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .detail { border-left: 3px solid var(--brand); padding: 9px 12px; background: #f8fafc; }
-    .detail span { color: var(--muted); font-size: 12px; }
-    .detail strong { display: block; margin-top: 2px; }
-    .warning-panel { margin-top: 18px; padding: 14px; border-radius: 10px; color: #784d00; background: #fff8e8; border: 1px solid #fedf89; }
-    .warning-panel h3 { margin: 0 0 8px; font-size: 14px; }
-    .warning-panel ul { margin: 0; padding-left: 20px; font-size: 13px; max-height: 150px; overflow: auto; }
-    .commit-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
-    .replace { display: none; align-items: flex-start; gap: 9px; color: var(--red); font-size: 14px; }
-    .replace.show { display: flex; }
-    .replace input { margin-top: 3px; }
-    .hidden { display: none !important; }
-    .spinner { width: 17px; height: 17px; display: inline-block; vertical-align: -3px; margin-right: 8px; border: 2px solid rgba(255,255,255,.4); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    footer { margin-top: 20px; color: var(--muted); text-align: center; font-size: 12px; }
-    @media (max-width: 760px) {
-      header { padding: 0 18px; }
-      main { padding: 32px 15px 50px; }
-      .form-row { grid-template-columns: 1fr; }
-      .stats { grid-template-columns: 1fr 1fr; }
-      .details { grid-template-columns: 1fr; }
-      .step { grid-template-columns: 1fr; padding: 22px; }
-      .commit-row { align-items: stretch; flex-direction: column; }
-      .commit-row button { width: 100%; }
-      .db-state span:last-child { display: none; }
-    }
+    :root { --navy:#102a43; --blue:#1677ff; --pale:#eef6ff; --ink:#172b3a; --muted:#6b7c8f; --line:#dbe5ee; --paper:#fff; --danger:#c5352a; }
+    * { box-sizing:border-box; }
+    html { background:#edf3f8; }
+    body { margin:0; color:var(--ink); background:#edf3f8; font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif; }
+    button, select, input { font:inherit; }
+    button { -webkit-tap-highlight-color:transparent; }
+    .app { width:100%; max-width:480px; min-height:100dvh; margin:auto; background:#f7fafc; box-shadow:0 0 35px #16324f18; }
+    header { padding:calc(18px + env(safe-area-inset-top)) 20px 19px; color:#fff; background:linear-gradient(145deg,#102a43,#174f78); }
+    .eyebrow { margin:0 0 6px; color:#a9d6ff; font-size:12px; font-weight:800; letter-spacing:.13em; }
+    h1 { margin:0; font-size:25px; letter-spacing:.01em; }
+    header p { margin:7px 0 0; color:#d7e8f5; font-size:13px; }
+    main { padding:18px 14px calc(30px + env(safe-area-inset-bottom)); }
+    .card { margin-bottom:14px; padding:18px; background:var(--paper); border:1px solid var(--line); border-radius:18px; box-shadow:0 8px 25px #183b5610; }
+    .section-title { display:flex; align-items:center; gap:10px; margin:0 0 16px; font-size:17px; }
+    .badge { width:27px; height:27px; display:grid; place-items:center; color:#fff; background:var(--blue); border-radius:9px; font-size:13px; }
+    label.field-label { display:block; margin:0 0 7px; color:#40566a; font-size:13px; font-weight:800; }
+    select { width:100%; min-height:49px; padding:0 42px 0 13px; color:var(--ink); border:1px solid #bccbd8; border-radius:12px; background:#fff; }
+    select:disabled { color:#8a9aaa; background:#f2f5f7; }
+    .stack { display:grid; gap:15px; }
+    .hint, .empty { color:var(--muted); font-size:13px; line-height:1.6; }
+    .empty { padding:22px 12px; text-align:center; border:1px dashed #c6d4df; border-radius:12px; background:#f9fbfd; }
+    .models { display:grid; gap:9px; }
+    .model-row { display:grid; grid-template-columns:minmax(0,1fr) 86px; gap:10px; align-items:center; padding:11px 11px 11px 13px; background:#f7fafc; border:1px solid #e0e9f0; border-radius:12px; }
+    .model-code { overflow-wrap:anywhere; font-weight:800; }
+    .stock { margin-top:3px; color:var(--muted); font-size:11px; }
+    .qty { width:100%; height:43px; padding:0 7px; text-align:center; border:1px solid #9eb3c4; border-radius:9px; background:#fff; }
+    .photo-group { margin-top:13px; padding:13px; border:1px solid var(--line); border-radius:15px; background:#fbfdff; }
+    .photo-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .photo-head strong { font-size:14px; }
+    .photo-head select { width:128px; min-height:42px; }
+    .photo-box { position:relative; aspect-ratio:1/1; overflow:hidden; display:grid; place-items:center; border:2px dashed #b4c8d8; border-radius:14px; background:#edf4f9; cursor:pointer; }
+    .photo-box:focus-visible { outline:3px solid #95c5ff; outline-offset:2px; }
+    .photo-box img { width:100%; height:100%; display:none; object-fit:cover; }
+    .photo-box.has-photo img { display:block; }
+    .photo-box.has-photo .camera-copy { display:none; }
+    .camera-copy { color:#557086; text-align:center; }
+    .camera-icon { display:block; margin-bottom:8px; font-size:34px; }
+    .camera-copy span:last-child { display:block; font-size:13px; font-weight:800; }
+    .photo-input { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+    .fake-submit { width:100%; min-height:54px; color:#fff; background:linear-gradient(135deg,#1677ff,#0d5bc0); border:0; border-radius:14px; font-size:16px; font-weight:900; box-shadow:0 9px 20px #1677ff38; }
+    .toast { position:fixed; left:50%; bottom:calc(22px + env(safe-area-inset-bottom)); z-index:5; width:max-content; max-width:calc(100% - 32px); padding:11px 16px; color:#fff; background:#172b3a; border-radius:999px; font-size:13px; transform:translate(-50%,20px); opacity:0; pointer-events:none; transition:.2s; }
+    .toast.show { transform:translate(-50%,0); opacity:1; }
+    .error { color:var(--danger); }
+    [hidden] { display:none !important; }
   </style>
 </head>
 <body>
-  <header>
-    <div class="brand"><span class="brand-mark">LG</span><span>LGSaleOut</span></div>
-    <div class="db-state"><span id="dbDot" class="dot"></span><span id="dbText">檢查資料庫連線中</span></div>
-  </header>
+  <div class="app">
+    <header>
+      <p class="eyebrow">LG SALES OUT</p>
+      <h1>門市庫存回報</h1>
+      <p>選擇客戶、填寫數量並拍攝現場照片</p>
+    </header>
+    <main>
+      <section class="card" aria-labelledby="loginTitle">
+        <h2 class="section-title" id="loginTitle"><span class="badge">1</span>業務登入</h2>
+        <label class="field-label" for="salesperson">Salesperson 業務</label>
+        <select id="salesperson"><option value="">資料載入中…</option></select>
+        <p id="loginStatus" class="hint">請先選擇您的業務姓名</p>
+      </section>
 
-  <main>
-    <section class="intro">
-      <h1>月底庫存匯入</h1>
-      <p>選擇 Excel、檢查內容，確認後才會寫入資料庫。</p>
-    </section>
-
-    <section class="card">
-      <div class="step">
-        <div class="step-number">1</div>
-        <div>
-          <h2>選擇並檢查 Excel</h2>
-          <p class="step-copy">檔案必須包含「期末」工作表，欄位標題位於第 4 列。</p>
-          <form id="uploadForm">
-            <div class="form-row">
-              <div>
-                <label for="excelFile">Excel 檔案</label>
-                <input id="excelFile" name="file" type="file" accept=".xlsx" required>
-              </div>
-              <div>
-                <label for="period">資料月份</label>
-                <input id="period" name="period" type="month" aria-describedby="periodHelp">
-              </div>
-              <button id="validateBtn" type="submit">檢查檔案</button>
+      <div id="reportPage" hidden>
+        <section class="card" aria-labelledby="inventoryTitle">
+          <h2 class="section-title" id="inventoryTitle"><span class="badge">2</span>Dealer 與庫存</h2>
+          <div class="stack">
+            <div>
+              <label class="field-label" for="dealer">Dealer 經銷商</label>
+              <select id="dealer" disabled><option value="">請選擇 Dealer</option></select>
             </div>
-            <small id="periodHelp" style="display:block;margin-top:8px;color:var(--muted)">未選月份時，會從檔名的 YYYYMM 自動判斷。</small>
-          </form>
-          <div id="validateMessage" class="message" role="alert"></div>
-        </div>
-      </div>
+            <div>
+              <label class="field-label">Product &gt; ModelCode／回報數量</label>
+              <div id="models" class="models"><div class="empty">選擇 Dealer 後顯示 ModelCode</div></div>
+            </div>
+          </div>
+        </section>
 
-      <div id="previewStep" class="step hidden">
-        <div class="step-number">2</div>
-        <div>
-          <h2>確認匯入內容</h2>
-          <p class="step-copy">以下數字已排除空白列與 Excel 最後的彙總列。</p>
-          <div class="stats">
-            <div class="stat"><span>有效明細</span><strong id="rowCount">—</strong></div>
-            <div class="stat"><span>經銷商</span><strong id="dealerCount">—</strong></div>
-            <div class="stat"><span>產品型號</span><strong id="productCount">—</strong></div>
-            <div class="stat"><span>期末總數</span><strong id="endingTotal">—</strong></div>
-          </div>
-          <div class="details">
-            <div class="detail"><span>資料月份</span><strong id="periodResult">—</strong></div>
-            <div class="detail"><span>陳列總數</span><strong id="displayTotal">—</strong></div>
-            <div class="detail"><span>計入期末</span><strong id="countedTotal">—</strong></div>
-            <div class="detail"><span>不計期末</span><strong id="excludedTotal">—</strong></div>
-          </div>
-          <div id="warnings" class="warning-panel hidden">
-            <h3 id="warningTitle">資料警告</h3>
-            <ul id="warningList"></ul>
-          </div>
-        </div>
+        <section class="card" aria-labelledby="photoTitle">
+          <h2 class="section-title" id="photoTitle"><span class="badge">3</span>現場照片</h2>
+          <p class="hint">每組選擇照片類型，再點選正方形區域拍照。</p>
+          <div id="photoGroups"></div>
+        </section>
+        <button id="submit" class="fake-submit" type="button">寫入回報</button>
       </div>
-
-      <div id="commitStep" class="step hidden">
-        <div class="step-number">3</div>
-        <div>
-          <h2>寫入 LGSaleOut</h2>
-          <p class="step-copy">匯入會建立批次紀錄，並保留 Excel 原始欄位供日後追查。</p>
-          <div class="commit-row">
-            <label id="replaceLabel" class="replace">
-              <input id="replaceExisting" type="checkbox">
-              <span id="replaceText">這個月份已有資料，我了解並要取代原資料。</span>
-            </label>
-            <span id="noReplaceNeeded" style="color:var(--green);font-size:14px">此月份尚無資料，可以安全匯入。</span>
-            <button id="commitBtn" type="button">確認匯入</button>
-          </div>
-          <div id="commitMessage" class="message" role="alert"></div>
-        </div>
-      </div>
-    </section>
-    <footer>Excel 只會傳送到本機 Python 服務，資料庫密碼不會出現在網頁中。</footer>
-  </main>
+    </main>
+  </div>
+  <div id="toast" class="toast" role="status"></div>
 
   <script>
-    const $ = (id) => document.getElementById(id);
-    const number = (value) => new Intl.NumberFormat('zh-TW').format(value);
-    let importToken = null;
-    let existingRows = 0;
+    const $ = id => document.getElementById(id);
+    const salesperson = $('salesperson');
+    const dealer = $('dealer');
 
-    function showMessage(element, text, type) {
-      element.textContent = text;
-      element.className = `message show ${type}`;
+    function option(value, text) {
+      const el = document.createElement('option');
+      el.value = value; el.textContent = text;
+      return el;
     }
-
-    function clearMessage(element) {
-      element.textContent = '';
-      element.className = 'message';
+    async function getJSON(url) {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (!response.ok || !data.ok) throw new Error(data.message || '資料讀取失敗');
+      return data.items;
     }
-
-    function setBusy(button, busy, text) {
-      button.disabled = busy;
-      button.innerHTML = busy ? `<span class="spinner"></span>${text}` : text;
+    function showToast(text) {
+      $('toast').textContent = text;
+      $('toast').classList.add('show');
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => $('toast').classList.remove('show'), 2400);
     }
-
-    async function checkDatabase() {
+    async function loadSalespeople() {
       try {
-        const response = await fetch('/api/health');
-        const data = await response.json();
-        $('dbDot').className = `dot ${data.ok ? 'ok' : 'bad'}`;
-        $('dbText').textContent = data.ok ? `已連線 ${data.database}` : '資料庫未連線';
-      } catch (_) {
-        $('dbDot').className = 'dot bad';
-        $('dbText').textContent = 'Python Server 未連線';
-      }
-    }
-
-    $('uploadForm').addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const file = $('excelFile').files[0];
-      if (!file) {
-        showMessage($('validateMessage'), '請先選擇 Excel 檔案。', 'error');
-        return;
-      }
-      importToken = null;
-      $('previewStep').classList.add('hidden');
-      $('commitStep').classList.add('hidden');
-      clearMessage($('validateMessage'));
-      clearMessage($('commitMessage'));
-      setBusy($('validateBtn'), true, '檢查中');
-
-      const form = new FormData();
-      form.append('file', file);
-      if ($('period').value) form.append('period', $('period').value);
-
-      try {
-        const response = await fetch('/api/imports/validate', { method: 'POST', body: form });
-        const data = await response.json();
-        if (!response.ok) {
-          const details = (data.errors || []).slice(0, 5).map(x => `第 ${x.row} 列：${x.message}`).join('；');
-          throw new Error(details ? `${data.message}：${details}` : data.message);
-        }
-
-        importToken = data.token;
-        existingRows = data.existingRows;
-        $('rowCount').textContent = number(data.rowCount);
-        $('dealerCount').textContent = number(data.dealerCount);
-        $('productCount').textContent = number(data.productCount);
-        $('endingTotal').textContent = number(data.endingTotal);
-        $('periodResult').textContent = data.period.slice(0, 7);
-        $('displayTotal').textContent = number(data.displayTotal);
-        $('countedTotal').textContent = number(data.countedTotal);
-        $('excludedTotal').textContent = number(data.excludedTotal);
-
-        const warningPanel = $('warnings');
-        const warningList = $('warningList');
-        warningList.innerHTML = '';
-        if (data.warningCount) {
-          $('warningTitle').textContent = `${data.warningCount} 筆警告（仍可匯入）`;
-          for (const warning of data.warnings) {
-            const li = document.createElement('li');
-            li.textContent = `第 ${warning.row} 列：${warning.message}`;
-            warningList.appendChild(li);
-          }
-          warningPanel.classList.remove('hidden');
-        } else {
-          warningPanel.classList.add('hidden');
-        }
-
-        const hasExisting = data.existingRows > 0;
-        $('replaceLabel').classList.toggle('show', hasExisting);
-        $('noReplaceNeeded').classList.toggle('hidden', hasExisting);
-        $('replaceExisting').checked = false;
-        if (hasExisting) $('replaceText').textContent = `這個月份已有 ${number(data.existingRows)} 筆，我了解並要全部取代。`;
-        $('previewStep').classList.remove('hidden');
-        $('commitStep').classList.remove('hidden');
-        showMessage($('validateMessage'), '檔案檢查完成，請確認下方數字。', 'success');
-        $('previewStep').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const items = await getJSON('/api/salespeople');
+        salesperson.replaceChildren(option('', '請選擇業務'));
+        items.forEach(item => salesperson.append(option(item.id, item.name)));
+        $('loginStatus').textContent = items.length ? '選擇後將開啟回報頁面' : '目前沒有可用的業務資料';
       } catch (error) {
-        showMessage($('validateMessage'), error.message || '檔案檢查失敗。', 'error');
-      } finally {
-        setBusy($('validateBtn'), false, '檢查檔案');
+        salesperson.replaceChildren(option('', '無法載入業務'));
+        $('loginStatus').textContent = error.message;
+        $('loginStatus').classList.add('error');
+      }
+    }
+    salesperson.addEventListener('change', async () => {
+      $('reportPage').hidden = !salesperson.value;
+      dealer.disabled = true;
+      dealer.replaceChildren(option('', 'Dealer 載入中…'));
+      $('models').innerHTML = '<div class="empty">選擇 Dealer 後顯示 ModelCode</div>';
+      if (!salesperson.value) return;
+      $('loginStatus').textContent = `已登入：${salesperson.selectedOptions[0].textContent}`;
+      try {
+        const items = await getJSON(`/api/dealers?salespersonId=${encodeURIComponent(salesperson.value)}`);
+        dealer.replaceChildren(option('', '請選擇 Dealer'));
+        items.forEach(item => dealer.append(option(item.id, `${item.name}｜${item.code}`)));
+        dealer.disabled = false;
+        $('reportPage').scrollIntoView({ behavior:'smooth', block:'start' });
+      } catch (error) {
+        dealer.replaceChildren(option('', '無法載入 Dealer'));
+        showToast(error.message);
       }
     });
-
-    $('commitBtn').addEventListener('click', async () => {
-      if (!importToken) return;
-      if (existingRows > 0 && !$('replaceExisting').checked) {
-        showMessage($('commitMessage'), '這個月份已有資料；若要取代，請先勾選確認。', 'error');
-        return;
-      }
-      clearMessage($('commitMessage'));
-      setBusy($('commitBtn'), true, '匯入中');
+    dealer.addEventListener('change', async () => {
+      const box = $('models');
+      if (!dealer.value) { box.innerHTML = '<div class="empty">選擇 Dealer 後顯示 ModelCode</div>'; return; }
+      box.innerHTML = '<div class="empty">庫存載入中…</div>';
       try {
-        const response = await fetch('/api/imports/commit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: importToken, replaceExisting: $('replaceExisting').checked })
+        const items = await getJSON(`/api/models?salespersonId=${encodeURIComponent(salesperson.value)}&dealerId=${encodeURIComponent(dealer.value)}`);
+        box.replaceChildren();
+        if (!items.length) { box.innerHTML = '<div class="empty">此 Dealer 目前沒有庫存資料</div>'; return; }
+        items.forEach(item => {
+          const row = document.createElement('div');
+          row.className = 'model-row';
+          row.innerHTML = `<div><div class="model-code"></div><div class="stock"></div></div><input class="qty" type="number" min="0" step="1" inputmode="numeric" placeholder="數量" aria-label="回報數量">`;
+          row.querySelector('.model-code').textContent = item.modelCode;
+          row.querySelector('.stock').textContent = `現有庫存 ${item.currentQuantity}`;
+          box.append(row);
         });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || '匯入失敗');
-        showMessage($('commitMessage'), `匯入完成：批次 #${data.batchId}，共 ${number(data.importedRows)} 筆。`, 'success');
-        importToken = null;
-        $('commitBtn').disabled = true;
-        $('excelFile').value = '';
-      } catch (error) {
-        showMessage($('commitMessage'), error.message || '資料庫匯入失敗。', 'error');
-      } finally {
-        if (importToken) setBusy($('commitBtn'), false, '確認匯入');
-      }
+      } catch (error) { box.innerHTML = `<div class="empty error"></div>`; box.firstElementChild.textContent = error.message; }
     });
 
-    checkDatabase();
+    for (let i = 1; i <= 3; i++) {
+      const group = document.createElement('div');
+      group.className = 'photo-group';
+      group.innerHTML = `<div class="photo-head"><strong>照片 ${i}</strong><select aria-label="照片 ${i} 類型"><option>賣場</option><option>陳列</option><option>活動</option></select></div><label class="photo-box" tabindex="0"><input class="photo-input" type="file" accept="image/*" capture="environment"><img alt="照片 ${i} 預覽"><span class="camera-copy"><span class="camera-icon">📷</span><span>點此拍照</span></span></label>`;
+      const box = group.querySelector('.photo-box');
+      const input = group.querySelector('input');
+      const image = group.querySelector('img');
+      box.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); } });
+      input.addEventListener('change', () => {
+        if (!input.files[0]) return;
+        if (image.dataset.url) URL.revokeObjectURL(image.dataset.url);
+        image.dataset.url = URL.createObjectURL(input.files[0]);
+        image.src = image.dataset.url;
+        box.classList.add('has-photo');
+      });
+      $('photoGroups').append(group);
+    }
+    $('submit').addEventListener('click', () => showToast('示範按鈕：資料尚未寫入'));
+    loadSalespeople();
   </script>
 </body>
 </html>
