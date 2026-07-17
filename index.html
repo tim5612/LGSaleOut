@@ -36,7 +36,7 @@
     .photo-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
     .photo-head strong { font-size:14px; }
     .photo-head select { width:128px; min-height:42px; }
-    .photo-box { position:relative; aspect-ratio:1/1; overflow:hidden; display:grid; place-items:center; border:2px dashed #b4c8d8; border-radius:14px; background:#edf4f9; cursor:pointer; }
+    .photo-box { position:relative; width:100%; aspect-ratio:1/1; overflow:hidden; display:grid; place-items:center; padding:0; border:2px dashed #b4c8d8; border-radius:14px; background:#edf4f9; cursor:pointer; }
     .photo-box:focus-visible { outline:3px solid #95c5ff; outline-offset:2px; }
     .photo-box img { width:100%; height:100%; display:none; object-fit:cover; }
     .photo-box.has-photo img { display:block; }
@@ -44,7 +44,19 @@
     .camera-copy { color:#557086; text-align:center; }
     .camera-icon { display:block; margin-bottom:8px; font-size:34px; }
     .camera-copy span:last-child { display:block; font-size:13px; font-weight:800; }
-    .photo-input { position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; }
+    .camera-modal { position:fixed; inset:0; z-index:20; display:grid; place-items:center; padding:16px; background:#071521ee; }
+    .camera-panel { width:min(100%,520px); padding:16px; color:#fff; background:#102a43; border-radius:20px; box-shadow:0 20px 60px #0008; }
+    .camera-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+    .camera-title h2 { margin:0; font-size:18px; }
+    .camera-close { min-width:44px; min-height:44px; color:#fff; background:#ffffff18; border:1px solid #ffffff35; border-radius:12px; font-size:22px; }
+    .camera-viewport { position:relative; width:100%; aspect-ratio:1/1; overflow:hidden; background:#000; border:2px solid #8bc4ff; border-radius:16px; }
+    .camera-viewport video { width:100%; height:100%; display:block; object-fit:cover; }
+    .camera-guide { position:absolute; inset:10px; border:1px solid #ffffffaa; border-radius:10px; pointer-events:none; }
+    .camera-status { min-height:22px; margin:10px 2px; color:#d7e8f5; font-size:13px; text-align:center; }
+    .camera-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .camera-actions button { min-height:50px; border:0; border-radius:13px; font-weight:900; }
+    .camera-secondary { color:#d7e8f5; background:#ffffff18; }
+    .camera-primary { color:#fff; background:#1677ff; }
     .fake-submit { width:100%; min-height:54px; color:#fff; background:linear-gradient(135deg,#1677ff,#0d5bc0); border:0; border-radius:14px; font-size:16px; font-weight:900; box-shadow:0 9px 20px #1677ff38; }
     .toast { position:fixed; left:50%; bottom:calc(22px + env(safe-area-inset-bottom)); z-index:5; width:max-content; max-width:calc(100% - 32px); padding:11px 16px; color:#fff; background:#172b3a; border-radius:999px; font-size:13px; transform:translate(-50%,20px); opacity:0; pointer-events:none; transition:.2s; }
     .toast.show { transform:translate(-50%,0); opacity:1; }
@@ -92,6 +104,24 @@
     </main>
   </div>
   <div id="toast" class="toast" role="status"></div>
+  <div id="cameraModal" class="camera-modal" role="dialog" aria-modal="true" aria-labelledby="cameraTitle" hidden>
+    <div class="camera-panel">
+      <div class="camera-title">
+        <h2 id="cameraTitle">現場拍照</h2>
+        <button id="cameraClose" class="camera-close" type="button" aria-label="關閉相機">×</button>
+      </div>
+      <div class="camera-viewport">
+        <video id="cameraVideo" autoplay muted playsinline></video>
+        <div class="camera-guide" aria-hidden="true"></div>
+      </div>
+      <p id="cameraStatus" class="camera-status">正在開啟後鏡頭…</p>
+      <div class="camera-actions">
+        <button id="cameraCancel" class="camera-secondary" type="button">取消</button>
+        <button id="cameraCapture" class="camera-primary" type="button" disabled>拍照</button>
+      </div>
+      <canvas id="cameraCanvas" hidden></canvas>
+    </div>
+  </div>
 
   <script>
     const $ = id => document.getElementById(id);
@@ -164,21 +194,91 @@
       } catch (error) { box.innerHTML = `<div class="empty error"></div>`; box.firstElementChild.textContent = error.message; }
     });
 
+    const cameraModal = $('cameraModal');
+    const cameraVideo = $('cameraVideo');
+    const cameraCanvas = $('cameraCanvas');
+    const cameraStatus = $('cameraStatus');
+    const cameraCapture = $('cameraCapture');
+    let cameraStream = null;
+    let activePhotoGroup = null;
+
+    function stopCamera() {
+      if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
+      cameraStream = null;
+      cameraVideo.srcObject = null;
+      cameraModal.hidden = true;
+      cameraCapture.disabled = true;
+      activePhotoGroup = null;
+    }
+
+    async function openCamera(group) {
+      activePhotoGroup = group;
+      cameraModal.hidden = false;
+      cameraCapture.disabled = true;
+      cameraStatus.textContent = '正在開啟後鏡頭…';
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: { ideal:'environment' },
+            width: { ideal:1920 },
+            height: { ideal:1440 }
+          },
+          audio:false
+        });
+        cameraVideo.srcObject = cameraStream;
+        await cameraVideo.play();
+        cameraCapture.disabled = false;
+        cameraStatus.textContent = '請將拍攝內容放在正方形取景框內';
+      } catch (error) {
+        cameraStatus.textContent = location.protocol !== 'https:' && location.hostname !== 'localhost'
+          ? '相機需要使用 HTTPS 網址才能開啟'
+          : '無法開啟相機，請允許瀏覽器使用相機權限';
+      }
+    }
+
+    cameraCapture.addEventListener('click', () => {
+      if (!activePhotoGroup || !cameraVideo.videoWidth) return;
+      const sourceWidth = cameraVideo.videoWidth;
+      const sourceHeight = cameraVideo.videoHeight;
+      const cropSize = Math.min(sourceWidth, sourceHeight);
+      const outputSize = Math.min(1200, cropSize);
+      cameraCanvas.width = outputSize;
+      cameraCanvas.height = outputSize;
+      cameraCanvas.getContext('2d').drawImage(
+        cameraVideo,
+        (sourceWidth - cropSize) / 2,
+        (sourceHeight - cropSize) / 2,
+        cropSize,
+        cropSize,
+        0,
+        0,
+        outputSize,
+        outputSize
+      );
+      const group = activePhotoGroup;
+      cameraCanvas.toBlob(blob => {
+        if (!blob) return showToast('照片建立失敗，請重新拍攝');
+        const image = group.querySelector('img');
+        if (image.dataset.url) URL.revokeObjectURL(image.dataset.url);
+        image.dataset.url = URL.createObjectURL(blob);
+        image.src = image.dataset.url;
+        group.photoBlob = blob;
+        group.querySelector('.photo-box').classList.add('has-photo');
+        stopCamera();
+        showToast(`已拍攝 ${outputSize} × ${outputSize} 照片`);
+      }, 'image/jpeg', 0.88);
+    });
+
+    $('cameraClose').addEventListener('click', stopCamera);
+    $('cameraCancel').addEventListener('click', stopCamera);
+    cameraModal.addEventListener('click', event => { if (event.target === cameraModal) stopCamera(); });
+
     for (let i = 1; i <= 3; i++) {
       const group = document.createElement('div');
       group.className = 'photo-group';
-      group.innerHTML = `<div class="photo-head"><strong>照片 ${i}</strong><select aria-label="照片 ${i} 類型"><option>賣場</option><option>陳列</option><option>活動</option></select></div><label class="photo-box" tabindex="0"><input class="photo-input" type="file" accept="image/*" capture="environment"><img alt="照片 ${i} 預覽"><span class="camera-copy"><span class="camera-icon">📷</span><span>點此拍照</span></span></label>`;
+      group.innerHTML = `<div class="photo-head"><strong>照片 ${i}</strong><select aria-label="照片 ${i} 類型"><option>賣場</option><option>陳列</option><option>活動</option></select></div><button class="photo-box" type="button" aria-label="現場拍攝照片 ${i}"><img alt="照片 ${i} 預覽"><span class="camera-copy"><span class="camera-icon">📷</span><span>開啟相機拍照</span></span></button>`;
       const box = group.querySelector('.photo-box');
-      const input = group.querySelector('input');
-      const image = group.querySelector('img');
-      box.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.click(); } });
-      input.addEventListener('change', () => {
-        if (!input.files[0]) return;
-        if (image.dataset.url) URL.revokeObjectURL(image.dataset.url);
-        image.dataset.url = URL.createObjectURL(input.files[0]);
-        image.src = image.dataset.url;
-        box.classList.add('has-photo');
-      });
+      box.addEventListener('click', () => openCamera(group));
       $('photoGroups').append(group);
     }
     $('submit').addEventListener('click', () => showToast('示範按鈕：資料尚未寫入'));

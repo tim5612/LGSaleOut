@@ -400,6 +400,11 @@ def index():
     return send_from_directory(BASE_DIR, "index.html")
 
 
+@app.get("/DBInput.html")
+def db_input():
+    return send_from_directory(BASE_DIR, "DBInput.html")
+
+
 @app.get("/api/health")
 def health():
     try:
