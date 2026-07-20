@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>業務異動工作台｜互動原型</title>
+  <style>
+    :root{--bg:#f5f4ef;--paper:#fff;--ink:#172321;--muted:#687470;--line:#dfe3de;--green:#176b55;--green2:#0f4f40;--mint:#e7f3ee;--amber:#a85b12;--amberbg:#fff4df;--red:#a33a32;--blue:#285f9b;--shadow:0 16px 45px #173c3020}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif} button,input,select,textarea{font:inherit} button{cursor:pointer}
+    .top{height:68px;display:flex;align-items:center;gap:18px;padding:0 28px;background:#17352e;color:#fff}.brand{font-size:18px;font-weight:900}.crumb{color:#aec7bf;font-size:13px}.top .right{margin-left:auto;display:flex;align-items:center;gap:12px}.avatar{width:34px;height:34px;display:grid;place-items:center;background:#e8b45a;color:#17352e;border-radius:50%;font-weight:900}
+    .page{max-width:1480px;margin:auto;padding:26px}.hero{display:flex;align-items:end;justify-content:space-between;margin-bottom:20px}.hero h1{margin:0 0 7px;font-size:28px}.hero p{margin:0;color:var(--muted)}.history{border:1px solid var(--line);background:var(--paper);border-radius:10px;padding:10px 14px;color:#41504c}
+    .layout{display:grid;grid-template-columns:290px minmax(470px,1fr) 350px;gap:16px;align-items:start}.panel{background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 5px 22px #183c3010}.panel-head{padding:18px 18px 14px;border-bottom:1px solid var(--line)}.panel-head h2{margin:0 0 5px;font-size:16px}.panel-head p{margin:0;color:var(--muted);font-size:12px}.panel-body{padding:16px}
+    .seg{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;padding:5px;background:#eef0ec;border-radius:11px}.seg button{border:0;padding:9px 5px;background:transparent;color:#5f6e69;border-radius:8px;font-weight:700;font-size:13px}.seg button.active{background:#fff;color:var(--green);box-shadow:0 2px 8px #203b3220}
+    .search{width:100%;margin:14px 0 10px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fbfcfa}.unit-label{margin:14px 2px 7px;color:#83908b;font-size:11px;font-weight:900;letter-spacing:.08em}.person{display:flex;gap:10px;align-items:center;width:100%;padding:11px;border:1px solid transparent;background:transparent;border-radius:11px;text-align:left}.person:hover{background:#f5f8f6}.person.active{background:var(--mint);border-color:#b9d8cc}.dot{width:34px;height:34px;display:grid;place-items:center;flex:none;border-radius:9px;background:#dce9e4;color:var(--green2);font-weight:900}.person strong{display:block;font-size:13px}.person small{display:block;margin-top:2px;color:var(--muted)}.count{margin-left:auto;color:var(--green);font-size:11px;font-weight:800}.check{width:17px;height:17px;accent-color:var(--green)}
+    .notice{display:flex;gap:10px;margin:0 0 16px;padding:12px 14px;background:#eef6fb;color:#294f69;border-radius:10px;font-size:12px;line-height:1.55}.templates{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:18px}.template{padding:12px;border:1px solid var(--line);background:#fff;border-radius:11px;text-align:left}.template:hover,.template.active{border-color:var(--green);background:#f3faf7}.template strong{display:block;color:var(--green2);font-size:13px}.template small{display:block;margin-top:5px;color:var(--muted);line-height:1.4}
+    .section{padding:18px 0;border-top:1px solid var(--line)}.section:first-of-type{border-top:0}.section-title{display:flex;align-items:center;gap:10px;margin-bottom:14px}.num{width:25px;height:25px;display:grid;place-items:center;border-radius:50%;background:var(--green);color:#fff;font-size:12px;font-weight:900}.section-title strong{font-size:15px}.optional{padding:3px 7px;background:#eff1ee;color:#6b7571;border-radius:99px;font-size:10px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;margin:0 0 6px;color:#52605c;font-size:12px;font-weight:800}.field select,.field input,.field textarea{width:100%;padding:11px 12px;border:1px solid #cfd6d1;background:#fff;border-radius:9px}.field textarea{min-height:70px;resize:vertical}.current{padding:12px 13px;background:#f4f6f3;border-radius:10px;color:#475651;font-size:13px}.arrow{color:#8d9995;margin:0 7px}.new{color:var(--green);font-weight:900}
+    .dealer-tools{display:flex;gap:8px;align-items:center;margin-bottom:10px}.dealer-tools input{flex:1;padding:10px;border:1px solid var(--line);border-radius:9px}.linkbtn{border:0;background:transparent;color:var(--green);font-weight:800;font-size:12px}.dealer-list{border:1px solid var(--line);border-radius:10px;overflow:hidden}.dealer-row{display:grid;grid-template-columns:28px 1.2fr .8fr 1fr;gap:8px;align-items:center;padding:10px 12px;border-top:1px solid #edf0ed;font-size:12px}.dealer-row:first-child{border-top:0}.dealer-row.header{background:#f5f6f3;color:#75817d;font-size:11px;font-weight:800}.dealer-row.selected{background:#f4faf7}.pill{display:inline-block;padding:3px 7px;border-radius:99px;background:#eaf2fb;color:var(--blue);font-size:10px}.emptydealer{padding:18px;text-align:center;color:var(--muted);font-size:12px}
+    .summary{position:sticky;top:16px}.status{display:flex;align-items:center;gap:8px;margin-bottom:14px;color:var(--green);font-weight:900;font-size:13px}.status i{width:9px;height:9px;background:#2a9875;border-radius:50%}.event{position:relative;padding:0 0 18px 25px}.event:before{content:"";position:absolute;left:7px;top:13px;bottom:-2px;width:1px;background:#ced9d4}.event:last-child:before{display:none}.event:after{content:"";position:absolute;left:2px;top:5px;width:11px;height:11px;background:#fff;border:2px solid var(--green);border-radius:50%}.event strong{font-size:13px}.event p{margin:4px 0 0;color:var(--muted);font-size:11px;line-height:1.5}.warn{padding:12px;background:var(--amberbg);border:1px solid #efd39e;border-radius:10px;color:#744413;font-size:11px;line-height:1.55}.confirm{width:100%;margin-top:14px;padding:13px;border:0;border-radius:10px;background:var(--green);color:#fff;font-weight:900}.confirm:hover{background:var(--green2)}.confirm:disabled{background:#aab5b1;cursor:not-allowed}.footnote{margin-top:10px;text-align:center;color:#7b8783;font-size:10px}
+    .bar{display:none}.toast{position:fixed;right:28px;bottom:28px;z-index:10;max-width:360px;padding:15px 18px;background:#17352e;color:#fff;border-radius:12px;box-shadow:var(--shadow);transform:translateY(20px);opacity:0;pointer-events:none;transition:.22s}.toast.show{opacity:1;transform:none}.modal{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:20px;background:#10251fd0}.modal-card{width:min(540px,100%);padding:24px;background:#fff;border-radius:16px;box-shadow:var(--shadow)}.modal h2{margin:0 0 8px}.modal p{color:var(--muted);line-height:1.6}.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}.secondary{padding:10px 14px;border:1px solid var(--line);background:#fff;border-radius:9px}.primary{padding:10px 14px;border:0;background:var(--green);color:#fff;border-radius:9px;font-weight:800}[hidden]{display:none!important}
+    @media(max-width:1050px){.layout{grid-template-columns:260px 1fr}.summary{grid-column:1/-1;position:static}.summary .panel-body{display:grid;grid-template-columns:1.5fr 1fr;gap:20px}}
+    @media(max-width:720px){.top{padding:0 16px}.crumb,.top .right span{display:none}.page{padding:16px}.hero{align-items:start}.history{display:none}.layout{display:block}.panel{margin-bottom:12px}.left .panel-body{max-height:300px;overflow:auto}.templates{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.dealer-row{grid-template-columns:26px 1fr}.dealer-row>*:nth-child(n+3){display:none}.summary .panel-body{display:block}.hero h1{font-size:23px}}
+  </style>
+</head>
+<body>
+  <header class="top"><div class="brand">SalesFlow</div><div class="crumb">人員與經銷商管理　/　異動工作台</div><div class="right"><span>資料時間：2026/07/18 10:32</span><div class="avatar">林</div></div></header>
+  <main class="page">
+    <div class="hero"><div><h1>異動工作台</h1><p>一次安排換線、換處所與職級異動，送出前先看清楚影響。</p></div><button class="history">查看異動紀錄</button></div>
+    <div class="layout">
+      <aside class="panel left">
+        <div class="panel-head"><h2>1. 選擇異動對象</h2><p>可一次選多人，建立批次異動</p></div>
+        <div class="panel-body">
+          <div class="seg"><button class="active">依人員</button><button id="dealerMode">依經銷商</button></div>
+          <input class="search" id="personSearch" placeholder="搜尋姓名、員編或經銷商">
+          <div class="unit-label">台北一處</div>
+          <button class="person active" data-name="王小明"><input class="check" type="checkbox" checked><span class="dot">王</span><span><strong>王小明</strong><small>S0128・業務</small></span><span class="count">12 家</span></button>
+          <button class="person" data-name="李小華"><input class="check" type="checkbox"><span class="dot">李</span><span><strong>李小華</strong><small>S0096・業務</small></span><span class="count">8 家</span></button>
+          <button class="person" data-name="陳美玲"><input class="check" type="checkbox"><span class="dot">陳</span><span><strong>陳美玲</strong><small>D0007・處長</small></span><span class="count">3 家</span></button>
+          <div class="unit-label">新竹處</div>
+          <button class="person" data-name="張志豪"><input class="check" type="checkbox"><span class="dot">張</span><span><strong>張志豪</strong><small>S0155・業務</small></span><span class="count">9 家</span></button>
+        </div>
+      </aside>
+
+      <section class="panel mainpanel">
+        <div class="panel-head"><h2>2. 安排異動內容</h2><p>目前編輯：王小明（S0128）</p></div>
+        <div class="panel-body">
+          <div class="notice"><strong>設計原則</strong><span>「換處所」與「經銷商換線」彼此獨立。系統不會偷偷連動；需要一起移動時，請在同一張異動單中明確勾選。</span></div>
+          <div class="templates">
+            <button class="template active" data-template="together"><strong>人與經銷商一起移動</strong><small>換處所，並挑選要跟著移動的經銷商</small></button>
+            <button class="template" data-template="org"><strong>只換人員處所</strong><small>經銷商負責關係維持不變</small></button>
+            <button class="template" data-template="line"><strong>只做經銷商換線</strong><small>人員處所與職級都不變</small></button>
+          </div>
+          <div class="section" id="orgSection">
+            <div class="section-title"><span class="num">1</span><strong>處所異動</strong><span class="optional">可獨立設定</span></div>
+            <div class="grid2"><div class="field"><label>目前處所</label><div class="current">台北一處</div></div><div class="field"><label for="newOrg">移至</label><select id="newOrg"><option>新竹處</option><option>台中處</option><option>高雄處</option></select></div></div>
+          </div>
+          <div class="section" id="dealerSection">
+            <div class="section-title"><span class="num">2</span><strong>經銷商換線</strong><span class="optional">逐家選擇</span></div>
+            <div class="grid2" style="margin-bottom:12px"><div class="field"><label for="receiver">接手人</label><select id="receiver"><option>李小華｜台北一處・業務</option><option>張志豪｜新竹處・業務</option><option>陳美玲｜台北一處・處長</option></select></div><div class="field"><label>快速選取</label><div class="current"><button class="linkbtn" id="selectAll">全選 12 家</button><span class="arrow">・</span><button class="linkbtn" id="clearAll">全部取消</button></div></div></div>
+            <div class="dealer-tools"><input id="dealerSearch" placeholder="搜尋經銷商名稱或代碼"><button class="linkbtn">篩選 ▾</button></div>
+            <div class="dealer-list" id="dealerList">
+              <div class="dealer-row header"><span></span><span>經銷商</span><span>區域</span><span>目前負責人</span></div>
+              <label class="dealer-row selected" data-dealer="光華家電"><input class="check dealer-check" type="checkbox" checked><strong>光華家電 <small>D1024</small></strong><span>台北市</span><span><span class="pill">王小明</span></span></label>
+              <label class="dealer-row selected" data-dealer="三民電器"><input class="check dealer-check" type="checkbox" checked><strong>三民電器 <small>D1088</small></strong><span>新竹市</span><span><span class="pill">王小明</span></span></label>
+              <label class="dealer-row" data-dealer="東區生活館"><input class="check dealer-check" type="checkbox"><strong>東區生活館 <small>D1142</small></strong><span>新竹縣</span><span><span class="pill">王小明</span></span></label>
+              <label class="dealer-row" data-dealer="宏達通訊"><input class="check dealer-check" type="checkbox"><strong>宏達通訊 <small>D1201</small></strong><span>台北市</span><span><span class="pill">王小明</span></span></label>
+            </div>
+          </div>
+          <div class="section">
+            <div class="section-title"><span class="num">3</span><strong>生效時間與原因</strong></div>
+            <div class="grid2"><div class="field"><label for="effective">交接生效時間</label><input id="effective" type="datetime-local" value="2026-07-21T09:00"></div><div class="field"><label for="reason">異動原因</label><select id="reason"><option>區域重整</option><option>人員調動</option><option>離職交接</option><option>臨時支援</option><option>其他</option></select></div></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel summary">
+        <div class="panel-head"><h2>3. 異動預覽</h2><p>這些紀錄會在同一時間點銜接</p></div>
+        <div class="panel-body">
+          <div class="status"><i></i><span id="validation">期間無重疊，可以送出</span></div>
+          <div id="timeline">
+            <div class="event org-event"><strong>王小明移至新竹處</strong><p>台北一處結束 → 新竹處開始<br>2026/07/21 09:00</p></div>
+            <div class="event dealer-event"><strong><span id="dealerCount">2</span> 家經銷商改由李小華負責</strong><p id="dealerNames">光華家電、三民電器<br>舊關係結束與新關係開始使用同一時間</p></div>
+            <div class="event"><strong>歷史銷售維持原歸屬</strong><p>不改寫 DealerAssignmentId 與 ResponsibleEmployeeId</p></div>
+          </div>
+          <div class="warn"><strong>不會連動的項目</strong><br><span id="nonLinked">王小明的職級維持「業務」；未勾選的 10 家經銷商仍由王小明負責。</span></div>
+          <button class="confirm" id="confirm">確認並建立異動</button>
+          <div class="footnote">此為體驗原型，不會寫入真實資料</div>
+        </div>
+      </aside>
+    </div>
+  </main>
+  <div class="toast" id="toast"></div>
+  <div class="modal" id="modal" hidden><div class="modal-card"><h2>最後確認</h2><p id="modalCopy"></p><div class="warn">生效後會保留完整歷史，不能直接覆蓋舊負責人；如需更正，必須再建立一筆異動。</div><div class="modal-actions"><button class="secondary" id="cancel">返回檢查</button><button class="primary" id="submit">確認建立（示範）</button></div></div></div>
+  <script>
+    const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)]; let mode='together';
+    function selectedDealers(){return $$('.dealer-check:checked').map(x=>x.closest('.dealer-row').dataset.dealer)}
+    function update(){
+      const names=selectedDealers(), org=mode!=='line', dealer=mode!=='org', time=$('#effective').value.replace('T',' '), receiver=$('#receiver').value.split('｜')[0];
+      $('.org-event').hidden=!org; $('.dealer-event').hidden=!dealer;
+      $('.org-event strong').textContent=`王小明移至${$('#newOrg').value}`; $('.org-event p').innerHTML=`台北一處結束 → ${$('#newOrg').value}開始<br>${time}`;
+      $('#dealerCount').textContent=names.length; $('.dealer-event strong').innerHTML=`<span id="dealerCount">${names.length}</span> 家經銷商改由${receiver}負責`;
+      $('#dealerNames').innerHTML=(names.length?names.join('、'):'尚未選擇經銷商')+'<br>舊關係結束與新關係開始使用同一時間';
+      const remain=12-names.length; $('#nonLinked').textContent=`王小明的職級維持「業務」；${dealer?`未勾選的 ${remain} 家經銷商仍由王小明負責。`:'全部 12 家經銷商仍由王小明負責。'}`;
+      const valid=!dealer||names.length>0; $('#validation').textContent=valid?'期間無重疊，可以送出':'請至少選擇一家要換線的經銷商'; $('#confirm').disabled=!valid;
+    }
+    $$('.template').forEach(b=>b.onclick=()=>{mode=b.dataset.template; $$('.template').forEach(x=>x.classList.toggle('active',x===b)); $('#orgSection').hidden=mode==='line'; $('#dealerSection').hidden=mode==='org'; update()});
+    $$('.dealer-check').forEach(c=>c.onchange=()=>{c.closest('.dealer-row').classList.toggle('selected',c.checked);update()});
+    $('#selectAll').onclick=()=>{$$('.dealer-check').forEach(c=>{c.checked=true;c.closest('.dealer-row').classList.add('selected')});update()};
+    $('#clearAll').onclick=()=>{$$('.dealer-check').forEach(c=>{c.checked=false;c.closest('.dealer-row').classList.remove('selected')});update()};
+    ['#newOrg','#receiver','#effective'].forEach(s=>$(s).onchange=update);
+    $('#dealerSearch').oninput=e=>{$$('#dealerList .dealer-row:not(.header)').forEach(r=>r.hidden=!r.dataset.dealer.includes(e.target.value.trim()))};
+    $('#personSearch').oninput=e=>{$$('.person').forEach(r=>r.hidden=!r.dataset.name.includes(e.target.value.trim()))};
+    $$('.person').forEach(p=>p.onclick=e=>{if(e.target.matches('input'))return;const c=p.querySelector('input');c.checked=!c.checked;p.classList.toggle('active',c.checked);show('已更新批次異動對象（示範）')});
+    function show(t){const x=$('#toast');x.textContent=t;x.classList.add('show');clearTimeout(show.t);show.t=setTimeout(()=>x.classList.remove('show'),2400)}
+    $('#confirm').onclick=()=>{const n=selectedDealers().length;$('#modalCopy').innerHTML=`將於 <strong>${$('#effective').value.replace('T',' ')}</strong> 建立異動：${mode!=='line'?`王小明移至${$('#newOrg').value}`:''}${mode==='together'?'，並':''}${mode!=='org'?`將 ${n} 家經銷商交接給${$('#receiver').value.split('｜')[0]}`:''}。`;$('#modal').hidden=false};
+    $('#cancel').onclick=()=>$('#modal').hidden=true; $('#submit').onclick=()=>{$('#modal').hidden=true;show('示範完成：異動單 CHG-20260718-003 已建立')};
+    $('#modal').onclick=e=>{if(e.target.id==='modal')$('#modal').hidden=true}; $('.history').onclick=()=>show('異動紀錄頁尚未製作，此按鈕僅供動線體驗');
+    $('#dealerMode').onclick=()=>show('可延伸為「先選多家經銷商，再指定接手人」的批次入口'); update();
+  </script>
+</body>
+</html>

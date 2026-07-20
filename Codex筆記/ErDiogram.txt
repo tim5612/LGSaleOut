@@ -1,0 +1,198 @@
+erDiagram
+    Employee__員工 {
+        bigint EmployeeId__員工識別碼 PK
+        nvarchar EmployeeNo__員工編號 UK
+        nvarchar EmployeeName__員工姓名
+        datetime2 HireDate__到職日期
+        datetime2 TerminationDate__離職日期
+        varchar EmploymentStatus__在職狀態
+        bit IsLoginEnabled__是否允許登入
+    }
+
+    EmployeePositionHistory__員工職級歷史 {
+        bigint EmployeePositionHistoryId__員工職級歷史識別碼 PK
+        bigint EmployeeId__員工識別碼 FK
+        varchar PositionLevel__職級
+        datetime2 StartDateTime__生效開始時間
+        datetime2 EndDateTime__生效結束時間
+        nvarchar ChangeReason__異動原因
+        datetime2 CreatedAt__建立時間
+        bigint CreatedByEmployeeId__建立者員工識別碼 FK
+    }
+
+    OrganizationUnit__組織單位 {
+        bigint OrgUnitId__組織單位識別碼 PK
+        varchar OrgUnitCode__組織單位代碼 UK
+        nvarchar OrgUnitName__組織單位名稱
+        bit IsActive__是否啟用
+    }
+
+    EmployeeOrgAssignmentHistory__員工組織歸屬歷史 {
+        bigint EmployeeOrgAssignmentId__員工組織歸屬識別碼 PK
+        bigint EmployeeId__員工識別碼 FK
+        bigint OrgUnitId__組織單位識別碼 FK
+        datetime2 StartDateTime__生效開始時間
+        datetime2 EndDateTime__生效結束時間
+        nvarchar ChangeReason__異動原因
+        datetime2 CreatedAt__建立時間
+        bigint CreatedByEmployeeId__建立者員工識別碼 FK
+    }
+
+    Dealer__經銷商 {
+        bigint DealerId__經銷商識別碼 PK
+        varchar DealerCode__經銷商代碼 UK
+        nvarchar DealerName__經銷商名稱
+        varchar DealerStatus__經銷商狀態
+        datetime2 CreatedAt__建立時間
+    }
+
+    DealerAssignmentHistory__經銷商負責人歷史 {
+        bigint DealerAssignmentId__經銷商指派識別碼 PK
+        bigint DealerId__經銷商識別碼 FK
+        bigint EmployeeId__負責員工識別碼 FK
+        datetime2 StartDateTime__生效開始時間
+        datetime2 EndDateTime__生效結束時間
+        nvarchar ChangeReason__異動原因
+        datetime2 CreatedAt__建立時間
+        bigint CreatedByEmployeeId__建立者員工識別碼 FK
+    }
+
+    Sales__銷售紀錄 {
+        bigint SaleId__銷售識別碼 PK
+        bigint DealerId__經銷商識別碼 FK
+        datetime2 SaleDateTime__銷售日期時間
+        decimal Amount__銷售金額
+        bigint DealerAssignmentId__經銷商指派識別碼 FK
+        bigint ResponsibleEmployeeId__負責員工識別碼 FK
+        datetime2 CreatedAt__建立時間
+        bigint CreatedByEmployeeId__建立者員工識別碼 FK
+        datetime2 UpdatedAt__更新時間
+        bigint UpdatedByEmployeeId__更新者員工識別碼 FK
+    }
+
+    Product__產品 {
+        bigint ProductId__產品識別碼 PK
+        varchar ProductCode__產品代碼 UK
+        nvarchar ProductName__產品名稱
+        nvarchar CategoryLevel1__第一層產品分類
+        nvarchar CategoryLevel2__第二層產品分類
+        bit IsActive__是否啟用
+        datetime2 CreatedAt__建立時間
+    }
+
+    ImportBatch__資料匯入批次 {
+        bigint ImportBatchId__匯入批次識別碼 PK
+        varchar ImportType__匯入類型
+        char DataMonth__資料月份
+        date DataDate__資料日期
+        nvarchar OriginalFileName__原始檔名
+        nvarchar StoredFileName__儲存檔名
+        nvarchar StoredFilePath__儲存檔案路徑
+        varchar FileHash__檔案雜湊值
+        bigint FileSize__檔案大小
+        varchar ImportStatus__匯入狀態
+        bigint ReplacedBatchId__被取代批次識別碼 FK
+        int TotalRowCount__總資料列數
+        int SuccessRowCount__成功資料列數
+        int ErrorRowCount__錯誤資料列數
+        nvarchar ErrorSummary__錯誤摘要
+        nvarchar ErrorReportPath__錯誤報告路徑
+        datetime2 ImportedAt__匯入時間
+        bigint ImportedByEmployeeId__匯入者員工識別碼 FK
+    }
+
+    MonthlyOpeningInventoryDetail__每月期初庫存明細 {
+        bigint OpeningInventoryDetailId__期初庫存明細識別碼 PK
+        bigint ImportBatchId__匯入批次識別碼 FK
+        int SourceRowNumber__來源資料列號碼
+        bigint DealerId__經銷商識別碼 FK
+        bigint ProductId__產品識別碼 FK
+        int OpeningQuantity__期初庫存數量
+    }
+
+    SellInTransaction__進貨交易 {
+        bigint SellInTransactionId__進貨交易識別碼 PK
+        bigint ImportBatchId__匯入批次識別碼 FK
+        int SourceRowNumber__來源資料列號碼
+        bigint DealerId__經銷商識別碼 FK
+        bigint ProductId__產品識別碼 FK
+        varchar SalesDocumentNo__銷售文件號碼
+        varchar SalesDocumentItemNo__銷售文件項次
+        varchar InvoiceNo__發票號碼
+        date OrderDate__訂單日期
+        date BillingDate__開立帳單日期
+        date InvoiceDate__發票日期
+        date InventoryEffectiveDate__庫存生效日期
+        decimal Quantity__交易數量
+        varchar TransactionType__交易類型
+        varchar TransactionStatus__交易狀態
+        varchar ReviewStatus__審核狀態
+        datetime2 CreatedAt__建立時間
+        datetime2 UpdatedAt__更新時間
+    }
+
+    StoreVisit__巡店紀錄 {
+        bigint StoreVisitId__巡店識別碼 PK
+        bigint DealerId__經銷商識別碼 FK
+        bigint DealerAssignmentId__經銷商指派識別碼 FK
+        bigint ResponsibleEmployeeId__負責員工識別碼 FK
+        bigint PreviousStoreVisitId__前次巡店識別碼 FK
+        datetime2 VisitDateTime__巡店日期時間
+        datetime2 PeriodStartDateTime__統計期間開始時間
+        datetime2 PeriodEndDateTime__統計期間結束時間
+        varchar VisitStatus__巡店狀態
+        datetime2 CreatedAt__建立時間
+        bigint CreatedByEmployeeId__建立者員工識別碼 FK
+        datetime2 UpdatedAt__更新時間
+        bigint UpdatedByEmployeeId__更新者員工識別碼 FK
+    }
+
+    StoreVisitProductDetail__巡店產品明細 {
+        bigint StoreVisitProductDetailId__巡店產品明細識別碼 PK
+        bigint StoreVisitId__巡店識別碼 FK
+        bigint ProductId__產品識別碼 FK
+        decimal SellOutQuantity__銷售出庫數量
+        int DisplayQuantity__陳列數量
+        bit IsSellOutChecked__是否確認銷售出庫
+        bit IsDisplayChecked__是否確認陳列數量
+        datetime2 CreatedAt__建立時間
+        datetime2 UpdatedAt__更新時間
+    }
+
+    Employee__員工 ||--o{ EmployeePositionHistory__員工職級歷史 : "Employee.EmployeeId__員工識別碼 to EmployeePositionHistory.EmployeeId__員工識別碼"
+    Employee__員工 ||--o{ EmployeePositionHistory__員工職級歷史 : "Employee.EmployeeId__員工識別碼 to EmployeePositionHistory.CreatedByEmployeeId__建立者員工識別碼"
+
+    Employee__員工 ||--o{ EmployeeOrgAssignmentHistory__員工組織歸屬歷史 : "Employee.EmployeeId__員工識別碼 to EmployeeOrgAssignmentHistory.EmployeeId__員工識別碼"
+    OrganizationUnit__組織單位 ||--o{ EmployeeOrgAssignmentHistory__員工組織歸屬歷史 : "OrganizationUnit.OrgUnitId__組織單位識別碼 to EmployeeOrgAssignmentHistory.OrgUnitId__組織單位識別碼"
+    Employee__員工 ||--o{ EmployeeOrgAssignmentHistory__員工組織歸屬歷史 : "Employee.EmployeeId__員工識別碼 to EmployeeOrgAssignmentHistory.CreatedByEmployeeId__建立者員工識別碼"
+
+    Dealer__經銷商 ||--o{ DealerAssignmentHistory__經銷商負責人歷史 : "Dealer.DealerId__經銷商識別碼 to DealerAssignmentHistory.DealerId__經銷商識別碼"
+    Employee__員工 ||--o{ DealerAssignmentHistory__經銷商負責人歷史 : "Employee.EmployeeId__員工識別碼 to DealerAssignmentHistory.EmployeeId__負責員工識別碼"
+    Employee__員工 ||--o{ DealerAssignmentHistory__經銷商負責人歷史 : "Employee.EmployeeId__員工識別碼 to DealerAssignmentHistory.CreatedByEmployeeId__建立者員工識別碼"
+
+    Dealer__經銷商 ||--o{ Sales__銷售紀錄 : "Dealer.DealerId__經銷商識別碼 to Sales.DealerId__經銷商識別碼"
+    DealerAssignmentHistory__經銷商負責人歷史 ||--o{ Sales__銷售紀錄 : "DealerAssignmentHistory.DealerAssignmentId__經銷商指派識別碼 to Sales.DealerAssignmentId__經銷商指派識別碼"
+    Employee__員工 ||--o{ Sales__銷售紀錄 : "Employee.EmployeeId__員工識別碼 to Sales.ResponsibleEmployeeId__負責員工識別碼"
+    Employee__員工 ||--o{ Sales__銷售紀錄 : "Employee.EmployeeId__員工識別碼 to Sales.CreatedByEmployeeId__建立者員工識別碼"
+    Employee__員工 ||--o{ Sales__銷售紀錄 : "Employee.EmployeeId__員工識別碼 to Sales.UpdatedByEmployeeId__更新者員工識別碼"
+
+    Employee__員工 ||--o{ ImportBatch__資料匯入批次 : "Employee.EmployeeId__員工識別碼 to ImportBatch.ImportedByEmployeeId__匯入者員工識別碼"
+    ImportBatch__資料匯入批次 o|--o{ ImportBatch__資料匯入批次 : "ImportBatch.ImportBatchId__匯入批次識別碼 to ImportBatch.ReplacedBatchId__被取代批次識別碼"
+
+    ImportBatch__資料匯入批次 ||--o{ MonthlyOpeningInventoryDetail__每月期初庫存明細 : "ImportBatch.ImportBatchId__匯入批次識別碼 to MonthlyOpeningInventoryDetail.ImportBatchId__匯入批次識別碼"
+    Dealer__經銷商 ||--o{ MonthlyOpeningInventoryDetail__每月期初庫存明細 : "Dealer.DealerId__經銷商識別碼 to MonthlyOpeningInventoryDetail.DealerId__經銷商識別碼"
+    Product__產品 ||--o{ MonthlyOpeningInventoryDetail__每月期初庫存明細 : "Product.ProductId__產品識別碼 to MonthlyOpeningInventoryDetail.ProductId__產品識別碼"
+
+    ImportBatch__資料匯入批次 ||--o{ SellInTransaction__進貨交易 : "ImportBatch.ImportBatchId__匯入批次識別碼 to SellInTransaction.ImportBatchId__匯入批次識別碼"
+    Dealer__經銷商 ||--o{ SellInTransaction__進貨交易 : "Dealer.DealerId__經銷商識別碼 to SellInTransaction.DealerId__經銷商識別碼"
+    Product__產品 ||--o{ SellInTransaction__進貨交易 : "Product.ProductId__產品識別碼 to SellInTransaction.ProductId__產品識別碼"
+
+    Dealer__經銷商 ||--o{ StoreVisit__巡店紀錄 : "Dealer.DealerId__經銷商識別碼 to StoreVisit.DealerId__經銷商識別碼"
+    DealerAssignmentHistory__經銷商負責人歷史 ||--o{ StoreVisit__巡店紀錄 : "DealerAssignmentHistory.DealerAssignmentId__經銷商指派識別碼 to StoreVisit.DealerAssignmentId__經銷商指派識別碼"
+    Employee__員工 ||--o{ StoreVisit__巡店紀錄 : "Employee.EmployeeId__員工識別碼 to StoreVisit.ResponsibleEmployeeId__負責員工識別碼"
+    Employee__員工 ||--o{ StoreVisit__巡店紀錄 : "Employee.EmployeeId__員工識別碼 to StoreVisit.CreatedByEmployeeId__建立者員工識別碼"
+    Employee__員工 ||--o{ StoreVisit__巡店紀錄 : "Employee.EmployeeId__員工識別碼 to StoreVisit.UpdatedByEmployeeId__更新者員工識別碼"
+    StoreVisit__巡店紀錄 o|--o{ StoreVisit__巡店紀錄 : "StoreVisit.StoreVisitId__巡店識別碼 to StoreVisit.PreviousStoreVisitId__前次巡店識別碼"
+
+    StoreVisit__巡店紀錄 ||--o{ StoreVisitProductDetail__巡店產品明細 : "StoreVisit.StoreVisitId__巡店識別碼 to StoreVisitProductDetail.StoreVisitId__巡店識別碼"
+    Product__產品 ||--o{ StoreVisitProductDetail__巡店產品明細 : "Product.ProductId__產品識別碼 to StoreVisitProductDetail.ProductId__產品識別碼"
