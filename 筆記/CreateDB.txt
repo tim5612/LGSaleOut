@@ -39,5 +39,33 @@
 
 【如果實際需求是一家經銷商永遠只有一組共用登入帳號】是，這端是他們自己登入即可。但這樣就延伸出另一個問題。我之後會要求每個登入的人，用LINE Developer裡面的 LEFF 頁面登入取得驗證碼。本來都是規劃在 Empolyee 裡面，這樣多了一個經銷商的登入權限要怎麼辦？
 
+
+
 能把經銷商也當成一
 
+
+
+
+我們來討論  LGSale_ERD0722.drawio 這張表 StoreVisit｜巡店／經銷商回報【新制】 的TABLE設計
+
+1. VisitDateTime 這張不應該允許 Null，新增了一個 StoreVisitId 應該就把新增時間 寫到 VisitDateTime 就好
+
+2. PeriodStartDateTime 跟 PeriodEndDateTime 這兩欄我不懂，這兩欄紀錄的時間是要幹嘛用？我不需要知道這個業務在經銷商那邊回報了多久
+
+3. DealerAssignmentId 是現在分配這間經銷商的正式業務沒錯，但是 ResponsibleEmployeeId 應該是說，如果正式業務不在，職務代理人填寫的意思嗎？如果是的話，可以解釋成 正式業務 沒有新增，由其他人新增這份巡點紀錄，譬如業務助理
+
+4.CreatedByUserAccountId、UpdatedAt、UpdatedByUserAccountId 這三個欄位完全不理解，可以跟我解釋一下功能嗎？
+
+
+
+
+下個來討論 StoreVisitProductDetail｜實銷／陳列明細
+1.實銷數量應該可以用 int 不需用 decimal(18,3)。
+2.IsSellOutChecke、IsDisplayCheckedbit 這兩欄不理解，請解釋一下
+3.CreatedAt 跟 UpdatedAt 是紀錄哪一列資料有更新，這樣解釋對吧？StoreVisit 裡面的 UpdatedByUserAccountId，UpdatedAt 是紀錄整張巡點紀錄表有更新而已。
+
+
+【因為商品以「個、盒、包」等完整單位回報，不需要小數。建議加上限制：CHECK (SellOutQuantity >= 0)】
+這部分不正確，我解釋一下。如果該經銷商有庫存商品 A、B、C、D、E，這次實銷回報有可能 A賣1、B賣2、D有陳列1，就會有其他的值是Null。 
+
+這樣資料的紀錄該如何，你可以列出一個 Grid 確認一下嗎？
