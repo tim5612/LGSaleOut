@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Codex" compressed="false">
   <diagram id="LGSaleERD0722" name="LGSale ERD 0722">
-    <mxGraphModel dx="5131" dy="2979" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="2300" math="0" shadow="0">
+    <mxGraphModel dx="5347" dy="3109" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="2300" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -53,13 +53,13 @@
           </mxCell>
         </UserObject>
         <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EmploymentStatus&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;在職狀態&lt;/span&gt;&lt;/div&gt;" dbColumn="EmploymentStatus" dbType="varchar" dbKey="" dbDescription="在職狀態" id="row_Employee_EmploymentStatus">
-          <mxCell parent="table_Employee" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+          <mxCell parent="table_Employee" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#dae8fc;connectable=1;portConstraint=eastwest;" vertex="1">
             <mxGeometry height="26" width="420" y="168" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="EmployeePositionHistory｜員工職級歷史" dbTable="EmployeePositionHistory" id="table_EmployeePositionHistory">
           <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
-            <mxGeometry height="246" width="420" x="-2440" y="-1030" as="geometry" />
+            <mxGeometry height="246" width="420" x="-2470" y="-1042" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EmployeePositionHistoryId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="EmployeePositionHistoryId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_EmployeePositionHistory_EmployeePositionHistoryId">
@@ -104,7 +104,7 @@
         </UserObject>
         <UserObject label="OrganizationUnit｜組織單位" dbTable="OrganizationUnit" id="table_OrganizationUnit">
           <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
-            <mxGeometry height="142" width="420" x="-2440" y="-696" as="geometry" />
+            <mxGeometry height="142" width="420" x="-2470" y="-748" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;OrgUnitId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="OrgUnitId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_OrganizationUnit_OrgUnitId">
@@ -174,7 +174,7 @@
         </UserObject>
         <UserObject label="Dealer｜經銷商" dbTable="Dealer" id="table_Dealer">
           <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
-            <mxGeometry height="168" width="420" x="890" y="-1381" as="geometry" />
+            <mxGeometry height="168" width="420" x="910" y="-1381" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_Dealer_DealerId">
@@ -204,7 +204,7 @@
         </UserObject>
         <UserObject label="DealerAssignmentHistory｜公司業務負責經銷商歷程" dbTable="DealerAssignmentHistory" id="table_DealerAssignmentHistory">
           <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
-            <mxGeometry height="246" width="420" x="1800" y="-1700" as="geometry" />
+            <mxGeometry height="246" width="420" x="1580" y="-1710" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerAssignmentId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerAssignmentId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_DealerAssignmentHistory_DealerAssignmentId">
