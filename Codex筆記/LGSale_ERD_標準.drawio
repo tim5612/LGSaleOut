@@ -1,0 +1,1156 @@
+<mxfile host="Electron" agent="Codex" compressed="false">
+  <diagram id="LGSaleERD0722" name="LGSale ERD 0722">
+    <mxGraphModel dx="5047" dy="2929" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="2300" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="section_60_40" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=20;fontStyle=1;fontColor=#2f5597;align=left;" value="人員與組織" vertex="1">
+          <mxGeometry height="34" width="900" x="-2400" y="-1530" as="geometry" />
+        </mxCell>
+        <mxCell id="section_1000_40" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=20;fontStyle=1;fontColor=#38761d;align=left;" value="經銷商與負責關係" vertex="1">
+          <mxGeometry height="34" width="850" x="540" y="-1850" as="geometry" />
+        </mxCell>
+        <mxCell id="section_1960_40" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=20;fontStyle=1;fontColor=#7030a0;align=left;" value="統一登入與 Passkey" vertex="1">
+          <mxGeometry height="34" width="900" x="2630" y="-1184" as="geometry" />
+        </mxCell>
+        <mxCell id="section_60_890" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=20;fontStyle=1;fontColor=#9a6700;align=left;" value="匯入、庫存與進貨" vertex="1">
+          <mxGeometry height="34" width="1700" x="-2940" y="398" as="geometry" />
+        </mxCell>
+        <mxCell id="section_1960_890" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=20;fontStyle=1;fontColor=#b45f06;align=left;" value="巡店／經銷商回報" vertex="1">
+          <mxGeometry height="34" width="900" x="2340" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="section_1960_1470" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=20;fontStyle=1;fontColor=#a61c00;align=left;" value="公司任務與照片" vertex="1">
+          <mxGeometry height="34" width="1770" x="1960" y="1470" as="geometry" />
+        </mxCell>
+        <UserObject label="Employee｜員工" dbTable="Employee" id="table_Employee">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="168" width="420" x="-1220" y="-1160" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;員工識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="EmployeeId" dbType="bigint" dbKey="PK" dbDescription="員工識別碼" id="row_Employee_EmployeeId">
+          <mxCell parent="table_Employee" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;UK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EmployeeNo&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;員工編號&lt;/span&gt;&lt;/div&gt;" dbColumn="EmployeeNo" dbType="nvarchar" dbKey="UK" dbDescription="員工編號" id="row_Employee_EmployeeNo">
+          <mxCell parent="table_Employee" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EmployeeName&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;員工姓名&lt;/span&gt;&lt;/div&gt;" dbColumn="EmployeeName" dbType="nvarchar" dbKey="" dbDescription="員工姓名" id="row_Employee_EmployeeName">
+          <mxCell parent="table_Employee" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;HireDate&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;date&lt;/span&gt;&lt;span&gt;到職日&lt;/span&gt;&lt;/div&gt;" dbColumn="HireDate" dbType="date" dbKey="" dbDescription="到職日" id="row_Employee_HireDate">
+          <mxCell parent="table_Employee" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;TerminationDate&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;date&lt;/span&gt;&lt;span&gt;離職日&lt;/span&gt;&lt;/div&gt;" dbColumn="TerminationDate" dbType="date" dbKey="NULL" dbDescription="離職日" id="row_Employee_TerminationDate">
+          <mxCell parent="table_Employee" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="EmployeePositionHistory｜員工職級歷史" dbTable="EmployeePositionHistory" id="table_EmployeePositionHistory">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="246" width="420" x="-2390" y="-1490" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EmployeePositionHistoryId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="EmployeePositionHistoryId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_EmployeePositionHistory_EmployeePositionHistoryId">
+          <mxCell parent="table_EmployeePositionHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;員工&lt;/span&gt;&lt;/div&gt;" dbColumn="EmployeeId" dbType="bigint" dbKey="FK" dbDescription="員工" id="row_EmployeePositionHistory_EmployeeId">
+          <mxCell parent="table_EmployeePositionHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;PositionLevel&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;業務／處長／經理&lt;/span&gt;&lt;/div&gt;" dbColumn="PositionLevel" dbType="varchar" dbKey="" dbDescription="業務／處長／經理" id="row_EmployeePositionHistory_PositionLevel">
+          <mxCell parent="table_EmployeePositionHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;StartDateTime&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;開始&lt;/span&gt;&lt;/div&gt;" dbColumn="StartDateTime" dbType="datetime2" dbKey="" dbDescription="開始" id="row_EmployeePositionHistory_StartDateTime">
+          <mxCell parent="table_EmployeePositionHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EndDateTime&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;結束&lt;/span&gt;&lt;/div&gt;" dbColumn="EndDateTime" dbType="datetime2" dbKey="NULL" dbDescription="結束" id="row_EmployeePositionHistory_EndDateTime">
+          <mxCell parent="table_EmployeePositionHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ChangeReason&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;原因&lt;/span&gt;&lt;/div&gt;" dbColumn="ChangeReason" dbType="nvarchar" dbKey="" dbDescription="原因" id="row_EmployeePositionHistory_ChangeReason">
+          <mxCell parent="table_EmployeePositionHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;建立&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="建立" id="row_EmployeePositionHistory_CreatedAt">
+          <mxCell parent="table_EmployeePositionHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedByEmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;建立者&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedByEmployeeId" dbType="bigint" dbKey="FK" dbDescription="建立者" id="row_EmployeePositionHistory_CreatedByEmployeeId">
+          <mxCell parent="table_EmployeePositionHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="220" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="OrganizationUnit｜組織單位" dbTable="OrganizationUnit" id="table_OrganizationUnit">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="142" width="420" x="-2390" y="-1150" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;OrgUnitId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="OrgUnitId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_OrganizationUnit_OrgUnitId">
+          <mxCell parent="table_OrganizationUnit" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;UK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;OrgUnitCode&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;代碼&lt;/span&gt;&lt;/div&gt;" dbColumn="OrgUnitCode" dbType="varchar" dbKey="UK" dbDescription="代碼" id="row_OrganizationUnit_OrgUnitCode">
+          <mxCell parent="table_OrganizationUnit" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;OrgUnitName&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;名稱&lt;/span&gt;&lt;/div&gt;" dbColumn="OrgUnitName" dbType="nvarchar" dbKey="" dbDescription="名稱" id="row_OrganizationUnit_OrgUnitName">
+          <mxCell parent="table_OrganizationUnit" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;IsActive&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bit&lt;/span&gt;&lt;span&gt;啟用&lt;/span&gt;&lt;/div&gt;" dbColumn="IsActive" dbType="bit" dbKey="" dbDescription="啟用" id="row_OrganizationUnit_IsActive">
+          <mxCell parent="table_OrganizationUnit" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="EmployeeOrgAssignmentHistory｜員工組織歸屬歷史" dbTable="EmployeeOrgAssignmentHistory" id="table_EmployeeOrgAssignmentHistory">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="246" width="420" x="-1860" y="-966" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EmployeeOrgAssignmentId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="EmployeeOrgAssignmentId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_EmployeeOrgAssignmentHistory_EmployeeOrgAssignmentId">
+          <mxCell parent="table_EmployeeOrgAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;員工&lt;/span&gt;&lt;/div&gt;" dbColumn="EmployeeId" dbType="bigint" dbKey="FK" dbDescription="員工" id="row_EmployeeOrgAssignmentHistory_EmployeeId">
+          <mxCell parent="table_EmployeeOrgAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;OrgUnitId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;組織&lt;/span&gt;&lt;/div&gt;" dbColumn="OrgUnitId" dbType="bigint" dbKey="FK" dbDescription="組織" id="row_EmployeeOrgAssignmentHistory_OrgUnitId">
+          <mxCell parent="table_EmployeeOrgAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;StartDateTime&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;開始&lt;/span&gt;&lt;/div&gt;" dbColumn="StartDateTime" dbType="datetime2" dbKey="" dbDescription="開始" id="row_EmployeeOrgAssignmentHistory_StartDateTime">
+          <mxCell parent="table_EmployeeOrgAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EndDateTime&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;結束&lt;/span&gt;&lt;/div&gt;" dbColumn="EndDateTime" dbType="datetime2" dbKey="NULL" dbDescription="結束" id="row_EmployeeOrgAssignmentHistory_EndDateTime">
+          <mxCell parent="table_EmployeeOrgAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ChangeReason&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;原因&lt;/span&gt;&lt;/div&gt;" dbColumn="ChangeReason" dbType="nvarchar" dbKey="" dbDescription="原因" id="row_EmployeeOrgAssignmentHistory_ChangeReason">
+          <mxCell parent="table_EmployeeOrgAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;建立&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="建立" id="row_EmployeeOrgAssignmentHistory_CreatedAt">
+          <mxCell parent="table_EmployeeOrgAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedByEmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;建立者&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedByEmployeeId" dbType="bigint" dbKey="FK" dbDescription="建立者" id="row_EmployeeOrgAssignmentHistory_CreatedByEmployeeId">
+          <mxCell parent="table_EmployeeOrgAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="220" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Dealer｜經銷商" dbTable="Dealer" id="table_Dealer">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="142" width="420" x="700" y="-1524" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_Dealer_DealerId">
+          <mxCell parent="table_Dealer" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;UK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerCode&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;經銷商代碼&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerCode" dbType="varchar" dbKey="UK" dbDescription="經銷商代碼" id="row_Dealer_DealerCode">
+          <mxCell parent="table_Dealer" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerName&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;名稱&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerName" dbType="nvarchar" dbKey="" dbDescription="名稱" id="row_Dealer_DealerName">
+          <mxCell parent="table_Dealer" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;建立&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="建立" id="row_Dealer_CreatedAt">
+          <mxCell parent="table_Dealer" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="DealerLevelHistory｜經銷商等級歷程" dbTable="DealerLevelHistory" id="table_DealerLevelHistory">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="220" width="420" x="140" y="-1400" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerLevelHistoryId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerLevelHistoryId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_DealerLevelHistory_DealerLevelHistoryId">
+          <mxCell parent="table_DealerLevelHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;經銷商&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerId" dbType="bigint" dbKey="FK" dbDescription="經銷商" id="row_DealerLevelHistory_DealerId">
+          <mxCell parent="table_DealerLevelHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerStatus&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;char(1)&lt;/span&gt;&lt;span&gt;A–E；Z=結束經銷&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerStatus" dbType="char(1)" dbKey="" dbDescription="A–E；Z=結束經銷" id="row_DealerLevelHistory_DealerStatus">
+          <mxCell parent="table_DealerLevelHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;StartDateTime&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;等級開始時間&lt;/span&gt;&lt;/div&gt;" dbColumn="StartDateTime" dbType="datetime2" dbKey="" dbDescription="等級開始時間" id="row_DealerLevelHistory_StartDateTime">
+          <mxCell parent="table_DealerLevelHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EndDateTime&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;等級結束時間&lt;/span&gt;&lt;/div&gt;" dbColumn="EndDateTime" dbType="datetime2" dbKey="NULL" dbDescription="等級結束時間" id="row_DealerLevelHistory_EndDateTime">
+          <mxCell parent="table_DealerLevelHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ChangeReason&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar(MAX)&lt;/span&gt;&lt;span&gt;升降等／結束原因&lt;/span&gt;&lt;/div&gt;" dbColumn="ChangeReason" dbType="varchar(MAX)" dbKey="NULL" dbDescription="升降等／結束原因" id="row_DealerLevelHistory_ChangeReason">
+          <mxCell parent="table_DealerLevelHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;歷程建立時間&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="歷程建立時間" id="row_DealerLevelHistory_CreatedAt">
+          <mxCell parent="table_DealerLevelHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="DealerAssignmentHistory｜公司業務負責經銷商歷程" dbTable="DealerAssignmentHistory" id="table_DealerAssignmentHistory">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="246" width="420" x="150" y="-1770" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerAssignmentId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerAssignmentId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_DealerAssignmentHistory_DealerAssignmentId">
+          <mxCell parent="table_DealerAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;經銷商&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerId" dbType="bigint" dbKey="FK" dbDescription="經銷商" id="row_DealerAssignmentHistory_DealerId">
+          <mxCell parent="table_DealerAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;負責業務&lt;/span&gt;&lt;/div&gt;" dbColumn="EmployeeId" dbType="bigint" dbKey="FK" dbDescription="負責業務" id="row_DealerAssignmentHistory_EmployeeId">
+          <mxCell parent="table_DealerAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;StartDateTime&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;開始&lt;/span&gt;&lt;/div&gt;" dbColumn="StartDateTime" dbType="datetime2" dbKey="" dbDescription="開始" id="row_DealerAssignmentHistory_StartDateTime">
+          <mxCell parent="table_DealerAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EndDateTime&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;結束&lt;/span&gt;&lt;/div&gt;" dbColumn="EndDateTime" dbType="datetime2" dbKey="NULL" dbDescription="結束" id="row_DealerAssignmentHistory_EndDateTime">
+          <mxCell parent="table_DealerAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ChangeReason&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;原因&lt;/span&gt;&lt;/div&gt;" dbColumn="ChangeReason" dbType="nvarchar" dbKey="" dbDescription="原因" id="row_DealerAssignmentHistory_ChangeReason">
+          <mxCell parent="table_DealerAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;建立&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="建立" id="row_DealerAssignmentHistory_CreatedAt">
+          <mxCell parent="table_DealerAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedByEmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;建立者&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedByEmployeeId" dbType="bigint" dbKey="FK" dbDescription="建立者" id="row_DealerAssignmentHistory_CreatedByEmployeeId">
+          <mxCell parent="table_DealerAssignmentHistory" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#82b366;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="220" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="UserAccount｜統一登入帳號【新】" dbTable="UserAccount" id="table_UserAccount">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="246" width="420" x="2630" y="-1124" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;UserAccountId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="UserAccountId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_UserAccount_UserAccountId">
+          <mxCell parent="table_UserAccount" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;AccountType&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;EMPLOYEE／DEALER&lt;/span&gt;&lt;/div&gt;" dbColumn="AccountType" dbType="varchar" dbKey="" dbDescription="EMPLOYEE／DEALER" id="row_UserAccount_AccountType">
+          <mxCell parent="table_UserAccount" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK UQ NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;員工帳號&lt;/span&gt;&lt;/div&gt;" dbColumn="EmployeeId" dbType="bigint" dbKey="FK UQ NULL" dbDescription="員工帳號" id="row_UserAccount_EmployeeId">
+          <mxCell parent="table_UserAccount" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK UQ NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;經銷商帳號&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerId" dbType="bigint" dbKey="FK UQ NULL" dbDescription="經銷商帳號" id="row_UserAccount_DealerId">
+          <mxCell parent="table_UserAccount" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;IsLoginEnabled&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bit&lt;/span&gt;&lt;span&gt;允許登入&lt;/span&gt;&lt;/div&gt;" dbColumn="IsLoginEnabled" dbType="bit" dbKey="" dbDescription="允許登入" id="row_UserAccount_IsLoginEnabled">
+          <mxCell parent="table_UserAccount" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;AccountStatus&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;狀態&lt;/span&gt;&lt;/div&gt;" dbColumn="AccountStatus" dbType="varchar" dbKey="" dbDescription="狀態" id="row_UserAccount_AccountStatus">
+          <mxCell parent="table_UserAccount" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;LastLoginAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;最近登入&lt;/span&gt;&lt;/div&gt;" dbColumn="LastLoginAt" dbType="datetime2" dbKey="NULL" dbDescription="最近登入" id="row_UserAccount_LastLoginAt">
+          <mxCell parent="table_UserAccount" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;建立&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="建立" id="row_UserAccount_CreatedAt">
+          <mxCell parent="table_UserAccount" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="220" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="PasskeyCredential｜Passkey憑證【新】" dbTable="PasskeyCredential" id="table_PasskeyCredential">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="298" width="420" x="3410" y="-1340" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;PasskeyCredentialId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="PasskeyCredentialId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_PasskeyCredential_PasskeyCredentialId">
+          <mxCell parent="table_PasskeyCredential" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;UserAccountId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;登入帳號&lt;/span&gt;&lt;/div&gt;" dbColumn="UserAccountId" dbType="bigint" dbKey="FK" dbDescription="登入帳號" id="row_PasskeyCredential_UserAccountId">
+          <mxCell parent="table_PasskeyCredential" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;UK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CredentialId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varbinary&lt;/span&gt;&lt;span&gt;WebAuthn ID&lt;/span&gt;&lt;/div&gt;" dbColumn="CredentialId" dbType="varbinary" dbKey="UK" dbDescription="WebAuthn ID" id="row_PasskeyCredential_CredentialId">
+          <mxCell parent="table_PasskeyCredential" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;PublicKey&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varbinary&lt;/span&gt;&lt;span&gt;公鑰&lt;/span&gt;&lt;/div&gt;" dbColumn="PublicKey" dbType="varbinary" dbKey="" dbDescription="公鑰" id="row_PasskeyCredential_PublicKey">
+          <mxCell parent="table_PasskeyCredential" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SignCount&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;簽章計數&lt;/span&gt;&lt;/div&gt;" dbColumn="SignCount" dbType="bigint" dbKey="" dbDescription="簽章計數" id="row_PasskeyCredential_SignCount">
+          <mxCell parent="table_PasskeyCredential" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;Transports&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;傳輸&lt;/span&gt;&lt;/div&gt;" dbColumn="Transports" dbType="varchar" dbKey="NULL" dbDescription="傳輸" id="row_PasskeyCredential_Transports">
+          <mxCell parent="table_PasskeyCredential" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DeviceName&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;裝置名&lt;/span&gt;&lt;/div&gt;" dbColumn="DeviceName" dbType="nvarchar" dbKey="NULL" dbDescription="裝置名" id="row_PasskeyCredential_DeviceName">
+          <mxCell parent="table_PasskeyCredential" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;建立&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="建立" id="row_PasskeyCredential_CreatedAt">
+          <mxCell parent="table_PasskeyCredential" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="220" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;LastUsedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;最近使用&lt;/span&gt;&lt;/div&gt;" dbColumn="LastUsedAt" dbType="datetime2" dbKey="NULL" dbDescription="最近使用" id="row_PasskeyCredential_LastUsedAt">
+          <mxCell parent="table_PasskeyCredential" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="246" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;RevokedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;撤銷&lt;/span&gt;&lt;/div&gt;" dbColumn="RevokedAt" dbType="datetime2" dbKey="NULL" dbDescription="撤銷" id="row_PasskeyCredential_RevokedAt">
+          <mxCell parent="table_PasskeyCredential" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="272" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="PasskeyRegistrationInvitation｜註冊邀請【新】" dbTable="PasskeyRegistrationInvitation" id="table_PasskeyRegistrationInvitation">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="246" width="420" x="3410" y="-794" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;InvitationId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="InvitationId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_PasskeyRegistrationInvitation_InvitationId">
+          <mxCell parent="table_PasskeyRegistrationInvitation" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;UserAccountId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;登入帳號&lt;/span&gt;&lt;/div&gt;" dbColumn="UserAccountId" dbType="bigint" dbKey="FK" dbDescription="登入帳號" id="row_PasskeyRegistrationInvitation_UserAccountId">
+          <mxCell parent="table_PasskeyRegistrationInvitation" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;TokenHash&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varbinary&lt;/span&gt;&lt;span&gt;邀請Token雜湊&lt;/span&gt;&lt;/div&gt;" dbColumn="TokenHash" dbType="varbinary" dbKey="" dbDescription="邀請Token雜湊" id="row_PasskeyRegistrationInvitation_TokenHash">
+          <mxCell parent="table_PasskeyRegistrationInvitation" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ExpiresAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;失效&lt;/span&gt;&lt;/div&gt;" dbColumn="ExpiresAt" dbType="datetime2" dbKey="" dbDescription="失效" id="row_PasskeyRegistrationInvitation_ExpiresAt">
+          <mxCell parent="table_PasskeyRegistrationInvitation" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;UsedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;使用&lt;/span&gt;&lt;/div&gt;" dbColumn="UsedAt" dbType="datetime2" dbKey="NULL" dbDescription="使用" id="row_PasskeyRegistrationInvitation_UsedAt">
+          <mxCell parent="table_PasskeyRegistrationInvitation" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;RevokedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;撤銷&lt;/span&gt;&lt;/div&gt;" dbColumn="RevokedAt" dbType="datetime2" dbKey="NULL" dbDescription="撤銷" id="row_PasskeyRegistrationInvitation_RevokedAt">
+          <mxCell parent="table_PasskeyRegistrationInvitation" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;建立&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="建立" id="row_PasskeyRegistrationInvitation_CreatedAt">
+          <mxCell parent="table_PasskeyRegistrationInvitation" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedByEmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;簽發者&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedByEmployeeId" dbType="bigint" dbKey="FK" dbDescription="簽發者" id="row_PasskeyRegistrationInvitation_CreatedByEmployeeId">
+          <mxCell parent="table_PasskeyRegistrationInvitation" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#9673a6;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="220" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Product｜產品" dbTable="Product" id="table_Product">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="220" width="420" x="-1200" y="400" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ProductId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="ProductId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_Product_ProductId">
+          <mxCell parent="table_Product" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;UK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ProductCode&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;標準品號&lt;/span&gt;&lt;/div&gt;" dbColumn="ProductCode" dbType="varchar" dbKey="UK" dbDescription="標準品號" id="row_Product_ProductCode">
+          <mxCell parent="table_Product" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ProductName&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;名稱&lt;/span&gt;&lt;/div&gt;" dbColumn="ProductName" dbType="nvarchar" dbKey="" dbDescription="名稱" id="row_Product_ProductName">
+          <mxCell parent="table_Product" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CategoryLevel1&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;大類&lt;/span&gt;&lt;/div&gt;" dbColumn="CategoryLevel1" dbType="nvarchar" dbKey="NULL" dbDescription="大類" id="row_Product_CategoryLevel1">
+          <mxCell parent="table_Product" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CategoryLevel2&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;細類&lt;/span&gt;&lt;/div&gt;" dbColumn="CategoryLevel2" dbType="nvarchar" dbKey="NULL" dbDescription="細類" id="row_Product_CategoryLevel2">
+          <mxCell parent="table_Product" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;IsActive&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bit&lt;/span&gt;&lt;span&gt;啟用&lt;/span&gt;&lt;/div&gt;" dbColumn="IsActive" dbType="bit" dbKey="" dbDescription="啟用" id="row_Product_IsActive">
+          <mxCell parent="table_Product" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;建立&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="建立" id="row_Product_CreatedAt">
+          <mxCell parent="table_Product" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="ImportBatch｜資料匯入批次" dbTable="ImportBatch" id="table_ImportBatch">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="454" width="420" x="-2960" y="490" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ImportBatchId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="ImportBatchId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_ImportBatch_ImportBatchId">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ImportType&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;匯入類型&lt;/span&gt;&lt;/div&gt;" dbColumn="ImportType" dbType="varchar" dbKey="" dbDescription="匯入類型" id="row_ImportBatch_ImportType">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#dae8fc;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DataMonth&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;char(6)&lt;/span&gt;&lt;span&gt;月份&lt;/span&gt;&lt;/div&gt;" dbColumn="DataMonth" dbType="char(6)" dbKey="NULL" dbDescription="月份" id="row_ImportBatch_DataMonth">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DataDate&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;date&lt;/span&gt;&lt;span&gt;基準日&lt;/span&gt;&lt;/div&gt;" dbColumn="DataDate" dbType="date" dbKey="NULL" dbDescription="基準日" id="row_ImportBatch_DataDate">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#dae8fc;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;OriginalFileName&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;原始檔&lt;/span&gt;&lt;/div&gt;" dbColumn="OriginalFileName" dbType="nvarchar" dbKey="" dbDescription="原始檔" id="row_ImportBatch_OriginalFileName">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;StoredFilePath&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;儲存路徑&lt;/span&gt;&lt;/div&gt;" dbColumn="StoredFilePath" dbType="nvarchar" dbKey="" dbDescription="儲存路徑" id="row_ImportBatch_StoredFilePath">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;FileHash&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;雜湊&lt;/span&gt;&lt;/div&gt;" dbColumn="FileHash" dbType="varchar" dbKey="" dbDescription="雜湊" id="row_ImportBatch_FileHash">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#dae8fc;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;FileSize&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;大小&lt;/span&gt;&lt;/div&gt;" dbColumn="FileSize" dbType="bigint" dbKey="" dbDescription="大小" id="row_ImportBatch_FileSize">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#dae8fc;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="220" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ImportStatus&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;狀態&lt;/span&gt;&lt;/div&gt;" dbColumn="ImportStatus" dbType="varchar" dbKey="" dbDescription="狀態" id="row_ImportBatch_ImportStatus">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#dae8fc;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="246" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ReplacedBatchId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;取代批次&lt;/span&gt;&lt;/div&gt;" dbColumn="ReplacedBatchId" dbType="bigint" dbKey="FK NULL" dbDescription="取代批次" id="row_ImportBatch_ReplacedBatchId">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="272" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;TotalRowCount&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;int&lt;/span&gt;&lt;span&gt;總列數&lt;/span&gt;&lt;/div&gt;" dbColumn="TotalRowCount" dbType="int" dbKey="" dbDescription="總列數" id="row_ImportBatch_TotalRowCount">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="298" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SuccessRowCount&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;int&lt;/span&gt;&lt;span&gt;成功&lt;/span&gt;&lt;/div&gt;" dbColumn="SuccessRowCount" dbType="int" dbKey="" dbDescription="成功" id="row_ImportBatch_SuccessRowCount">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="324" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ErrorRowCount&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;int&lt;/span&gt;&lt;span&gt;錯誤&lt;/span&gt;&lt;/div&gt;" dbColumn="ErrorRowCount" dbType="int" dbKey="" dbDescription="錯誤" id="row_ImportBatch_ErrorRowCount">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#dae8fc;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="350" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ErrorSummary&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;錯誤摘要&lt;/span&gt;&lt;/div&gt;" dbColumn="ErrorSummary" dbType="nvarchar" dbKey="NULL" dbDescription="錯誤摘要" id="row_ImportBatch_ErrorSummary">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#dae8fc;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="376" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ImportedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;匯入時間&lt;/span&gt;&lt;/div&gt;" dbColumn="ImportedAt" dbType="datetime2" dbKey="" dbDescription="匯入時間" id="row_ImportBatch_ImportedAt">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="402" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ImportedByEmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;匯入者&lt;/span&gt;&lt;/div&gt;" dbColumn="ImportedByEmployeeId" dbType="bigint" dbKey="FK" dbDescription="匯入者" id="row_ImportBatch_ImportedByEmployeeId">
+          <mxCell parent="table_ImportBatch" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="428" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="MonthlyOpeningInventoryDetail｜每月期初庫存" dbTable="MonthlyOpeningInventoryDetail" id="table_MonthlyOpeningInventoryDetail">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="194" width="420" x="-2290" y="1020" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;OpeningInventoryDetailId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="OpeningInventoryDetailId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_MonthlyOpeningInventoryDetail_OpeningInventoryDetailId">
+          <mxCell parent="table_MonthlyOpeningInventoryDetail" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK UQ1&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ImportBatchId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;批次&lt;/span&gt;&lt;/div&gt;" dbColumn="ImportBatchId" dbType="bigint" dbKey="FK UQ1" dbDescription="批次" id="row_MonthlyOpeningInventoryDetail_ImportBatchId">
+          <mxCell parent="table_MonthlyOpeningInventoryDetail" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SourceRowNumber&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;int&lt;/span&gt;&lt;span&gt;來源列&lt;/span&gt;&lt;/div&gt;" dbColumn="SourceRowNumber" dbType="int" dbKey="" dbDescription="來源列" id="row_MonthlyOpeningInventoryDetail_SourceRowNumber">
+          <mxCell parent="table_MonthlyOpeningInventoryDetail" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#dae8fc;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK UQ1&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;經銷商&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerId" dbType="bigint" dbKey="FK UQ1" dbDescription="經銷商" id="row_MonthlyOpeningInventoryDetail_DealerId">
+          <mxCell parent="table_MonthlyOpeningInventoryDetail" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK UQ1&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ProductId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;產品&lt;/span&gt;&lt;/div&gt;" dbColumn="ProductId" dbType="bigint" dbKey="FK UQ1" dbDescription="產品" id="row_MonthlyOpeningInventoryDetail_ProductId">
+          <mxCell parent="table_MonthlyOpeningInventoryDetail" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;OpeningQuantity&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;int&lt;/span&gt;&lt;span&gt;期初數量&lt;/span&gt;&lt;/div&gt;" dbColumn="OpeningQuantity" dbType="int" dbKey="" dbDescription="期初數量" id="row_MonthlyOpeningInventoryDetail_OpeningQuantity">
+          <mxCell parent="table_MonthlyOpeningInventoryDetail" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="SellInTransaction｜進貨交易" dbTable="SellInTransaction" id="table_SellInTransaction">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="506" width="420" x="-2160" y="1360" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SellInTransactionId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="SellInTransactionId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_SellInTransaction_SellInTransactionId">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ImportBatchId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;批次&lt;/span&gt;&lt;/div&gt;" dbColumn="ImportBatchId" dbType="bigint" dbKey="FK" dbDescription="批次" id="row_SellInTransaction_ImportBatchId">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SourceRowNumber&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;int&lt;/span&gt;&lt;span&gt;來源列&lt;/span&gt;&lt;/div&gt;" dbColumn="SourceRowNumber" dbType="int" dbKey="" dbDescription="來源列" id="row_SellInTransaction_SourceRowNumber">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#6c8ebf;strokeWidth=0.5;fillColor=#dae8fc;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;經銷商&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerId" dbType="bigint" dbKey="FK" dbDescription="經銷商" id="row_SellInTransaction_DealerId">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ProductId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;產品&lt;/span&gt;&lt;/div&gt;" dbColumn="ProductId" dbType="bigint" dbKey="FK" dbDescription="產品" id="row_SellInTransaction_ProductId">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;UQ?&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SalesDocumentNo&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;文件號&lt;/span&gt;&lt;/div&gt;" dbColumn="SalesDocumentNo" dbType="varchar" dbKey="UQ?" dbDescription="文件號" id="row_SellInTransaction_SalesDocumentNo">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;UQ?&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SalesDocumentItemNo&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;項次&lt;/span&gt;&lt;/div&gt;" dbColumn="SalesDocumentItemNo" dbType="varchar" dbKey="UQ?" dbDescription="項次" id="row_SellInTransaction_SalesDocumentItemNo">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;InvoiceNo&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;發票&lt;/span&gt;&lt;/div&gt;" dbColumn="InvoiceNo" dbType="varchar" dbKey="NULL" dbDescription="發票" id="row_SellInTransaction_InvoiceNo">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="220" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;OrderDate&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;date&lt;/span&gt;&lt;span&gt;訂單日&lt;/span&gt;&lt;/div&gt;" dbColumn="OrderDate" dbType="date" dbKey="" dbDescription="訂單日" id="row_SellInTransaction_OrderDate">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="246" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;BillingDate&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;date&lt;/span&gt;&lt;span&gt;計帳日&lt;/span&gt;&lt;/div&gt;" dbColumn="BillingDate" dbType="date" dbKey="" dbDescription="計帳日" id="row_SellInTransaction_BillingDate">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="272" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;InvoiceDate&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;date&lt;/span&gt;&lt;span&gt;發票日&lt;/span&gt;&lt;/div&gt;" dbColumn="InvoiceDate" dbType="date" dbKey="NULL" dbDescription="發票日" id="row_SellInTransaction_InvoiceDate">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="298" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;InventoryEffectiveDate&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;date&lt;/span&gt;&lt;span&gt;庫存生效日&lt;/span&gt;&lt;/div&gt;" dbColumn="InventoryEffectiveDate" dbType="date" dbKey="" dbDescription="庫存生效日" id="row_SellInTransaction_InventoryEffectiveDate">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="324" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;Quantity&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;decimal(18,3)&lt;/span&gt;&lt;span&gt;數量&lt;/span&gt;&lt;/div&gt;" dbColumn="Quantity" dbType="decimal(18,3)" dbKey="" dbDescription="數量" id="row_SellInTransaction_Quantity">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#f8cecc;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="350" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;TransactionType&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;類型&lt;/span&gt;&lt;/div&gt;" dbColumn="TransactionType" dbType="varchar" dbKey="" dbDescription="類型" id="row_SellInTransaction_TransactionType">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="376" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;TransactionStatus&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;狀態&lt;/span&gt;&lt;/div&gt;" dbColumn="TransactionStatus" dbType="varchar" dbKey="" dbDescription="狀態" id="row_SellInTransaction_TransactionStatus">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="402" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ReviewStatus&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;審核&lt;/span&gt;&lt;/div&gt;" dbColumn="ReviewStatus" dbType="varchar" dbKey="" dbDescription="審核" id="row_SellInTransaction_ReviewStatus">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="428" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;建立&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="建立" id="row_SellInTransaction_CreatedAt">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="454" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;UpdatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;更新&lt;/span&gt;&lt;/div&gt;" dbColumn="UpdatedAt" dbType="datetime2" dbKey="NULL" dbDescription="更新" id="row_SellInTransaction_UpdatedAt">
+          <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="480" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="StoreVisit｜巡店／經銷商回報【新制】" dbTable="StoreVisit" id="table_StoreVisit">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="298" width="420" x="2360" y="280" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;StoreVisitId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="StoreVisitId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_StoreVisit_StoreVisitId">
+          <mxCell parent="table_StoreVisit" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d79b00;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;經銷商&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerId" dbType="bigint" dbKey="FK" dbDescription="經銷商" id="row_StoreVisit_DealerId">
+          <mxCell parent="table_StoreVisit" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d79b00;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerAssignmentId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;業務填寫時指派&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerAssignmentId" dbType="bigint" dbKey="FK NULL" dbDescription="業務填寫時指派" id="row_StoreVisit_DealerAssignmentId">
+          <mxCell parent="table_StoreVisit" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EntrySourceType&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;EMPLOYEE／DEALER&lt;/span&gt;&lt;/div&gt;" dbColumn="EntrySourceType" dbType="varchar" dbKey="" dbDescription="填寫來源：EMPLOYEE 為業務或助理；DEALER 為經銷商" id="row_StoreVisit_EntrySourceType">
+          <mxCell parent="table_StoreVisit" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d79b00;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ReportDateTime&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;回報時間（72小時起算）&lt;/span&gt;&lt;/div&gt;" dbColumn="ReportDateTime" dbType="datetime2" dbKey="" dbDescription="不可空；建立 StoreVisit 時由資料庫寫入，並作為 72 小時修改期限起算點" id="row_StoreVisit_ReportDateTime">
+          <mxCell parent="table_StoreVisit" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d79b00;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;RecordStatus&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;資料狀態：ACTIVE／VOIDED&lt;/span&gt;&lt;/div&gt;" dbColumn="RecordStatus" dbType="varchar" dbKey="" dbDescription="資料狀態：ACTIVE 有效；VOIDED 作廢且不參與庫存計算" id="row_StoreVisit_RecordStatus">
+          <mxCell parent="table_StoreVisit" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;資料列建立時間&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="資料列實際寫入資料庫的稽核時間，不可修改" id="row_StoreVisit_CreatedAt">
+          <mxCell parent="table_StoreVisit" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d79b00;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedByUserAccountId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;實際填寫帳號&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedByUserAccountId" dbType="bigint" dbKey="FK" dbDescription="實際建立者；用於辨識正式業務、業務助理或經銷商填寫，並支援現場填寫分析及經銷商回報獎勵" id="row_StoreVisit_CreatedByUserAccountId">
+          <mxCell parent="table_StoreVisit" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="220" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;UpdatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;最後修改時間&lt;/span&gt;&lt;/div&gt;" dbColumn="UpdatedAt" dbType="datetime2" dbKey="NULL" dbDescription="最後修改時間；一般修改僅允許在 ReportDateTime 後 72 小時內" id="row_StoreVisit_UpdatedAt">
+          <mxCell parent="table_StoreVisit" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="246" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;UpdatedByUserAccountId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;最後修改帳號&lt;/span&gt;&lt;/div&gt;" dbColumn="UpdatedByUserAccountId" dbType="bigint" dbKey="FK NULL" dbDescription="最後修改這筆回報的登入帳號" id="row_StoreVisit_UpdatedByUserAccountId">
+          <mxCell parent="table_StoreVisit" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="272" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="StoreVisitProductDetail｜實銷／陳列明細" dbTable="StoreVisitProductDetail" id="table_StoreVisitProductDetail">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="246" width="420" x="2930" y="620" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;StoreVisitProductDetailId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="StoreVisitProductDetailId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_StoreVisitProductDetail_StoreVisitProductDetailId">
+          <mxCell parent="table_StoreVisitProductDetail" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d79b00;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK UQ1&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;StoreVisitId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;回報&lt;/span&gt;&lt;/div&gt;" dbColumn="StoreVisitId" dbType="bigint" dbKey="FK UQ1" dbDescription="回報" id="row_StoreVisitProductDetail_StoreVisitId">
+          <mxCell parent="table_StoreVisitProductDetail" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d79b00;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK UQ1&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ProductId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;產品&lt;/span&gt;&lt;/div&gt;" dbColumn="ProductId" dbType="bigint" dbKey="FK UQ1" dbDescription="產品" id="row_StoreVisitProductDetail_ProductId">
+          <mxCell parent="table_StoreVisitProductDetail" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d79b00;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SellOutQuantity&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;int&lt;/span&gt;&lt;span&gt;實銷個數；NULL＝未填&lt;/span&gt;&lt;/div&gt;" dbColumn="SellOutQuantity" dbType="int" dbKey="NULL" dbDescription="實銷個數；NULL 表示未填，0 表示明確回報為零" id="row_StoreVisitProductDetail_SellOutQuantity">
+          <mxCell parent="table_StoreVisitProductDetail" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d79b00;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SellOutDate&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;date&lt;/span&gt;&lt;span&gt;實銷日期；預設當天可修改&lt;/span&gt;&lt;/div&gt;" dbColumn="SellOutDate" dbType="date" dbKey="NULL" dbDescription="實銷日期；畫面預設當天且可修改，只有陳列時可以不保存" id="row_StoreVisitProductDetail_SellOutDate">
+          <mxCell parent="table_StoreVisitProductDetail" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d79b00;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DisplayQuantity&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;int&lt;/span&gt;&lt;span&gt;陳列個數；NULL＝未填&lt;/span&gt;&lt;/div&gt;" dbColumn="DisplayQuantity" dbType="int" dbKey="NULL" dbDescription="陳列個數；NULL 表示未填，0 表示明確回報為零" id="row_StoreVisitProductDetail_DisplayQuantity">
+          <mxCell parent="table_StoreVisitProductDetail" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d79b00;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;建立&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="建立" id="row_StoreVisitProductDetail_CreatedAt">
+          <mxCell parent="table_StoreVisitProductDetail" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;UpdatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;更新&lt;/span&gt;&lt;/div&gt;" dbColumn="UpdatedAt" dbType="datetime2" dbKey="NULL" dbDescription="更新" id="row_StoreVisitProductDetail_UpdatedAt">
+          <mxCell parent="table_StoreVisitProductDetail" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="220" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="VisitTask｜巡店任務【新】" dbTable="VisitTask" id="table_VisitTask">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="376" width="420" x="1990" y="1530" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;VisitTaskId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="VisitTaskId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_VisitTask_VisitTaskId">
+          <mxCell parent="table_VisitTask" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;TaskTitle&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;標題&lt;/span&gt;&lt;/div&gt;" dbColumn="TaskTitle" dbType="nvarchar" dbKey="" dbDescription="標題" id="row_VisitTask_TaskTitle">
+          <mxCell parent="table_VisitTask" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;Instruction&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar(max)&lt;/span&gt;&lt;span&gt;指令&lt;/span&gt;&lt;/div&gt;" dbColumn="Instruction" dbType="nvarchar(max)" dbKey="" dbDescription="指令" id="row_VisitTask_Instruction">
+          <mxCell parent="table_VisitTask" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ValidFrom&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;date&lt;/span&gt;&lt;span&gt;開始&lt;/span&gt;&lt;/div&gt;" dbColumn="ValidFrom" dbType="date" dbKey="" dbDescription="開始" id="row_VisitTask_ValidFrom">
+          <mxCell parent="table_VisitTask" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DueDate&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;date&lt;/span&gt;&lt;span&gt;期限&lt;/span&gt;&lt;/div&gt;" dbColumn="DueDate" dbType="date" dbKey="" dbDescription="期限" id="row_VisitTask_DueDate">
+          <mxCell parent="table_VisitTask" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;RecordStatus&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;資料狀態：ACTIVE／VOIDED&lt;/span&gt;&lt;/div&gt;" dbColumn="RecordStatus" dbType="varchar" dbKey="" dbDescription="資料狀態：ACTIVE 有效；VOIDED 作廢" id="row_VisitTask_RecordStatus">
+          <mxCell parent="table_VisitTask" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK UQ NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SampleTaskExecutionId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;樣本搜尋起點★&lt;/span&gt;&lt;/div&gt;" dbColumn="SampleTaskExecutionId" dbType="bigint" dbKey="FK UQ NULL" dbDescription="樣本搜尋起點：連到 VisitTaskExecution.TaskExecutionId；NULL 表示尚未指定樣本" id="row_VisitTask_SampleTaskExecutionId">
+          <mxCell parent="table_VisitTask" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SampleApprovedByEmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;樣本核准員工&lt;/span&gt;&lt;/div&gt;" dbColumn="SampleApprovedByEmployeeId" dbType="bigint" dbKey="FK NULL" dbDescription="核准樣本的員工；未核准時為 NULL" id="row_VisitTask_SampleApprovedByEmployeeId">
+          <mxCell parent="table_VisitTask" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="220" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SampleApprovedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;樣本核准時間&lt;/span&gt;&lt;/div&gt;" dbColumn="SampleApprovedAt" dbType="datetime2" dbKey="NULL" dbDescription="樣本核准時間；有值後其他業務可依樣本執行" id="row_VisitTask_SampleApprovedAt">
+          <mxCell parent="table_VisitTask" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="246" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedByEmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;實際建立員工&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedByEmployeeId" dbType="bigint" dbKey="FK" dbDescription="實際建立任務的員工，不限定經理" id="row_VisitTask_CreatedByEmployeeId">
+          <mxCell parent="table_VisitTask" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="272" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;建立&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="建立" id="row_VisitTask_CreatedAt">
+          <mxCell parent="table_VisitTask" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="298" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;UpdatedByEmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;最後修改員工&lt;/span&gt;&lt;/div&gt;" dbColumn="UpdatedByEmployeeId" dbType="bigint" dbKey="FK NULL" dbDescription="最後修改任務的員工；尚未修改時為 NULL" id="row_VisitTask_UpdatedByEmployeeId">
+          <mxCell parent="table_VisitTask" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="324" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;UpdatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;最後修改時間&lt;/span&gt;&lt;/div&gt;" dbColumn="UpdatedAt" dbType="datetime2" dbKey="NULL" dbDescription="最後修改時間；尚未修改時為 NULL" id="row_VisitTask_UpdatedAt">
+          <mxCell parent="table_VisitTask" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="350" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="VisitTaskExecution｜任務執行【新】" dbTable="VisitTaskExecution" id="table_VisitTaskExecution">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="246" width="420" x="2630" y="1924" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;TaskExecutionId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="TaskExecutionId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_VisitTaskExecution_TaskExecutionId">
+          <mxCell parent="table_VisitTaskExecution" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK UQ1&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;VisitTaskId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;任務&lt;/span&gt;&lt;/div&gt;" dbColumn="VisitTaskId" dbType="bigint" dbKey="FK UQ1" dbDescription="任務；與 DealerId 組成唯一鍵" id="row_VisitTaskExecution_VisitTaskId">
+          <mxCell parent="table_VisitTaskExecution" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK UQ1&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;應回報經銷商&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerId" dbType="bigint" dbKey="FK UQ1" dbDescription="應回報經銷商；每個任務每家一筆" id="row_VisitTaskExecution_DealerId">
+          <mxCell parent="table_VisitTaskExecution" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ResponsibleEmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;發布時負責業務&lt;/span&gt;&lt;/div&gt;" dbColumn="ResponsibleEmployeeId" dbType="bigint" dbKey="FK" dbDescription="任務發布時負責該經銷商的業務快照" id="row_VisitTaskExecution_ResponsibleEmployeeId">
+          <mxCell parent="table_VisitTaskExecution" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CompletedByEmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;實際回報員工&lt;/span&gt;&lt;/div&gt;" dbColumn="CompletedByEmployeeId" dbType="bigint" dbKey="FK NULL" dbDescription="實際回報員工；尚未回報時為 NULL" id="row_VisitTaskExecution_CompletedByEmployeeId">
+          <mxCell parent="table_VisitTaskExecution" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ExecutionNote&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar(max)&lt;/span&gt;&lt;span&gt;任務狀況說明&lt;/span&gt;&lt;/div&gt;" dbColumn="ExecutionNote" dbType="nvarchar(max)" dbKey="NULL" dbDescription="執行與未執行皆使用此欄說明；正式送出時必填" id="row_VisitTaskExecution_ExecutionNote">
+          <mxCell parent="table_VisitTaskExecution" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SubmittedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;正式送出時間&lt;/span&gt;&lt;/div&gt;" dbColumn="SubmittedAt" dbType="datetime2" dbKey="NULL" dbDescription="NULL 表示尚未回報；有值表示正式送出" id="row_VisitTaskExecution_SubmittedAt">
+          <mxCell parent="table_VisitTaskExecution" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;待辦建立時間&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="系統為經銷商建立任務待辦資料的時間" id="row_VisitTaskExecution_CreatedAt">
+          <mxCell parent="table_VisitTaskExecution" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="220" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="VisitTaskPhoto｜任務照片【新】" dbTable="VisitTaskPhoto" id="table_VisitTaskPhoto">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
+            <mxGeometry height="272" width="420" x="3260" y="1690" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;TaskPhotoId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="TaskPhotoId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_VisitTaskPhoto_TaskPhotoId">
+          <mxCell parent="table_VisitTaskPhoto" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;TaskExecutionId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;任務執行&lt;/span&gt;&lt;/div&gt;" dbColumn="TaskExecutionId" dbType="bigint" dbKey="FK" dbDescription="任務執行" id="row_VisitTaskPhoto_TaskExecutionId">
+          <mxCell parent="table_VisitTaskPhoto" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="64" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SampleTaskPhotoId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;對應樣本照片&lt;/span&gt;&lt;/div&gt;" dbColumn="SampleTaskPhotoId" dbType="bigint" dbKey="FK NULL" dbDescription="樣本照片本身為 NULL；一般照片指向必須仿照的樣本照片" id="row_VisitTaskPhoto_SampleTaskPhotoId">
+          <mxCell parent="table_VisitTaskPhoto" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="90" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;PhotoDescription&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;樣本照片說明&lt;/span&gt;&lt;/div&gt;" dbColumn="PhotoDescription" dbType="nvarchar" dbKey="NULL" dbDescription="樣本照片必填；一般業務只能讀取對應樣本說明，不可修改" id="row_VisitTaskPhoto_PhotoDescription">
+          <mxCell parent="table_VisitTaskPhoto" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="116" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;StoredFileName&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;檔名&lt;/span&gt;&lt;/div&gt;" dbColumn="StoredFileName" dbType="nvarchar" dbKey="" dbDescription="檔名" id="row_VisitTaskPhoto_StoredFileName">
+          <mxCell parent="table_VisitTaskPhoto" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;StoredFilePath&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;路徑&lt;/span&gt;&lt;/div&gt;" dbColumn="StoredFilePath" dbType="nvarchar" dbKey="" dbDescription="路徑" id="row_VisitTaskPhoto_StoredFilePath">
+          <mxCell parent="table_VisitTaskPhoto" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CapturedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;拍照時間&lt;/span&gt;&lt;/div&gt;" dbColumn="CapturedAt" dbType="datetime2" dbKey="" dbDescription="拍照時間" id="row_VisitTaskPhoto_CapturedAt">
+          <mxCell parent="table_VisitTaskPhoto" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SortOrder&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;int&lt;/span&gt;&lt;span&gt;順序&lt;/span&gt;&lt;/div&gt;" dbColumn="SortOrder" dbType="int" dbKey="" dbDescription="順序" id="row_VisitTaskPhoto_SortOrder">
+          <mxCell parent="table_VisitTaskPhoto" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="220" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;UploadedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;上傳時間&lt;/span&gt;&lt;/div&gt;" dbColumn="UploadedAt" dbType="datetime2" dbKey="" dbDescription="上傳時間" id="row_VisitTaskPhoto_UploadedAt">
+          <mxCell parent="table_VisitTaskPhoto" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#b85450;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
+            <mxGeometry height="26" width="420" y="246" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="任職員工" parentTable="Employee" parentColumn="EmployeeId" childTable="EmployeePositionHistory" childColumn="EmployeeId" id="rel_1">
+          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_EmployeePositionHistory_EmployeeId">
+            <mxGeometry relative="1" x="0.2257" as="geometry">
+              <mxPoint as="offset" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="建立職級異動" parentTable="Employee" parentColumn="EmployeeId" childTable="EmployeePositionHistory" childColumn="CreatedByEmployeeId" id="rel_2">
+          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_EmployeePositionHistory_CreatedByEmployeeId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="歸屬員工" parentTable="Employee" parentColumn="EmployeeId" childTable="EmployeeOrgAssignmentHistory" childColumn="EmployeeId" id="rel_3">
+          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_EmployeeOrgAssignmentHistory_EmployeeId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="所屬組織" parentTable="OrganizationUnit" parentColumn="OrgUnitId" childTable="EmployeeOrgAssignmentHistory" childColumn="OrgUnitId" id="rel_4">
+          <mxCell edge="1" parent="1" source="row_OrganizationUnit_OrgUnitId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_EmployeeOrgAssignmentHistory_OrgUnitId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="建立組織異動" parentTable="Employee" parentColumn="EmployeeId" childTable="EmployeeOrgAssignmentHistory" childColumn="CreatedByEmployeeId" id="rel_5">
+          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_EmployeeOrgAssignmentHistory_CreatedByEmployeeId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="經銷商等級歷程" parentTable="Dealer" parentColumn="DealerId" childTable="DealerLevelHistory" childColumn="DealerId" id="rel_DealerLevelHistory">
+          <mxCell edge="1" parent="1" source="row_Dealer_DealerId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_DealerLevelHistory_DealerId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="負責經銷商" parentTable="Dealer" parentColumn="DealerId" childTable="DealerAssignmentHistory" childColumn="DealerId" id="rel_6">
+          <mxCell edge="1" parent="1" source="row_Dealer_DealerId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_DealerAssignmentHistory_DealerId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="負責業務" parentTable="Employee" parentColumn="EmployeeId" childTable="DealerAssignmentHistory" childColumn="EmployeeId" id="rel_7">
+          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_DealerAssignmentHistory_EmployeeId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="建立換線異動" parentTable="Employee" parentColumn="EmployeeId" childTable="DealerAssignmentHistory" childColumn="CreatedByEmployeeId" id="rel_8">
+          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_DealerAssignmentHistory_CreatedByEmployeeId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="員工登入帳號" parentTable="Employee" parentColumn="EmployeeId" childTable="UserAccount" childColumn="EmployeeId" id="rel_14">
+          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_UserAccount_EmployeeId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="經銷商登入帳號" parentTable="Dealer" parentColumn="DealerId" childTable="UserAccount" childColumn="DealerId" id="rel_15">
+          <mxCell edge="1" parent="1" source="row_Dealer_DealerId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_UserAccount_DealerId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Passkey憑證" parentTable="UserAccount" parentColumn="UserAccountId" childTable="PasskeyCredential" childColumn="UserAccountId" id="rel_16">
+          <mxCell edge="1" parent="1" source="row_UserAccount_UserAccountId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_PasskeyCredential_UserAccountId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="註冊邀請" parentTable="UserAccount" parentColumn="UserAccountId" childTable="PasskeyRegistrationInvitation" childColumn="UserAccountId" id="rel_17">
+          <mxCell edge="1" parent="1" source="row_UserAccount_UserAccountId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_PasskeyRegistrationInvitation_UserAccountId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="邀請簽發者" parentTable="Employee" parentColumn="EmployeeId" childTable="PasskeyRegistrationInvitation" childColumn="CreatedByEmployeeId" id="rel_18">
+          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_PasskeyRegistrationInvitation_CreatedByEmployeeId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="執行匯入" parentTable="Employee" parentColumn="EmployeeId" childTable="ImportBatch" childColumn="ImportedByEmployeeId" id="rel_19">
+          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_ImportBatch_ImportedByEmployeeId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="整批取代" parentTable="ImportBatch" parentColumn="ImportBatchId" childTable="ImportBatch" childColumn="ReplacedBatchId" id="rel_20">
+          <mxCell edge="1" parent="1" source="row_ImportBatch_ImportBatchId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_ImportBatch_ReplacedBatchId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="期初批次" parentTable="ImportBatch" parentColumn="ImportBatchId" childTable="MonthlyOpeningInventoryDetail" childColumn="ImportBatchId" id="rel_21">
+          <mxCell edge="1" parent="1" source="row_ImportBatch_ImportBatchId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_MonthlyOpeningInventoryDetail_ImportBatchId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="庫存經銷商" parentTable="Dealer" parentColumn="DealerId" childTable="MonthlyOpeningInventoryDetail" childColumn="DealerId" id="rel_22">
+          <mxCell edge="1" parent="1" source="row_Dealer_DealerId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_MonthlyOpeningInventoryDetail_DealerId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="庫存產品" parentTable="Product" parentColumn="ProductId" childTable="MonthlyOpeningInventoryDetail" childColumn="ProductId" id="rel_23">
+          <mxCell edge="1" parent="1" source="row_Product_ProductId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_MonthlyOpeningInventoryDetail_ProductId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="進貨批次" parentTable="ImportBatch" parentColumn="ImportBatchId" childTable="SellInTransaction" childColumn="ImportBatchId" id="rel_24">
+          <mxCell edge="1" parent="1" source="row_ImportBatch_ImportBatchId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_SellInTransaction_ImportBatchId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="進貨經銷商" parentTable="Dealer" parentColumn="DealerId" childTable="SellInTransaction" childColumn="DealerId" id="rel_25">
+          <mxCell edge="1" parent="1" source="row_Dealer_DealerId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_SellInTransaction_DealerId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="進貨產品" parentTable="Product" parentColumn="ProductId" childTable="SellInTransaction" childColumn="ProductId" id="rel_26">
+          <mxCell edge="1" parent="1" source="row_Product_ProductId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_SellInTransaction_ProductId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="回報經銷商" parentTable="Dealer" parentColumn="DealerId" childTable="StoreVisit" childColumn="DealerId" id="rel_27">
+          <mxCell edge="1" parent="1" source="row_Dealer_DealerId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_StoreVisit_DealerId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="巡店時指派" parentTable="DealerAssignmentHistory" parentColumn="DealerAssignmentId" childTable="StoreVisit" childColumn="DealerAssignmentId" id="rel_28">
+          <mxCell edge="1" parent="1" source="row_DealerAssignmentHistory_DealerAssignmentId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_StoreVisit_DealerAssignmentId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="回報建立帳號" parentTable="UserAccount" parentColumn="UserAccountId" childTable="StoreVisit" childColumn="CreatedByUserAccountId" id="rel_30">
+          <mxCell edge="1" parent="1" source="row_UserAccount_UserAccountId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_StoreVisit_CreatedByUserAccountId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="回報更新帳號" parentTable="UserAccount" parentColumn="UserAccountId" childTable="StoreVisit" childColumn="UpdatedByUserAccountId" id="rel_31">
+          <mxCell edge="1" parent="1" source="row_UserAccount_UserAccountId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_StoreVisit_UpdatedByUserAccountId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="回報明細" parentTable="StoreVisit" parentColumn="StoreVisitId" childTable="StoreVisitProductDetail" childColumn="StoreVisitId" id="rel_33">
+          <mxCell edge="1" parent="1" source="row_StoreVisit_StoreVisitId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_StoreVisitProductDetail_StoreVisitId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="回報產品" parentTable="Product" parentColumn="ProductId" childTable="StoreVisitProductDetail" childColumn="ProductId" id="rel_34">
+          <mxCell edge="1" parent="1" source="row_Product_ProductId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_StoreVisitProductDetail_ProductId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="員工建立任務" parentTable="Employee" parentColumn="EmployeeId" childTable="VisitTask" childColumn="CreatedByEmployeeId" id="rel_35">
+          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_VisitTask_CreatedByEmployeeId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="員工最後修改任務" parentTable="Employee" parentColumn="EmployeeId" childTable="VisitTask" childColumn="UpdatedByEmployeeId" id="rel_43">
+          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_VisitTask_UpdatedByEmployeeId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="任務經銷商執行紀錄" parentTable="VisitTask" parentColumn="VisitTaskId" childTable="VisitTaskExecution" childColumn="VisitTaskId" id="rel_36">
+          <mxCell edge="1" parent="1" source="row_VisitTask_VisitTaskId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_VisitTaskExecution_VisitTaskId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="應回報經銷商" parentTable="Dealer" parentColumn="DealerId" childTable="VisitTaskExecution" childColumn="DealerId" id="rel_37">
+          <mxCell edge="1" parent="1" source="row_Dealer_DealerId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_VisitTaskExecution_DealerId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="發布時負責業務" parentTable="Employee" parentColumn="EmployeeId" childTable="VisitTaskExecution" childColumn="ResponsibleEmployeeId" id="rel_38">
+          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_VisitTaskExecution_ResponsibleEmployeeId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="實際回報員工" parentTable="Employee" parentColumn="EmployeeId" childTable="VisitTaskExecution" childColumn="CompletedByEmployeeId" id="rel_41">
+          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_VisitTaskExecution_CompletedByEmployeeId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="樣本核准員工" parentTable="Employee" parentColumn="EmployeeId" childTable="VisitTask" childColumn="SampleApprovedByEmployeeId" id="rel_44">
+          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_VisitTask_SampleApprovedByEmployeeId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="沿此線找到唯一樣本★" parentTable="VisitTaskExecution" parentColumn="TaskExecutionId" childTable="VisitTask" childColumn="SampleTaskExecutionId" id="rel_45">
+          <mxCell edge="1" parent="1" source="row_VisitTaskExecution_TaskExecutionId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERzeroToOne;endFill=0;startArrow=ERzeroToOne;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_VisitTask_SampleTaskExecutionId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="多張照片" parentTable="VisitTaskExecution" parentColumn="TaskExecutionId" childTable="VisitTaskPhoto" childColumn="TaskExecutionId" id="rel_42">
+          <mxCell edge="1" parent="1" source="row_VisitTaskExecution_TaskExecutionId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_VisitTaskPhoto_TaskExecutionId">
+            <mxGeometry relative="1" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="一般照片對應樣本照片" parentTable="VisitTaskPhoto" parentColumn="TaskPhotoId" childTable="VisitTaskPhoto" childColumn="SampleTaskPhotoId" id="rel_46">
+          <mxCell edge="1" parent="1" source="row_VisitTaskPhoto_TaskPhotoId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_VisitTaskPhoto_SampleTaskPhotoId">
+            <mxGeometry relative="1" as="geometry">
+              <Array as="points">
+                <mxPoint x="3242" y="1741" />
+                <mxPoint x="3242" y="1660" />
+                <mxPoint x="3698" y="1660" />
+                <mxPoint x="3698" y="1793" />
+              </Array>
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <mxCell id="note_task_rules" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=14;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;align=left;verticalAlign=top;spacing=10;" value="&lt;b&gt;VisitTask／樣本任務規則&lt;/b&gt;&lt;br&gt;&lt;b&gt;★ 樣本搜尋邏輯：VisitTask.SampleTaskExecutionId ＝ VisitTaskExecution.TaskExecutionId；被指到的那一筆就是唯一樣本，不保存 IsSampleExecution。&lt;/b&gt;&lt;br&gt;• 為防止指到其他任務，外鍵同時驗證 VisitTaskId＋SampleTaskExecutionId 對應同一筆 VisitTaskExecution。&lt;br&gt;• SampleTaskExecutionId＝NULL：尚未指定樣本；樣本 SubmittedAt＝NULL：製作中；樣本已送出而 SampleApprovedAt＝NULL：等待核准；核准時間有值：可供其他業務執行。&lt;br&gt;• 任務發布時，系統依 DealerAssignmentHistory 為每家經銷商建立一筆 VisitTaskExecution；VisitTaskId＋DealerId 唯一。&lt;br&gt;• ExecutionNote 合併執行及未執行說明；SubmittedAt 為 NULL 表示尚未正式回報。&lt;br&gt;• 樣本的每張 VisitTaskPhoto 必須填 PhotoDescription 與 SortOrder；一般照片以 SampleTaskPhotoId 逐張對應，說明與順序不可修改。&lt;br&gt;• 樣本有幾個照片項目，其他已執行回報就必須完成幾個對應照片；不使用 MinPhotoCount。&lt;br&gt;• 任務執行與 StoreVisit 分開，不保存 StoreVisitId。" vertex="1">
+          <mxGeometry height="330" width="500" x="1980" y="2510" as="geometry" />
+        </mxCell>
+        <mxCell id="note_legend" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=14;fillColor=#f5f5f5;strokeColor=#666666;fontSize=13;align=left;verticalAlign=top;spacing=10;" value="&lt;b&gt;欄位級關聯圖例&lt;/b&gt;&lt;br&gt;每條線直接連接實際 PK／FK 欄位。&lt;br&gt;直線端＝1；鳥腳端＝多筆；圓圈＋直線＝FK 可空（0..1）。&lt;br&gt;PK 主鍵　FK 外鍵　UK 唯一鍵　UQ1 同組複合唯一鍵　UQ? 待確認。" vertex="1">
+          <mxGeometry height="200" width="760" x="-800" y="1810" as="geometry" />
+        </mxCell>
+        <mxCell id="note_rules" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=14;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;align=left;verticalAlign=top;spacing=10;" value="&lt;b&gt;0723 StoreVisit／明細確認規則&lt;/b&gt;&lt;br&gt;• ReportDateTime 不可空，由資料庫在建立回報時寫入；一般使用者可在其後 72 小時內修改。&lt;br&gt;• EntrySourceType：EMPLOYEE 表示業務／助理填寫；DEALER 表示經銷商自行回報。&lt;br&gt;• DealerAssignmentId 保存當時正式負責業務；CreatedByUserAccountId 保存真正填寫者。&lt;br&gt;• CreatedByUserAccountId 用於分析現場填寫、助理代填，以及經銷商主動回報頻率與獎勵。&lt;br&gt;• RecordStatus：ACTIVE 表示有效；VOIDED 表示作廢，且不參與實銷及庫存計算。&lt;br&gt;• SellOutQuantity／DisplayQuantity 使用 int；NULL＝未填、0＝明確回報為零。&lt;br&gt;• SellOutDate 畫面預設當天且可修改；只有陳列時可以不保存日期。&lt;br&gt;• 三個回報欄位全為 NULL 時不建立空白明細；不再使用 IsSellOutChecked／IsDisplayChecked。&lt;br&gt;• 明細新增、修改或刪除時，同步更新 StoreVisit.UpdatedAt 與 UpdatedByUserAccountId。" vertex="1">
+          <mxGeometry height="300" width="850" y="1810" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
