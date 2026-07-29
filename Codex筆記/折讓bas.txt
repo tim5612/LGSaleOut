@@ -1,0 +1,1180 @@
+Option Explicit
+
+Private Const OUTPUT_HEADER As String = "INVPair"
+Private Const NO_INVOICE_TEXT As String = "無發票處理"
+'Private Const KEY_SEPARATOR As String = ChrW(30)
+Private Const AMOUNT_EPSILON As Double = 0.0000001
+
+Public Sub 建立INVPair()
+
+    Dim wbSource As Workbook
+    Dim wbTarget As Workbook
+
+    Dim wsSource As Worksheet
+    Dim wsTarget As Worksheet
+
+    Dim srcDealerHeader As Range
+    Dim srcReasonHeader As Range
+    Dim srcAmountHeader As Range
+
+    Dim dstDealerHeader As Range
+    Dim dstInvoiceHeader As Range
+    Dim dstAmountHeader As Range
+
+    Dim srcDealerCol As Long
+    Dim srcReasonCol As Long
+    Dim srcAmountCol As Long
+
+    Dim dstDealerCol As Long
+    Dim dstInvoiceCol As Long
+    Dim dstAmountCol As Long
+
+    Dim outputCol As Long
+    Dim targetPath As String
+
+    Dim sourceDealers As Object
+    Dim targetDealers As Object
+
+    Dim sourceDealerOrder As Collection
+    Dim targetDealerOrder As Collection
+
+    Dim sourceVisibleRows As Collection
+    Dim targetVisibleRows As Collection
+
+    Dim oldScreenUpdating As Boolean
+    Dim oldEnableEvents As Boolean
+    Dim oldCalculation As XlCalculation
+
+    Dim pairedRows As Long
+    Dim noInvoiceRows As Long
+    Dim invalidSourceRows As Long
+    Dim invalidTargetRows As Long
+    Dim usedInvoiceCount As Long
+
+    Dim completed As Boolean
+
+    On Error GoTo ErrorHandler
+
+    Set wbSource = ThisWorkbook
+
+    If Not ActiveWorkbook Is wbSource Then
+        wbSource.Activate
+    End If
+
+    Set wsSource = ActiveSheet
+
+    '==========================================================
+    ' 選擇來源欄位
+    '==========================================================
+
+    Set srcDealerHeader = PickHeaderCell( _
+        "請在【來源】工作表選擇：" & vbCrLf & _
+        "【經銷商編號 Bill To Customer Code】的標題儲存格", _
+        "來源－經銷商編號")
+
+    If srcDealerHeader Is Nothing Then Exit Sub
+
+    If Not srcDealerHeader.Worksheet.Parent Is wbSource Then
+        MsgBox "來源欄位必須選在執行 VBA 的來源活頁簿。", vbExclamation
+        Exit Sub
+    End If
+
+    Set wsSource = srcDealerHeader.Worksheet
+    wsSource.Activate
+
+    Set srcReasonHeader = PickHeaderCell( _
+        "請選擇：" & vbCrLf & _
+        "【折讓號碼 Sales PGM Reason Code】的標題儲存格", _
+        "來源－折讓號碼")
+
+    If srcReasonHeader Is Nothing Then Exit Sub
+
+    Set srcAmountHeader = PickHeaderCell( _
+        "請選擇：" & vbCrLf & _
+        "【折讓金額 Balance (Book)】的標題儲存格", _
+        "來源－折讓金額")
+
+    If srcAmountHeader Is Nothing Then Exit Sub
+
+    If Not srcReasonHeader.Worksheet Is wsSource _
+       Or Not srcAmountHeader.Worksheet Is wsSource Then
+
+        MsgBox "來源的三個欄位必須位於同一張工作表。", vbExclamation
+        Exit Sub
+
+    End If
+
+    If srcDealerHeader.Row <> srcReasonHeader.Row _
+       Or srcDealerHeader.Row <> srcAmountHeader.Row Then
+
+        MsgBox "來源的三個欄位標題必須位於同一列。", vbExclamation
+        Exit Sub
+
+    End If
+
+    srcDealerCol = srcDealerHeader.Column
+    srcReasonCol = srcReasonHeader.Column
+    srcAmountCol = srcAmountHeader.Column
+
+    '==========================================================
+    ' 選擇目的檔案
+    '==========================================================
+
+    targetPath = PickTargetWorkbookPath()
+
+    If Len(targetPath) = 0 Then Exit Sub
+
+    If StrComp(targetPath, wbSource.FullName, vbTextCompare) = 0 Then
+        MsgBox "目的檔案不可與來源檔案相同。", vbExclamation
+        Exit Sub
+    End If
+
+    Set wbTarget = GetOrOpenWorkbook(targetPath)
+
+    If wbTarget Is Nothing Then
+        MsgBox "無法開啟目的檔案。", vbCritical
+        Exit Sub
+    End If
+
+    wbTarget.Activate
+
+    '==========================================================
+    ' 選擇目的欄位
+    '==========================================================
+
+    Set dstDealerHeader = PickHeaderCell( _
+        "請在【目的】工作表選擇：" & vbCrLf & _
+        "【經銷商編號 Customer Code】的標題儲存格", _
+        "目的－經銷商編號")
+
+    If dstDealerHeader Is Nothing Then Exit Sub
+
+    If Not dstDealerHeader.Worksheet.Parent Is wbTarget Then
+        MsgBox "目的欄位必須選在剛才開啟的目的活頁簿。", vbExclamation
+        Exit Sub
+    End If
+
+    Set wsTarget = dstDealerHeader.Worksheet
+    wsTarget.Activate
+
+    Set dstInvoiceHeader = PickHeaderCell( _
+        "請選擇：" & vbCrLf & _
+        "【發票號碼 Invoice No.】的標題儲存格", _
+        "目的－發票號碼")
+
+    If dstInvoiceHeader Is Nothing Then Exit Sub
+
+    Set dstAmountHeader = PickHeaderCell( _
+        "請選擇：" & vbCrLf & _
+        "【發票金額 Original List Pirce】的標題儲存格", _
+        "目的－發票金額")
+
+    If dstAmountHeader Is Nothing Then Exit Sub
+
+    If Not dstInvoiceHeader.Worksheet Is wsTarget _
+       Or Not dstAmountHeader.Worksheet Is wsTarget Then
+
+        MsgBox "目的的三個欄位必須位於同一張工作表。", vbExclamation
+        Exit Sub
+
+    End If
+
+    If dstDealerHeader.Row <> dstInvoiceHeader.Row _
+       Or dstDealerHeader.Row <> dstAmountHeader.Row Then
+
+        MsgBox "目的的三個欄位標題必須位於同一列。", vbExclamation
+        Exit Sub
+
+    End If
+
+    dstDealerCol = dstDealerHeader.Column
+    dstInvoiceCol = dstInvoiceHeader.Column
+    dstAmountCol = dstAmountHeader.Column
+
+    '==========================================================
+    ' 儲存 Excel 狀態
+    '==========================================================
+
+    oldScreenUpdating = Application.ScreenUpdating
+    oldEnableEvents = Application.EnableEvents
+    oldCalculation = Application.Calculation
+
+    Application.ScreenUpdating = False
+    Application.EnableEvents = False
+    Application.Calculation = xlCalculationManual
+
+    '==========================================================
+    ' 刪除舊 INVPair 並重新新增
+    '==========================================================
+
+    RemoveTrailingINVPair wsSource, srcDealerHeader.Row
+
+    outputCol = LastUsedColumnInRow( _
+                    wsSource, _
+                    srcDealerHeader.Row) + 1
+
+    wsSource.Cells(srcDealerHeader.Row, outputCol).Value = OUTPUT_HEADER
+
+    '==========================================================
+    ' 取得篩選後的可見資料列
+    '==========================================================
+
+    Set sourceVisibleRows = GetVisibleDataRows( _
+        wsSource, _
+        srcDealerHeader.Row, _
+        srcDealerCol)
+
+    Set targetVisibleRows = GetVisibleDataRows( _
+        wsTarget, _
+        dstDealerHeader.Row, _
+        dstDealerCol)
+
+    If sourceVisibleRows.Count = 0 Then
+
+        MsgBox "來源工作表的篩選結果中沒有可見資料。", vbExclamation
+        GoTo SafeExit
+
+    End If
+
+    If targetVisibleRows.Count = 0 Then
+
+        MsgBox "目的工作表的篩選結果中沒有可見資料。", vbExclamation
+        GoTo SafeExit
+
+    End If
+
+    '==========================================================
+    ' 建立來源分組
+    ' 第一層：經銷商
+    ' 第二層：折讓號碼
+    ' 第三層：折讓金額合計
+    '==========================================================
+
+    Set sourceDealers = CreateObject("Scripting.Dictionary")
+    sourceDealers.CompareMode = vbTextCompare
+
+    Set sourceDealerOrder = New Collection
+
+    BuildSourceGroups _
+        wsSource:=wsSource, _
+        visibleRows:=sourceVisibleRows, _
+        dealerCol:=srcDealerCol, _
+        reasonCol:=srcReasonCol, _
+        amountCol:=srcAmountCol, _
+        outputCol:=outputCol, _
+        dealers:=sourceDealers, _
+        dealerOrder:=sourceDealerOrder, _
+        invalidRowCount:=invalidSourceRows
+
+    '==========================================================
+    ' 建立目的分組
+    ' 第一層：經銷商
+    ' 第二層：發票號碼
+    ' 第三層：發票金額合計
+    '==========================================================
+
+    Set targetDealers = CreateObject("Scripting.Dictionary")
+    targetDealers.CompareMode = vbTextCompare
+
+    Set targetDealerOrder = New Collection
+
+    BuildTargetGroups _
+        wsTarget:=wsTarget, _
+        visibleRows:=targetVisibleRows, _
+        dealerCol:=dstDealerCol, _
+        invoiceCol:=dstInvoiceCol, _
+        amountCol:=dstAmountCol, _
+        dealers:=targetDealers, _
+        dealerOrder:=targetDealerOrder, _
+        invalidRowCount:=invalidTargetRows
+
+    '==========================================================
+    ' 執行比對
+    '==========================================================
+
+    MatchAllDealers _
+        wsSource:=wsSource, _
+        outputCol:=outputCol, _
+        sourceDealers:=sourceDealers, _
+        sourceDealerOrder:=sourceDealerOrder, _
+        targetDealers:=targetDealers, _
+        pairedRows:=pairedRows, _
+        noInvoiceRows:=noInvoiceRows, _
+        usedInvoiceCount:=usedInvoiceCount
+
+    wsSource.Columns(outputCol).AutoFit
+
+    completed = True
+
+SafeExit:
+
+    Application.ScreenUpdating = oldScreenUpdating
+    Application.EnableEvents = oldEnableEvents
+    Application.Calculation = oldCalculation
+
+    If completed Then
+
+        wbSource.Activate
+        wsSource.Activate
+
+        MsgBox _
+            "INVPair 處理完成。" & vbCrLf & vbCrLf & _
+            "成功配對來源資料列：" & pairedRows & vbCrLf & _
+            "無發票處理資料列：" & noInvoiceRows & vbCrLf & _
+            "來源無效資料列：" & invalidSourceRows & vbCrLf & _
+            "目的無效資料列：" & invalidTargetRows & vbCrLf & _
+            "已使用發票數：" & usedInvoiceCount & vbCrLf & vbCrLf & _
+            "來源與目的的篩選均未移除或變更。", _
+            vbInformation, _
+            "INVPair"
+
+    End If
+
+    Exit Sub
+
+ErrorHandler:
+
+    Application.ScreenUpdating = oldScreenUpdating
+    Application.EnableEvents = oldEnableEvents
+    Application.Calculation = oldCalculation
+
+    MsgBox _
+        "程式執行失敗：" & vbCrLf & Err.Description, _
+        vbCritical, _
+        "INVPair"
+
+End Sub
+
+Private Sub BuildSourceGroups( _
+    ByVal wsSource As Worksheet, _
+    ByVal visibleRows As Collection, _
+    ByVal dealerCol As Long, _
+    ByVal reasonCol As Long, _
+    ByVal amountCol As Long, _
+    ByVal outputCol As Long, _
+    ByRef dealers As Object, _
+    ByRef dealerOrder As Collection, _
+    ByRef invalidRowCount As Long)
+
+    Dim rowItem As Variant
+    Dim rowNumber As Long
+
+    Dim dealerValue As String
+    Dim reasonValue As String
+
+    Dim dealerKey As String
+    Dim reasonKey As String
+
+    Dim amountValue As Double
+
+    Dim dealerData As Object
+    Dim groups As Object
+    Dim groupData As Object
+    Dim groupRows As Collection
+
+    For Each rowItem In visibleRows
+
+        rowNumber = CLng(rowItem)
+
+        dealerValue = GetCellIdentifier( _
+            wsSource.Cells(rowNumber, dealerCol))
+
+        reasonValue = GetCellIdentifier( _
+            wsSource.Cells(rowNumber, reasonCol))
+
+        If Len(dealerValue) = 0 _
+           Or Len(reasonValue) = 0 _
+           Or Not TryGetAmount( _
+                wsSource.Cells(rowNumber, amountCol).Value2, _
+                amountValue) Then
+
+            wsSource.Cells(rowNumber, outputCol).Value = NO_INVOICE_TEXT
+            invalidRowCount = invalidRowCount + 1
+
+        Else
+
+            dealerKey = NormalizeKey(dealerValue)
+            reasonKey = NormalizeKey(reasonValue)
+
+            If Not dealers.Exists(dealerKey) Then
+
+                Set dealerData = CreateObject("Scripting.Dictionary")
+                dealerData.CompareMode = vbTextCompare
+
+                Set groups = CreateObject("Scripting.Dictionary")
+                groups.CompareMode = vbTextCompare
+
+                dealerData.Add "Dealer", dealerValue
+                dealerData.Add "Groups", groups
+
+                dealers.Add dealerKey, dealerData
+                dealerOrder.Add dealerKey
+
+            Else
+
+                Set dealerData = dealers(dealerKey)
+                Set groups = dealerData("Groups")
+
+            End If
+
+            If Not groups.Exists(reasonKey) Then
+
+                Set groupData = CreateObject("Scripting.Dictionary")
+                groupData.CompareMode = vbTextCompare
+
+                Set groupRows = New Collection
+
+                groupData.Add "Reason", reasonValue
+                groupData.Add "Total", amountValue
+                groupData.Add "Rows", groupRows
+
+                groups.Add reasonKey, groupData
+
+            Else
+
+                Set groupData = groups(reasonKey)
+
+                groupData("Total") = _
+                    CDbl(groupData("Total")) + amountValue
+
+                Set groupRows = groupData("Rows")
+
+            End If
+
+            groupRows.Add rowNumber
+
+        End If
+
+    Next rowItem
+
+End Sub
+
+Private Sub BuildTargetGroups( _
+    ByVal wsTarget As Worksheet, _
+    ByVal visibleRows As Collection, _
+    ByVal dealerCol As Long, _
+    ByVal invoiceCol As Long, _
+    ByVal amountCol As Long, _
+    ByRef dealers As Object, _
+    ByRef dealerOrder As Collection, _
+    ByRef invalidRowCount As Long)
+
+    Dim rowItem As Variant
+    Dim rowNumber As Long
+
+    Dim dealerValue As String
+    Dim invoiceValue As String
+
+    Dim dealerKey As String
+    Dim invoiceKey As String
+
+    Dim amountValue As Double
+
+    Dim dealerData As Object
+    Dim invoices As Object
+    Dim invoiceData As Object
+
+    For Each rowItem In visibleRows
+
+        rowNumber = CLng(rowItem)
+
+        dealerValue = GetCellIdentifier( _
+            wsTarget.Cells(rowNumber, dealerCol))
+
+        invoiceValue = GetCellIdentifier( _
+            wsTarget.Cells(rowNumber, invoiceCol))
+
+        If Len(dealerValue) = 0 _
+           Or Len(invoiceValue) = 0 _
+           Or Not TryGetAmount( _
+                wsTarget.Cells(rowNumber, amountCol).Value2, _
+                amountValue) Then
+
+            invalidRowCount = invalidRowCount + 1
+
+        Else
+
+            dealerKey = NormalizeKey(dealerValue)
+            invoiceKey = NormalizeKey(invoiceValue)
+
+            If Not dealers.Exists(dealerKey) Then
+
+                Set dealerData = CreateObject("Scripting.Dictionary")
+                dealerData.CompareMode = vbTextCompare
+
+                Set invoices = CreateObject("Scripting.Dictionary")
+                invoices.CompareMode = vbTextCompare
+
+                dealerData.Add "Dealer", dealerValue
+                dealerData.Add "Invoices", invoices
+
+                dealers.Add dealerKey, dealerData
+                dealerOrder.Add dealerKey
+
+            Else
+
+                Set dealerData = dealers(dealerKey)
+                Set invoices = dealerData("Invoices")
+
+            End If
+
+            If Not invoices.Exists(invoiceKey) Then
+
+                Set invoiceData = CreateObject("Scripting.Dictionary")
+                invoiceData.CompareMode = vbTextCompare
+
+                invoiceData.Add "Invoice", invoiceValue
+                invoiceData.Add "Total", amountValue
+                invoiceData.Add "Used", False
+
+                invoices.Add invoiceKey, invoiceData
+
+            Else
+
+                Set invoiceData = invoices(invoiceKey)
+
+                invoiceData("Total") = _
+                    CDbl(invoiceData("Total")) + amountValue
+
+            End If
+
+        End If
+
+    Next rowItem
+
+End Sub
+
+Private Sub MatchAllDealers( _
+    ByVal wsSource As Worksheet, _
+    ByVal outputCol As Long, _
+    ByVal sourceDealers As Object, _
+    ByVal sourceDealerOrder As Collection, _
+    ByVal targetDealers As Object, _
+    ByRef pairedRows As Long, _
+    ByRef noInvoiceRows As Long, _
+    ByRef usedInvoiceCount As Long)
+
+    Dim dealerItem As Variant
+    Dim dealerKey As String
+
+    Dim sourceDealerData As Object
+    Dim targetDealerData As Object
+
+    Dim sourceGroups As Object
+    Dim targetInvoices As Object
+
+    For Each dealerItem In sourceDealerOrder
+
+        dealerKey = CStr(dealerItem)
+
+        Set sourceDealerData = sourceDealers(dealerKey)
+        Set sourceGroups = sourceDealerData("Groups")
+
+        If targetDealers.Exists(dealerKey) Then
+
+            Set targetDealerData = targetDealers(dealerKey)
+            Set targetInvoices = targetDealerData("Invoices")
+
+            MatchOneDealer _
+                wsSource:=wsSource, _
+                outputCol:=outputCol, _
+                sourceGroups:=sourceGroups, _
+                targetInvoices:=targetInvoices, _
+                pairedRows:=pairedRows, _
+                noInvoiceRows:=noInvoiceRows, _
+                usedInvoiceCount:=usedInvoiceCount
+
+        Else
+
+            MarkAllGroupsNoInvoice _
+                wsSource:=wsSource, _
+                outputCol:=outputCol, _
+                sourceGroups:=sourceGroups, _
+                noInvoiceRows:=noInvoiceRows
+
+        End If
+
+    Next dealerItem
+
+End Sub
+
+Private Sub MatchOneDealer( _
+    ByVal wsSource As Worksheet, _
+    ByVal outputCol As Long, _
+    ByVal sourceGroups As Object, _
+    ByVal targetInvoices As Object, _
+    ByRef pairedRows As Long, _
+    ByRef noInvoiceRows As Long, _
+    ByRef usedInvoiceCount As Long)
+
+    Dim sourceKeys As Variant
+    Dim invoiceKeys As Variant
+
+    Dim sourceIndex As Long
+    Dim invoiceIndex As Long
+    Dim endSourceIndex As Long
+
+    Dim sourceKey As String
+    Dim invoiceKey As String
+
+    Dim sourceGroup As Object
+    Dim invoiceData As Object
+
+    Dim firstSourceTotal As Double
+    Dim accumulatedTotal As Double
+    Dim invoiceTotal As Double
+
+    Dim foundInvoice As Boolean
+    Dim invoiceNumber As String
+
+    sourceKeys = DictionaryKeysToArray(sourceGroups)
+    invoiceKeys = DictionaryKeysToArray(targetInvoices)
+
+    If IsEmpty(sourceKeys) Then Exit Sub
+
+    If IsEmpty(invoiceKeys) Then
+
+        MarkAllGroupsNoInvoice _
+            wsSource, _
+            outputCol, _
+            sourceGroups, _
+            noInvoiceRows
+
+        Exit Sub
+
+    End If
+
+    '來源按折讓群組總金額降冪
+    SortKeysByTotalDescending sourceKeys, sourceGroups
+
+    '目的按發票合計金額降冪
+    SortKeysByTotalDescending invoiceKeys, targetInvoices
+
+    sourceIndex = LBound(sourceKeys)
+
+    Do While sourceIndex <= UBound(sourceKeys)
+
+        sourceKey = CStr(sourceKeys(sourceIndex))
+        Set sourceGroup = sourceGroups(sourceKey)
+
+        firstSourceTotal = CDbl(sourceGroup("Total"))
+
+        foundInvoice = False
+        invoiceNumber = vbNullString
+        invoiceTotal = 0
+
+        '由發票金額最大的開始尋找
+        For invoiceIndex = LBound(invoiceKeys) To UBound(invoiceKeys)
+
+            invoiceKey = CStr(invoiceKeys(invoiceIndex))
+            Set invoiceData = targetInvoices(invoiceKey)
+
+            If Not CBool(invoiceData("Used")) Then
+
+                If CDbl(invoiceData("Total")) + AMOUNT_EPSILON _
+                   >= firstSourceTotal Then
+
+                    foundInvoice = True
+                    invoiceNumber = CStr(invoiceData("Invoice"))
+                    invoiceTotal = CDbl(invoiceData("Total"))
+
+                    Exit For
+
+                End If
+
+            End If
+
+        Next invoiceIndex
+
+        If Not foundInvoice Then
+
+            '找不到金額足夠的發票
+            WriteGroupResult _
+                wsSource:=wsSource, _
+                outputCol:=outputCol, _
+                groupData:=sourceGroup, _
+                resultText:=NO_INVOICE_TEXT, _
+                affectedRows:=noInvoiceRows
+
+            sourceIndex = sourceIndex + 1
+
+        Else
+
+            accumulatedTotal = 0
+            endSourceIndex = sourceIndex
+
+            '加入後續來源群組，直到累計達到或超過發票金額
+            Do While endSourceIndex <= UBound(sourceKeys)
+
+                sourceKey = CStr(sourceKeys(endSourceIndex))
+                Set sourceGroup = sourceGroups(sourceKey)
+
+                accumulatedTotal = accumulatedTotal + _
+                                   CDbl(sourceGroup("Total"))
+
+                endSourceIndex = endSourceIndex + 1
+
+                If accumulatedTotal + AMOUNT_EPSILON _
+                   >= invoiceTotal Then
+
+                    Exit Do
+
+                End If
+
+            Loop
+
+            '將同一張發票號碼寫回所有被組合的來源群組
+            WriteInvoiceToSourceRange _
+                wsSource:=wsSource, _
+                outputCol:=outputCol, _
+                sourceGroups:=sourceGroups, _
+                sourceKeys:=sourceKeys, _
+                firstIndex:=sourceIndex, _
+                lastIndex:=endSourceIndex - 1, _
+                invoiceNumber:=invoiceNumber, _
+                pairedRows:=pairedRows
+
+            '發票使用後不可再次使用
+            invoiceData("Used") = True
+            usedInvoiceCount = usedInvoiceCount + 1
+
+            sourceIndex = endSourceIndex
+
+        End If
+
+    Loop
+
+End Sub
+
+Private Sub WriteInvoiceToSourceRange( _
+    ByVal wsSource As Worksheet, _
+    ByVal outputCol As Long, _
+    ByVal sourceGroups As Object, _
+    ByRef sourceKeys As Variant, _
+    ByVal firstIndex As Long, _
+    ByVal lastIndex As Long, _
+    ByVal invoiceNumber As String, _
+    ByRef pairedRows As Long)
+
+    Dim groupIndex As Long
+    Dim groupKey As String
+    Dim groupData As Object
+
+    For groupIndex = firstIndex To lastIndex
+
+        groupKey = CStr(sourceKeys(groupIndex))
+        Set groupData = sourceGroups(groupKey)
+
+        WriteGroupResult _
+            wsSource:=wsSource, _
+            outputCol:=outputCol, _
+            groupData:=groupData, _
+            resultText:=invoiceNumber, _
+            affectedRows:=pairedRows
+
+    Next groupIndex
+
+End Sub
+
+Private Sub WriteGroupResult( _
+    ByVal wsSource As Worksheet, _
+    ByVal outputCol As Long, _
+    ByVal groupData As Object, _
+    ByVal resultText As String, _
+    ByRef affectedRows As Long)
+
+    Dim groupRows As Collection
+    Dim rowItem As Variant
+    Dim rowNumber As Long
+
+    Set groupRows = groupData("Rows")
+
+    For Each rowItem In groupRows
+
+        rowNumber = CLng(rowItem)
+
+        wsSource.Cells(rowNumber, outputCol).Value = resultText
+        affectedRows = affectedRows + 1
+
+    Next rowItem
+
+End Sub
+
+Private Sub MarkAllGroupsNoInvoice( _
+    ByVal wsSource As Worksheet, _
+    ByVal outputCol As Long, _
+    ByVal sourceGroups As Object, _
+    ByRef noInvoiceRows As Long)
+
+    Dim keyItem As Variant
+    Dim groupData As Object
+
+    For Each keyItem In sourceGroups.Keys
+
+        Set groupData = sourceGroups(CStr(keyItem))
+
+        WriteGroupResult _
+            wsSource:=wsSource, _
+            outputCol:=outputCol, _
+            groupData:=groupData, _
+            resultText:=NO_INVOICE_TEXT, _
+            affectedRows:=noInvoiceRows
+
+    Next keyItem
+
+End Sub
+
+Private Function DictionaryKeysToArray( _
+    ByVal dictionaryObject As Object) As Variant
+
+    If dictionaryObject Is Nothing Then
+        DictionaryKeysToArray = Empty
+    ElseIf dictionaryObject.Count = 0 Then
+        DictionaryKeysToArray = Empty
+    Else
+        DictionaryKeysToArray = dictionaryObject.Keys
+    End If
+
+End Function
+
+Private Sub SortKeysByTotalDescending( _
+    ByRef keyArray As Variant, _
+    ByVal groupDictionary As Object)
+
+    If IsEmpty(keyArray) Then Exit Sub
+
+    If UBound(keyArray) > LBound(keyArray) Then
+
+        QuickSortByTotal _
+            keyArray:=keyArray, _
+            firstIndex:=LBound(keyArray), _
+            lastIndex:=UBound(keyArray), _
+            groupDictionary:=groupDictionary
+
+    End If
+
+End Sub
+
+Private Sub QuickSortByTotal( _
+    ByRef keyArray As Variant, _
+    ByVal firstIndex As Long, _
+    ByVal lastIndex As Long, _
+    ByVal groupDictionary As Object)
+
+    Dim leftIndex As Long
+    Dim rightIndex As Long
+
+    Dim pivotTotal As Double
+    Dim tempKey As Variant
+
+    leftIndex = firstIndex
+    rightIndex = lastIndex
+
+    pivotTotal = GetGroupTotal( _
+        groupDictionary, _
+        CStr(keyArray((firstIndex + lastIndex) \ 2)))
+
+    Do While leftIndex <= rightIndex
+
+        Do While GetGroupTotal( _
+            groupDictionary, _
+            CStr(keyArray(leftIndex))) > pivotTotal
+
+            leftIndex = leftIndex + 1
+
+            If leftIndex > lastIndex Then Exit Do
+
+        Loop
+
+        Do While GetGroupTotal( _
+            groupDictionary, _
+            CStr(keyArray(rightIndex))) < pivotTotal
+
+            rightIndex = rightIndex - 1
+
+            If rightIndex < firstIndex Then Exit Do
+
+        Loop
+
+        If leftIndex <= rightIndex Then
+
+            tempKey = keyArray(leftIndex)
+            keyArray(leftIndex) = keyArray(rightIndex)
+            keyArray(rightIndex) = tempKey
+
+            leftIndex = leftIndex + 1
+            rightIndex = rightIndex - 1
+
+        End If
+
+    Loop
+
+    If firstIndex < rightIndex Then
+
+        QuickSortByTotal _
+            keyArray, _
+            firstIndex, _
+            rightIndex, _
+            groupDictionary
+
+    End If
+
+    If leftIndex < lastIndex Then
+
+        QuickSortByTotal _
+            keyArray, _
+            leftIndex, _
+            lastIndex, _
+            groupDictionary
+
+    End If
+
+End Sub
+
+Private Function GetGroupTotal( _
+    ByVal groupDictionary As Object, _
+    ByVal groupKey As String) As Double
+
+    Dim groupData As Object
+
+    Set groupData = groupDictionary(groupKey)
+
+    GetGroupTotal = CDbl(groupData("Total"))
+
+End Function
+
+Private Function PickHeaderCell( _
+    ByVal promptText As String, _
+    ByVal titleText As String) As Range
+
+    Dim selectedRange As Range
+
+    On Error Resume Next
+
+    Set selectedRange = Application.InputBox( _
+        Prompt:=promptText, _
+        Title:=titleText, _
+        Type:=8)
+
+    On Error GoTo 0
+
+    If Not selectedRange Is Nothing Then
+        Set PickHeaderCell = selectedRange.Cells(1, 1)
+    End If
+
+End Function
+
+Private Function PickTargetWorkbookPath() As String
+
+    Dim fileDialogObject As FileDialog
+
+    Set fileDialogObject = _
+        Application.FileDialog(msoFileDialogFilePicker)
+
+    With fileDialogObject
+
+        .Title = "選擇【目的】Excel 檔案"
+        .AllowMultiSelect = False
+
+        .Filters.Clear
+        .Filters.Add _
+            "Excel 活頁簿", _
+            "*.xlsx;*.xlsm;*.xlsb;*.xls"
+
+        If .Show = -1 Then
+            PickTargetWorkbookPath = .SelectedItems(1)
+        End If
+
+    End With
+
+End Function
+
+Private Function GetOrOpenWorkbook( _
+    ByVal fullPath As String) As Workbook
+
+    Dim workbookItem As Workbook
+
+    For Each workbookItem In Application.Workbooks
+
+        If Len(workbookItem.Path) > 0 Then
+
+            If StrComp( _
+                workbookItem.FullName, _
+                fullPath, _
+                vbTextCompare) = 0 Then
+
+                Set GetOrOpenWorkbook = workbookItem
+                Exit Function
+
+            End If
+
+        End If
+
+    Next workbookItem
+
+    Set GetOrOpenWorkbook = _
+        Application.Workbooks.Open(Filename:=fullPath)
+
+End Function
+
+Private Sub RemoveTrailingINVPair( _
+    ByVal ws As Worksheet, _
+    ByVal headerRow As Long)
+
+    Dim lastColumn As Long
+
+    lastColumn = LastUsedColumnInRow(ws, headerRow)
+
+    If lastColumn = 0 Then Exit Sub
+
+    If StrComp( _
+        Trim$(CStr(ws.Cells(headerRow, lastColumn).Value)), _
+        OUTPUT_HEADER, _
+        vbTextCompare) = 0 Then
+
+        ws.Columns(lastColumn).Delete
+
+    End If
+
+End Sub
+
+Private Function LastUsedColumnInRow( _
+    ByVal ws As Worksheet, _
+    ByVal rowNumber As Long) As Long
+
+    Dim foundCell As Range
+
+    Set foundCell = ws.Rows(rowNumber).Find( _
+        What:="*", _
+        After:=ws.Cells(rowNumber, 1), _
+        LookIn:=xlFormulas, _
+        LookAt:=xlPart, _
+        SearchOrder:=xlByColumns, _
+        SearchDirection:=xlPrevious, _
+        MatchCase:=False)
+
+    If foundCell Is Nothing Then
+        LastUsedColumnInRow = 0
+    Else
+        LastUsedColumnInRow = foundCell.Column
+    End If
+
+End Function
+
+Private Function GetVisibleDataRows( _
+    ByVal ws As Worksheet, _
+    ByVal headerRow As Long, _
+    ByVal keyColumn As Long) As Collection
+
+    Dim resultRows As New Collection
+
+    Dim firstDataRow As Long
+    Dim lastDataRow As Long
+    Dim rowNumber As Long
+
+    Dim filterRange As Range
+
+    firstDataRow = headerRow + 1
+    lastDataRow = LastRelevantRow(ws, keyColumn)
+
+    If ws.AutoFilterMode Then
+
+        On Error Resume Next
+        Set filterRange = ws.AutoFilter.Range
+        On Error GoTo 0
+
+        If Not filterRange Is Nothing Then
+
+            firstDataRow = Application.Max( _
+                firstDataRow, _
+                filterRange.Row + 1)
+
+            lastDataRow = Application.Min( _
+                lastDataRow, _
+                filterRange.Row + filterRange.Rows.Count - 1)
+
+        End If
+
+    End If
+
+    If lastDataRow < firstDataRow Then
+        Set GetVisibleDataRows = resultRows
+        Exit Function
+    End If
+
+    For rowNumber = firstDataRow To lastDataRow
+
+        If Not ws.Rows(rowNumber).Hidden Then
+            resultRows.Add rowNumber
+        End If
+
+    Next rowNumber
+
+    Set GetVisibleDataRows = resultRows
+
+End Function
+
+Private Function LastRelevantRow( _
+    ByVal ws As Worksheet, _
+    ByVal keyColumn As Long) As Long
+
+    Dim lastKeyRow As Long
+    Dim lastUsedCell As Range
+
+    lastKeyRow = _
+        ws.Cells(ws.Rows.Count, keyColumn).End(xlUp).Row
+
+    Set lastUsedCell = ws.Cells.Find( _
+        What:="*", _
+        After:=ws.Cells(1, 1), _
+        LookIn:=xlFormulas, _
+        LookAt:=xlPart, _
+        SearchOrder:=xlByRows, _
+        SearchDirection:=xlPrevious, _
+        MatchCase:=False)
+
+    If lastUsedCell Is Nothing Then
+        LastRelevantRow = lastKeyRow
+    Else
+        LastRelevantRow = _
+            Application.Max(lastKeyRow, lastUsedCell.Row)
+    End If
+
+End Function
+
+Private Function GetCellIdentifier( _
+    ByVal targetCell As Range) As String
+
+    Dim rawValue As Variant
+
+    rawValue = targetCell.Value2
+
+    If IsError(rawValue) Then
+        GetCellIdentifier = vbNullString
+    Else
+        GetCellIdentifier = Trim$(CStr(rawValue))
+    End If
+
+End Function
+
+Private Function NormalizeKey( _
+    ByVal sourceText As String) As String
+
+    NormalizeKey = UCase$(Trim$(sourceText))
+
+End Function
+
+Private Function TryGetAmount( _
+    ByVal rawValue As Variant, _
+    ByRef amountValue As Double) As Boolean
+
+    If IsError(rawValue) Then Exit Function
+    If Not IsNumeric(rawValue) Then Exit Function
+
+    '折讓金額可能為負數，因此統一取絕對值
+    amountValue = Abs(CDbl(rawValue))
+
+    TryGetAmount = True
+
+End Function
+
