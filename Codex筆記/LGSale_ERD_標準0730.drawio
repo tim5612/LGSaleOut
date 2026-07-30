@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Codex" compressed="false">
   <diagram id="LGSaleERD0722" name="LGSale ERD 0722">
-    <mxGraphModel dx="4786" dy="2772" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="2300" math="0" shadow="0">
+    <mxGraphModel dx="5047" dy="2929" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="2300" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -582,56 +582,6 @@
             <mxGeometry height="26" width="420" y="168" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="OpeningInventoryProductExclusion｜期初庫存商品排除規則" dbTable="OpeningInventoryProductExclusion" id="table_OpeningInventoryProductExclusion">
-          <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
-            <mxGeometry height="298" width="420" x="-1800" y="60" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ExclusionId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="ExclusionId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_OpeningInventoryProductExclusion_ExclusionId">
-          <mxCell parent="table_OpeningInventoryProductExclusion" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
-            <mxGeometry height="26" width="420" y="38" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK UQ1&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ProductId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;排除產品&lt;/span&gt;&lt;/div&gt;" dbColumn="ProductId" dbType="bigint" dbKey="FK UQ1" dbDescription="排除產品；參與排除規則唯一鍵" id="row_OpeningInventoryProductExclusion_ProductId">
-          <mxCell parent="table_OpeningInventoryProductExclusion" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
-            <mxGeometry height="26" width="420" y="64" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;UQ1&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ScopeType&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;ALL／DEALER&lt;/span&gt;&lt;/div&gt;" dbColumn="ScopeType" dbType="varchar" dbKey="UQ1" dbDescription="排除範圍：ALL 全部經銷商；DEALER 指定經銷商" id="row_OpeningInventoryProductExclusion_ScopeType">
-          <mxCell parent="table_OpeningInventoryProductExclusion" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
-            <mxGeometry height="26" width="420" y="90" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK NULL UQ1&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;適用經銷商&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerId" dbType="bigint" dbKey="FK NULL UQ1" dbDescription="ScopeType＝DEALER 時必填；ScopeType＝ALL 時必須為 NULL" id="row_OpeningInventoryProductExclusion_DealerId">
-          <mxCell parent="table_OpeningInventoryProductExclusion" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
-            <mxGeometry height="26" width="420" y="116" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;UQ1&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EffectiveFromMonth&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;char(6)&lt;/span&gt;&lt;span&gt;生效月份 YYYYMM&lt;/span&gt;&lt;/div&gt;" dbColumn="EffectiveFromMonth" dbType="char(6)" dbKey="UQ1" dbDescription="生效月份 YYYYMM；參與排除規則唯一鍵" id="row_OpeningInventoryProductExclusion_EffectiveFromMonth">
-          <mxCell parent="table_OpeningInventoryProductExclusion" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
-            <mxGeometry height="26" width="420" y="142" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;EffectiveToMonth&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;char(6)&lt;/span&gt;&lt;span&gt;失效月份（含）&lt;/span&gt;&lt;/div&gt;" dbColumn="EffectiveToMonth" dbType="char(6)" dbKey="NULL" dbDescription="失效月份 YYYYMM（含）；NULL 表示持續有效" id="row_OpeningInventoryProductExclusion_EffectiveToMonth">
-          <mxCell parent="table_OpeningInventoryProductExclusion" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
-            <mxGeometry height="26" width="420" y="168" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ExclusionReason&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;nvarchar&lt;/span&gt;&lt;span&gt;排除原因&lt;/span&gt;&lt;/div&gt;" dbColumn="ExclusionReason" dbType="nvarchar" dbKey="NULL" dbDescription="排除原因" id="row_OpeningInventoryProductExclusion_ExclusionReason">
-          <mxCell parent="table_OpeningInventoryProductExclusion" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
-            <mxGeometry height="26" width="420" y="194" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;建立時間&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="建立時間" id="row_OpeningInventoryProductExclusion_CreatedAt">
-          <mxCell parent="table_OpeningInventoryProductExclusion" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
-            <mxGeometry height="26" width="420" y="220" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedByEmployeeId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;建立者&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedByEmployeeId" dbType="bigint" dbKey="FK" dbDescription="建立者" id="row_OpeningInventoryProductExclusion_CreatedByEmployeeId">
-          <mxCell parent="table_OpeningInventoryProductExclusion" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
-            <mxGeometry height="26" width="420" y="246" as="geometry" />
-          </mxCell>
-        </UserObject>
         <UserObject label="SellInTransaction｜進貨交易" dbTable="SellInTransaction" id="table_SellInTransaction">
           <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
             <mxGeometry height="506" width="420" x="-2160" y="1360" as="geometry" />
@@ -1089,21 +1039,6 @@
             <mxGeometry relative="1" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="期初庫存排除產品" parentTable="Product" parentColumn="ProductId" childTable="OpeningInventoryProductExclusion" childColumn="ProductId" id="rel_opening_exclusion_product">
-          <mxCell edge="1" parent="1" source="row_Product_ProductId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_OpeningInventoryProductExclusion_ProductId">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="期初庫存排除經銷商" parentTable="Dealer" parentColumn="DealerId" childTable="OpeningInventoryProductExclusion" childColumn="DealerId" id="rel_opening_exclusion_dealer">
-          <mxCell edge="1" parent="1" source="row_Dealer_DealerId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_OpeningInventoryProductExclusion_DealerId">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
-        <UserObject label="建立期初庫存排除規則" parentTable="Employee" parentColumn="EmployeeId" childTable="OpeningInventoryProductExclusion" childColumn="CreatedByEmployeeId" id="rel_opening_exclusion_employee">
-          <mxCell edge="1" parent="1" source="row_Employee_EmployeeId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_OpeningInventoryProductExclusion_CreatedByEmployeeId">
-            <mxGeometry relative="1" as="geometry" />
-          </mxCell>
-        </UserObject>
         <UserObject label="進貨批次" parentTable="ImportBatch" parentColumn="ImportBatchId" childTable="SellInTransaction" childColumn="ImportBatchId" id="rel_24">
           <mxCell edge="1" parent="1" source="row_ImportBatch_ImportBatchId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;startFill=0;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_SellInTransaction_ImportBatchId">
             <mxGeometry relative="1" as="geometry" />
@@ -1214,9 +1149,6 @@
         </mxCell>
         <mxCell id="note_rules" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=14;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;align=left;verticalAlign=top;spacing=10;" value="&lt;b&gt;0723 StoreVisit／明細確認規則&lt;/b&gt;&lt;br&gt;• ReportDateTime 不可空，由資料庫在建立回報時寫入；一般使用者可在其後 72 小時內修改。&lt;br&gt;• EntrySourceType：EMPLOYEE 表示業務／助理填寫；DEALER 表示經銷商自行回報。&lt;br&gt;• DealerAssignmentId 保存當時正式負責業務；CreatedByUserAccountId 保存真正填寫者。&lt;br&gt;• CreatedByUserAccountId 用於分析現場填寫、助理代填，以及經銷商主動回報頻率與獎勵。&lt;br&gt;• RecordStatus：ACTIVE 表示有效；VOIDED 表示作廢，且不參與實銷及庫存計算。&lt;br&gt;• SellOutQuantity／DisplayQuantity 使用 int；NULL＝未填、0＝明確回報為零。&lt;br&gt;• SellOutDate 畫面預設當天且可修改；只有陳列時可以不保存日期。&lt;br&gt;• 三個回報欄位全為 NULL 時不建立空白明細；不再使用 IsSellOutChecked／IsDisplayChecked。&lt;br&gt;• 明細新增、修改或刪除時，同步更新 StoreVisit.UpdatedAt 與 UpdatedByUserAccountId。" vertex="1">
           <mxGeometry height="300" width="850" y="1810" as="geometry" />
-        </mxCell>
-        <mxCell id="note_opening_inventory_exclusion" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=14;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;align=left;verticalAlign=top;spacing=10;" value="&lt;b&gt;每月期初庫存匯入排除規則&lt;/b&gt;&lt;br&gt;• ScopeType＝ALL：DealerId 必須為 NULL，匯入時忽略經銷商並套用全部經銷商。&lt;br&gt;• ScopeType＝DEALER：DealerId 必填，只排除指定經銷商的指定商品。&lt;br&gt;• ALL 與 DEALER 採聯集判斷；符合任一有效規則即排除。新增 ALL 規則不得刪除既有 DEALER 規則。&lt;br&gt;• DataMonth 介於 EffectiveFromMonth 與 EffectiveToMonth（含）時有效；EffectiveToMonth＝NULL 表示持續有效。&lt;br&gt;• 停用規則應填入 EffectiveToMonth，不實體刪除，以保留歷史與稽核。&lt;br&gt;• 被排除的來源列不建立 MonthlyOpeningInventoryDetail。" vertex="1">
-          <mxGeometry height="230" width="760" x="-1650" y="1140" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

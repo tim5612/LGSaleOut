@@ -1,0 +1,39 @@
+方向正確，我們用這個圖溝通就好。
+
+請幫我直接修改在 (Codex筆記)資料夾下的 LGSale_UI_Wireframe.drawio
+
+
+設計時請參考
+Codex筆記) 資料夾下的 (LGSale_ERD_標準.drawio) 以及 (整合式人員經銷商庫存巡店資料庫設計規格.md) 檔
+
+我再敘述一下這個UI的設計
+
+*.登入時要使用 Passkey
+
+*.業務介面
+**.輸入實銷 StoreVisitProductDetail / SellOutQuantity
+**.輸入陳列 StoreVisitProductDetail / DisplayQuantity
+**.任務執行 VisitTask
+
+
+*.經銷商介面
+**.輸入實銷 StoreVisitProductDetail / SellOutQuantity
+**.輸入陳列 StoreVisitProductDetail / DisplayQuantity
+
+
+*.業務介面與經銷商介面是不同的連結，無法相連接
+
+
+
+請加入拍照介面的UI，還有(樣本任務)照片的UI設計 **VisitTaskPhoto\\**SampleTaskPhotoId，要有幾個不一樣的拍照 UI，有樣本任務、沒樣本任務、以及樣本任務建立中的UI
+請幫我直接修改在 (Codex筆記)資料夾下的 LGSale_UI_Wireframe.drawio
+
+
+
+
+請幫我新增一個 (Codex筆記)資料夾下的 LGSale_UI_PHOTO.drawio，這個單獨討論拍照的 UI，還有請把所有的手機介面都設計成一樣比例
+我有看到一個比較理想的比例是 360px*760px，請直接按照這個設計
+
+拍照成1:1的比例，如果能在拍照時就截好 1:1 的比例是最理想，如果不行就要 user 後續再截圖成 1:1，哪個處理上比較方便？
+
+請將拍照任務這部分的UI設計，獨立畫在  LGSale_UI_PHOTO.drawio 裡面，不要跟別的 UI 設計混在一起，所以這個請從建立 VisitTaskExecution 這邊開始

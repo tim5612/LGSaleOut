@@ -1,0 +1,771 @@
+<mxfile host="Electron" agent="Codex" compressed="false" pages="7">
+  <diagram id="ui-map" name="00_雙入口系統總圖">
+    <mxGraphModel dx="1983" dy="894" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=24;fontStyle=1;align=left;verticalAlign=middle;" value="LGSale｜業務端與經銷商端雙入口總圖（Wireframe v0.2）" vertex="1">
+          <mxGeometry height="40" width="1000" x="50" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" parent="1" style="text;html=1;fontSize=14;fontColor=#666666;align=left;" value="兩個入口使用不同連結與獨立導覽，皆以 Passkey 登入；登入後不可切換到另一端。" vertex="1">
+          <mxGeometry height="30" width="1100" x="50" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="role1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;" value="業務端連結&#xa;Passkey 登入" vertex="1">
+          <mxGeometry height="75" width="150" x="40" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="s1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" value="VISIT-M-01&#xa;我的工作台" vertex="1">
+          <mxGeometry height="70" width="150" x="230" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="s2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" value="VISIT-M-02&#xa;選擇經銷商" vertex="1">
+          <mxGeometry height="70" width="150" x="450" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="s3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" value="VISIT-M-03&#xa;經銷商摘要" vertex="1">
+          <mxGeometry height="70" width="150" x="670" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="s4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" value="VISIT-M-04&#xa;巡店商品填寫" vertex="1">
+          <mxGeometry height="70" width="170" x="890" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="s5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" value="VISIT-M-05&#xa;送出前確認" vertex="1">
+          <mxGeometry height="70" width="150" x="1130" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="s6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" value="VISIT-M-06&#xa;送出成功" vertex="1">
+          <mxGeometry height="70" width="150" x="1350" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="role1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="s1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="s1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="s2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="s2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="s3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="s4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="s4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="s5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="s5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="s6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="history" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" value="VISIT-M-07&#xa;巡店紀錄／詳細" vertex="1">
+          <mxGeometry height="70" width="170" x="670" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="edit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" value="VISIT-M-08&#xa;72 小時內修改" vertex="1">
+          <mxGeometry height="70" width="170" x="930" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="locked" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;" value="VISIT-M-09&#xa;逾期唯讀" vertex="1">
+          <mxGeometry height="70" width="170" x="1190" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="s1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="history" value="查看紀錄">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="history" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="edit" value="仍可修改">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="history" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" target="locked" value="超過 72 小時">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="dealerLogin" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;" value="經銷商端連結&#xa;Passkey 登入" vertex="1">
+          <mxGeometry height="70" width="150" x="50" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="dealerHome" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" value="DEALER-M-01&#xa;經銷商首頁" vertex="1">
+          <mxGeometry height="70" width="150" x="270" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="dealerEntry" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" value="DEALER-M-02&#xa;輸入實銷／陳列" vertex="1">
+          <mxGeometry height="70" width="170" x="490" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="dealerConfirm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" value="DEALER-M-03&#xa;確認並送出" vertex="1">
+          <mxGeometry height="70" width="160" x="730" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="dealerDone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" value="DEALER-M-04&#xa;送出成功／紀錄" vertex="1">
+          <mxGeometry height="70" width="170" x="960" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="de1" edge="1" parent="1" source="dealerLogin" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#d79b00;" target="dealerHome">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="de2" edge="1" parent="1" source="dealerHome" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#d79b00;" target="dealerEntry">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="de3" edge="1" parent="1" source="dealerEntry" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#d79b00;" target="dealerConfirm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="de4" edge="1" parent="1" source="dealerConfirm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeColor=#d79b00;" target="dealerDone">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="separate" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;" value="禁止跨入口導覽／切換" vertex="1">
+          <mxGeometry height="50" width="230" x="1230" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="decision" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=16;align=left;spacingLeft=12;" value="已確認的入口原則" vertex="1">
+          <mxGeometry height="45" width="1460" x="50" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="notes" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f2fff2;strokeColor=#82b366;align=left;verticalAlign=top;spacing=12;fontSize=14;" value="• 業務端：輸入實銷、輸入陳列、執行 VisitTask。　• 經銷商端：輸入實銷、輸入陳列。&#xa;• 兩端使用不同連結，沒有互相切換入口。　• 兩端皆使用 Passkey；後端依入口及 UserAccount.AccountType 驗證身分。" vertex="1">
+          <mxGeometry height="105" width="1460" x="50" y="565" as="geometry" />
+        </mxCell>
+        <mxCell id="legend" parent="1" style="text;html=1;fontSize=13;fontColor=#666666;align=left;" value="圖例：　灰＝一般頁面　藍＝主要輸入　黃＝確認　綠＝完成　紅＝受限制／錯誤" vertex="1">
+          <mxGeometry height="30" width="1000" x="50" y="730" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="ui-passkey" name="01_Passkey登入_雙入口">
+    <mxGraphModel dx="2216" dy="999" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=24;fontStyle=1;align=left;" value="Passkey 登入｜業務端與經銷商端使用不同連結" vertex="1">
+          <mxGeometry height="40" width="1100" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="empZone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=17;align=left;spacingLeft=14;" value="業務端網址（僅接受 EMPLOYEE 帳號）" vertex="1">
+          <mxGeometry height="48" width="760" x="50" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="empPhone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="650" width="330" x="90" y="155" as="geometry" />
+        </mxCell>
+        <mxCell id="empLogo" parent="1" style="text;html=1;fontSize=26;fontStyle=1;align=center;verticalAlign=middle;" value="LGSale&#xa;業務入口" vertex="1">
+          <mxGeometry height="90" width="240" x="135" y="245" as="geometry" />
+        </mxCell>
+        <mxCell id="empHint" parent="1" style="text;html=1;fontSize=14;align=center;verticalAlign=middle;fontColor=#666666;" value="使用你的公司 Passkey 登入&#xa;可使用 Face ID、Touch ID、Windows Hello 或裝置解鎖。" vertex="1">
+          <mxGeometry height="90" width="260" x="125" y="355" as="geometry" />
+        </mxCell>
+        <mxCell id="empBtn" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=16;" value="使用 Passkey 登入" vertex="1">
+          <mxGeometry height="58" width="260" x="125" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="empNoPwd" parent="1" style="text;html=1;fontSize=12;align=center;fontColor=#888888;" value="不提供帳號密碼登入" vertex="1">
+          <mxGeometry height="30" width="250" x="130" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="empResult" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" value="驗證成功&#xa;UserAccount.AccountType = EMPLOYEE&#xa;→ 進入業務工作台" vertex="1">
+          <mxGeometry height="115" width="290" x="470" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="empReject" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;" value="若憑證屬於 DEALER&#xa;→ 拒絕登入&#xa;→ 不顯示經銷商入口連結" vertex="1">
+          <mxGeometry height="110" width="290" x="470" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="dealerZone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;fontSize=17;align=left;spacingLeft=14;" value="經銷商端網址（僅接受 DEALER 帳號）" vertex="1">
+          <mxGeometry height="48" width="760" x="890" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="dealerPhone" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="650" width="330" x="930" y="155" as="geometry" />
+        </mxCell>
+        <mxCell id="dealerLogo" parent="1" style="text;html=1;fontSize=26;fontStyle=1;align=center;verticalAlign=middle;" value="LGSale&#xa;經銷商入口" vertex="1">
+          <mxGeometry height="90" width="240" x="975" y="245" as="geometry" />
+        </mxCell>
+        <mxCell id="dealerHint" parent="1" style="text;html=1;fontSize=14;align=center;verticalAlign=middle;fontColor=#666666;" value="使用經銷商 Passkey 登入&#xa;登入後只可查看及回報自己的經銷商資料。" vertex="1">
+          <mxGeometry height="90" width="260" x="965" y="355" as="geometry" />
+        </mxCell>
+        <mxCell id="dealerBtn" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=16;" value="使用 Passkey 登入" vertex="1">
+          <mxGeometry height="58" width="260" x="965" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="dealerNoPwd" parent="1" style="text;html=1;fontSize=12;align=center;fontColor=#888888;" value="不提供帳號密碼登入" vertex="1">
+          <mxGeometry height="30" width="250" x="970" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="dealerResult" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" value="驗證成功&#xa;UserAccount.AccountType = DEALER&#xa;→ 進入經銷商首頁" vertex="1">
+          <mxGeometry height="115" width="290" x="1310" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="dealerReject" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=14;" value="若憑證屬於 EMPLOYEE&#xa;→ 拒絕登入&#xa;→ 不顯示業務入口連結" vertex="1">
+          <mxGeometry height="110" width="290" x="1310" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="ruleTitle" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=16;align=left;spacingLeft=12;" value="安全與導覽規則" vertex="1">
+          <mxGeometry height="42" width="1600" x="50" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="ruleBody" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;align=left;verticalAlign=top;spacing=12;fontSize=14;" value="• WebAuthn userVerification = required；Python 後端驗證 Challenge 與簽章。　• 不由前端自行宣告角色。&#xa;• 登入入口與 AccountType 不符時直接拒絕。　• 業務端與經銷商端的頁首、選單及 URL 均不提供互相跳轉。" vertex="1">
+          <mxGeometry height="90" width="1600" x="50" y="892" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="ui-core" name="02_業務端_實銷與陳列">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="2000" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=24;fontStyle=1;align=left;" value="業務端｜實銷與陳列回報（Wireframe v0.2）" vertex="1">
+          <mxGeometry height="40" width="900" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="760" width="360" x="40" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p1bar" parent="1" style="text;html=1;fontSize=11;align=center;" value="9:41　　　　　　　　　●●●" vertex="1">
+          <mxGeometry height="24" width="330" x="55" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="p1head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;" value="LGSale　　我的工作台　　☰" vertex="1">
+          <mxGeometry height="50" width="330" x="55" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p1hello" parent="1" style="text;html=1;fontSize=18;fontStyle=1;align=left;verticalAlign=middle;" value="王小明，早安&#xa;今天有 3 家建議巡店" vertex="1">
+          <mxGeometry height="60" width="290" x="70" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="p1action" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=16;" value="＋ 新增巡店" vertex="1">
+          <mxGeometry height="52" width="290" x="70" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="p1card1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" value="今日建議巡店　3&#xa;台北大同電器　上次 18 天前&#xa;宏達家電　　　上次 12 天前" vertex="1">
+          <mxGeometry height="125" width="290" x="70" y="335" as="geometry" />
+        </mxCell>
+        <mxCell id="p1card2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" value="最近巡店紀錄&#xa;07/29　信義生活館　已送出　›&#xa;07/28　東區家電行　可修改　›" vertex="1">
+          <mxGeometry height="125" width="290" x="70" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="p1nav" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=12;" value="首頁　　 經銷商　　 任務　　 我的" vertex="1">
+          <mxGeometry height="50" width="330" x="55" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="p1label" parent="1" style="text;html=1;fontStyle=1;fontSize=14;align=center;" value="VISIT-M-01｜我的工作台" vertex="1">
+          <mxGeometry height="30" width="360" x="40" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="760" width="360" x="450" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p2bar" parent="1" style="text;html=1;fontSize=11;align=center;" value="9:41　　　　　　　　　●●●" vertex="1">
+          <mxGeometry height="24" width="330" x="465" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="p2head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" value="‹　選擇經銷商" vertex="1">
+          <mxGeometry height="50" width="330" x="465" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p2search" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;spacingLeft=12;fontColor=#777777;" value="🔍 搜尋代碼或經銷商名稱" vertex="1">
+          <mxGeometry height="45" width="300" x="480" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="p2filter" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=13;" value="全部　｜　近期　｜　久未巡店" vertex="1">
+          <mxGeometry height="38" width="300" x="480" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="p2d1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=10;fontSize=13;" value="台北大同電器　›&#xa;TW002351001H｜A 級&#xa;上次巡店：2026/07/12（18 天前）" vertex="1">
+          <mxGeometry height="90" width="300" x="480" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="p2d2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=10;fontSize=13;" value="宏達家電　›&#xa;TW002351018B｜B 級&#xa;上次巡店：2026/07/18（12 天前）" vertex="1">
+          <mxGeometry height="90" width="300" x="480" y="415" as="geometry" />
+        </mxCell>
+        <mxCell id="p2d3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=10;fontSize=13;" value="信義生活館　›&#xa;TW002351077C｜C 級&#xa;上次巡店：昨天" vertex="1">
+          <mxGeometry height="90" width="300" x="480" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="p2label" parent="1" style="text;html=1;fontStyle=1;fontSize=14;align=center;" value="VISIT-M-02｜選擇經銷商" vertex="1">
+          <mxGeometry height="30" width="360" x="450" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="760" width="360" x="860" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p3bar" parent="1" style="text;html=1;fontSize=11;align=center;" value="9:41　　　　　　　　　●●●" vertex="1">
+          <mxGeometry height="24" width="330" x="875" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="p3head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" value="‹　經銷商摘要" vertex="1">
+          <mxGeometry height="50" width="330" x="875" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p3dealer" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;fontStyle=1;" value="台北大同電器　　A 級&#xa;TW002351001H&#xa;負責業務：王小明" vertex="1">
+          <mxGeometry height="105" width="300" x="890" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="p3info" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=12;fontSize=14;" value="最近巡店　2026/07/12 14:20&#xa;距今　　　18 天&#xa;資料狀態　需更新" vertex="1">
+          <mxGeometry height="110" width="300" x="890" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="p3last" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="上次回報摘要&#xa;已填商品 8 項｜實銷 23｜陳列 17&#xa;查看上次內容　›" vertex="1">
+          <mxGeometry height="105" width="300" x="890" y="445" as="geometry" />
+        </mxCell>
+        <mxCell id="p3start" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=16;" value="開始本次巡店" vertex="1">
+          <mxGeometry height="55" width="300" x="890" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="p3history" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=15;" value="查看巡店紀錄" vertex="1">
+          <mxGeometry height="48" width="300" x="890" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="p3label" parent="1" style="text;html=1;fontStyle=1;fontSize=14;align=center;" value="VISIT-M-03｜經銷商摘要" vertex="1">
+          <mxGeometry height="30" width="360" x="860" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="760" width="360" x="1270" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p4bar" parent="1" style="text;html=1;fontSize=11;align=center;" value="9:41　　　　　　　　　●●●" vertex="1">
+          <mxGeometry height="24" width="330" x="1285" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="p4head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=15;" value="‹　台北大同電器　　暫存" vertex="1">
+          <mxGeometry height="50" width="330" x="1285" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p4search" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;spacingLeft=12;fontColor=#777777;" value="🔍 搜尋商品名稱或品號" vertex="1">
+          <mxGeometry height="42" width="300" x="1300" y="185" as="geometry" />
+        </mxCell>
+        <mxCell id="p4toggle" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=12;" value="全部商品　｜　只顯示已填（2）" vertex="1">
+          <mxGeometry height="36" width="300" x="1300" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="p4prod1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;align=left;verticalAlign=top;spacing=10;fontSize=13;" value="GN-B372PL｜雙門冰箱&#xa;上次：實銷 2／陳列 1&#xa;實銷數量　[　2　]　日期 [07/30]&#xa;陳列數量　[　1　]" vertex="1">
+          <mxGeometry height="130" width="300" x="1300" y="292" as="geometry" />
+        </mxCell>
+        <mxCell id="p4prod2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;align=left;verticalAlign=top;spacing=10;fontSize=13;" value="WD-S13VDW｜洗衣機&#xa;上次：實銷 0／陳列 2&#xa;實銷數量　[　0　]　日期 [07/30]&#xa;陳列數量　[　2　]" vertex="1">
+          <mxGeometry height="130" width="300" x="1300" y="435" as="geometry" />
+        </mxCell>
+        <mxCell id="p4prod3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=10;fontSize=13;" value="OLED65C4｜OLED 電視&#xa;上次：未填&#xa;實銷數量　[　　 ]　日期 [　　 ]&#xa;陳列數量　[　　 ]" vertex="1">
+          <mxGeometry height="120" width="300" x="1300" y="578" as="geometry" />
+        </mxCell>
+        <mxCell id="p4foot" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" value="已填 2 項　　　　　　　　下一步 ›" vertex="1">
+          <mxGeometry height="65" width="330" x="1285" y="755" as="geometry" />
+        </mxCell>
+        <mxCell id="p4label" parent="1" style="text;html=1;fontStyle=1;fontSize=14;align=center;" value="VISIT-M-04｜巡店商品填寫" vertex="1">
+          <mxGeometry height="30" width="360" x="1270" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="spec" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=16;align=left;spacingLeft=12;" value="本頁共通規則" vertex="1">
+          <mxGeometry height="42" width="1590" x="40" y="930" as="geometry" />
+        </mxCell>
+        <mxCell id="specbody" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#faf7fb;strokeColor=#9673a6;align=left;verticalAlign=top;spacing=12;fontSize=14;" value="• 空白＝本次未填；0＝明確回報為零，不可互相轉換。　• 數量只接受 0 或正整數。　• 實銷日期預設今天，可修改。&#xa;• 只有陳列數量時，實銷日期可空白。　• 三個回報欄位皆空白時不建立明細。　• 商品清單需支援搜尋、分類與只看已填。" vertex="1">
+          <mxGeometry height="90" width="1590" x="40" y="972" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="ui-submit" name="03_業務端_確認送出與紀錄">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="手機巡店｜確認、送出、查看與修改" style="text;html=1;fontSize=24;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="900" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p5" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="360" height="760" as="geometry" />
+        </mxCell>
+        <mxCell id="p5head" value="‹　送出前確認" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="55" y="120" width="330" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p5dealer" value="台北大同電器&#xa;TW002351001H｜2026/07/30" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="195" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p5sum" value="本次填寫摘要&#xa;商品　　　　　　2 項&#xa;有填實銷　　　　2 項&#xa;明確回報為 0　　1 項&#xa;有填陳列　　　　2 項" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="70" y="295" width="300" height="155" as="geometry" />
+        </mxCell>
+        <mxCell id="p5items" value="GN-B372PL　實銷 2｜陳列 1　›&#xa;WD-S13VDW　實銷 0｜陳列 2　›" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="70" y="470" width="300" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="p5warn" value="送出後將開始計算 72 小時修改期限。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="70" y="600" width="300" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="p5submit" value="確認送出" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="70" y="680" width="300" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="p5back" value="返回修改" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="70" y="750" width="300" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p5label" value="VISIT-M-05｜送出前確認" style="text;html=1;fontStyle=1;fontSize=14;align=center;" vertex="1" parent="1">
+          <mxGeometry x="40" y="850" width="360" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p6" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="450" y="80" width="360" height="760" as="geometry" />
+        </mxCell>
+        <mxCell id="p6icon" value="✓" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=42;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="575" y="190" width="110" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="p6text" value="巡店回報已送出&#xa;2026/07/30 14:35&#xa;&#xa;共回報 2 項商品" style="text;html=1;fontSize=18;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="490" y="330" width="280" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="p6time" value="可修改至&#xa;2026/08/02 14:35" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="475" width="260" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="p6view" value="查看本次回報" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="480" y="610" width="300" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="p6home" value="返回工作台" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="480" y="680" width="300" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="p6label" value="VISIT-M-06｜送出成功" style="text;html=1;fontStyle=1;fontSize=14;align=center;" vertex="1" parent="1">
+          <mxGeometry x="450" y="850" width="360" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p7" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="860" y="80" width="360" height="760" as="geometry" />
+        </mxCell>
+        <mxCell id="p7head" value="‹　巡店詳細" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="875" y="120" width="330" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p7status" value="已送出｜尚可修改 70 小時" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="890" y="190" width="300" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="p7meta" value="台北大同電器&#xa;回報：2026/07/30 14:35&#xa;填寫者：王小明（業務）&#xa;正式負責：王小明" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="890" y="250" width="300" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="p7items" value="商品回報（2）&#xa;&#xa;GN-B372PL｜雙門冰箱&#xa;實銷 2（07/30）｜陳列 1&#xa;&#xa;WD-S13VDW｜洗衣機&#xa;實銷 0（07/30）｜陳列 2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="890" y="400" width="300" height="220" as="geometry" />
+        </mxCell>
+        <mxCell id="p7edit" value="修改回報" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="890" y="650" width="300" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="p7label" value="VISIT-M-07｜巡店紀錄／詳細" style="text;html=1;fontStyle=1;fontSize=14;align=center;" vertex="1" parent="1">
+          <mxGeometry x="860" y="850" width="360" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="p8" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="80" width="360" height="760" as="geometry" />
+        </mxCell>
+        <mxCell id="p8head" value="‹　修改巡店回報" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="1285" y="120" width="330" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p8timer" value="剩餘 70 小時 12 分可修改" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="190" width="300" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="p8prod1" value="GN-B372PL｜雙門冰箱&#xa;實銷數量　[　2　]　日期 [07/30]&#xa;陳列數量　[　1　]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;align=left;verticalAlign=top;spacing=12;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="260" width="300" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="p8prod2" value="WD-S13VDW｜洗衣機&#xa;實銷數量　[　0　]　日期 [07/30]&#xa;陳列數量　[　2　]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;align=left;verticalAlign=top;spacing=12;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="390" width="300" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="p8audit" value="儲存後會更新最後修改時間與修改者；原始建立者不變。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="530" width="300" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="p8save" value="儲存修改" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=16;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="650" width="300" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="p8label" value="VISIT-M-08｜72 小時內修改" style="text;html=1;fontStyle=1;fontSize=14;align=center;" vertex="1" parent="1">
+          <mxGeometry x="1270" y="850" width="360" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="spec" value="需要確認" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;fontSize=16;align=left;spacingLeft=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="930" width="1590" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="specbody" value="此線框暫以「正式送出後開始 72 小時」呈現；目前資料規格仍以 ReportDateTime 起算。確認 UI 流程後，需決定是否新增 SubmittedAt 或調整 ReportDateTime 的定義。" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#d79b00;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="40" y="972" width="1590" height="70" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="ui-task" name="04_業務端_任務執行">
+    <mxGraphModel dx="2216" dy="999" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=24;fontStyle=1;align=left;" value="業務端｜VisitTask 任務執行" vertex="1">
+          <mxGeometry height="40" width="900" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="740" width="360" x="40" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p1h" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=17;" value="公司任務" vertex="1">
+          <mxGeometry height="50" width="330" x="55" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p1tabs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=13;" value="待完成（3）｜已完成｜全部" vertex="1">
+          <mxGeometry height="40" width="300" x="70" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="p1task1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=12;fontSize=14;" value="新機上市布置　即將到期&#xa;台北大同電器&#xa;期限：2026/08/02　›" vertex="1">
+          <mxGeometry height="105" width="300" x="70" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="p1task2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" value="夏季展示檢查&#xa;宏達家電&#xa;期限：2026/08/10　›" vertex="1">
+          <mxGeometry height="105" width="300" x="70" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="p1nav" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=12;" value="首頁　　 經銷商　　 任務　　 我的" vertex="1">
+          <mxGeometry height="50" width="330" x="55" y="750" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="740" width="360" x="450" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p2h" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" value="‹　任務內容" vertex="1">
+          <mxGeometry height="50" width="330" x="465" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p2info" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" value="新機上市布置&#xa;台北大同電器&#xa;期限：2026/08/02&#xa;&#xa;依照核准樣本完成展示布置，並逐項拍攝照片。" vertex="1">
+          <mxGeometry height="170" width="300" x="480" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="p2sample" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#9673a6;align=left;verticalAlign=top;spacing=12;fontSize=14;" value="核准樣本（3 項）&#xa;① 跳跳牌照片　[查看樣本]&#xa;② 製冰盒照片　[查看樣本]&#xa;③ 鏡面烤漆照片 [查看樣本]" vertex="1">
+          <mxGeometry height="155" width="300" x="480" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="p2start" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=16;" value="開始執行" vertex="1">
+          <mxGeometry height="55" width="300" x="480" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="p2cant" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=14;" value="無法執行／填寫原因" vertex="1">
+          <mxGeometry height="48" width="300" x="480" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="740" width="360" x="860" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p3h" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" value="‹　拍攝任務照片" vertex="1">
+          <mxGeometry height="50" width="330" x="875" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p3photo1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="① 跳跳牌照片&#xa;[ 樣本縮圖 ]　[ 拍照／上傳 ]&#xa;尚未完成" vertex="1">
+          <mxGeometry height="115" width="300" x="890" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="p3photo2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="② 製冰盒照片&#xa;[ 樣本縮圖 ]　[ 已拍照片 ]&#xa;✓ 已完成　[重拍]" vertex="1">
+          <mxGeometry height="115" width="300" x="890" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="p3photo3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="③ 鏡面烤漆照片&#xa;[ 樣本縮圖 ]　[ 拍照／上傳 ]&#xa;尚未完成" vertex="1">
+          <mxGeometry height="115" width="300" x="890" y="465" as="geometry" />
+        </mxCell>
+        <mxCell id="p3note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=10;fontSize=13;" value="執行說明（送出時必填）&#xa;[　　　　　　　　　　　　　]" vertex="1">
+          <mxGeometry height="75" width="300" x="890" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="p3submit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontStyle=1;fontSize=14;fontColor=#888888;" value="尚缺 2 張照片｜確認送出" vertex="1">
+          <mxGeometry height="55" width="300" x="890" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="740" width="360" x="1270" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p4h" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" value="‹　未執行回報" vertex="1">
+          <mxGeometry height="50" width="330" x="1285" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p4msg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;" value="本次無法完成任務&#xa;&#xa;沒有照片時代表未執行，必須填寫具體原因。" vertex="1">
+          <mxGeometry height="105" width="300" x="1300" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="p4reason" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" value="未執行原因（必填）&#xa;&#xa;[ 經銷商今日臨時休店，無法進場布置。　　　　　]" vertex="1">
+          <mxGeometry height="145" width="300" x="1300" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="p4submit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=16;" value="送出未執行回報" vertex="1">
+          <mxGeometry height="55" width="300" x="1300" y="550" as="geometry" />
+        </mxCell>
+        <mxCell id="rule" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf7fb;strokeColor=#9673a6;align=left;verticalAlign=top;spacing=14;fontSize=14;" value="VisitTaskExecution 規則：同一任務＋經銷商只有一筆執行；有完整照片＝已執行，無照片＝未執行；ExecutionNote 正式送出時必填。一般照片逐張對應 SampleTaskPhotoId。" vertex="1">
+          <mxGeometry height="90" width="1590" x="40" y="870" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="ui-dealer" name="05_經銷商端_實銷與陳列">
+    <mxGraphModel dx="2093" dy="943" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1800" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=24;fontStyle=1;align=left;" value="經銷商端｜實銷與陳列回報（獨立入口）" vertex="1">
+          <mxGeometry height="40" width="1000" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="740" width="360" x="40" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p1h" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=16;" value="台北大同電器　　　　　☰" vertex="1">
+          <mxGeometry height="50" width="330" x="55" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p1welcome" parent="1" style="text;html=1;fontSize=18;fontStyle=1;align=left;verticalAlign=middle;" value="經銷商回報首頁&#xa;TW002351001H｜A 級" vertex="1">
+          <mxGeometry height="65" width="290" x="70" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="p1btn" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=16;" value="＋ 回報實銷與陳列" vertex="1">
+          <mxGeometry height="58" width="290" x="70" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="p1last" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" value="最近回報&#xa;2026/07/25 10:20&#xa;商品 6 項｜查看內容　›" vertex="1">
+          <mxGeometry height="115" width="290" x="70" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="p1note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=12;" value="你只能查看與回報本經銷商資料。" vertex="1">
+          <mxGeometry height="48" width="290" x="70" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="p1nav" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=12;" value="首頁　　　　回報紀錄　　　　我的" vertex="1">
+          <mxGeometry height="50" width="330" x="55" y="750" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="740" width="360" x="450" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p2h" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=15;" value="‹　回報實銷與陳列　暫存" vertex="1">
+          <mxGeometry height="50" width="330" x="465" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p2search" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;spacingLeft=12;fontColor=#777777;" value="🔍 搜尋商品名稱或品號" vertex="1">
+          <mxGeometry height="42" width="300" x="480" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="p2prod1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="GN-B372PL｜雙門冰箱&#xa;實銷數量　[　2　]　日期 [07/30]&#xa;陳列數量　[　1　]" vertex="1">
+          <mxGeometry height="115" width="300" x="480" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="p2prod2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="WD-S13VDW｜洗衣機&#xa;實銷數量　[　0　]　日期 [07/30]&#xa;陳列數量　[　2　]" vertex="1">
+          <mxGeometry height="115" width="300" x="480" y="395" as="geometry" />
+        </mxCell>
+        <mxCell id="p2rule" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=12;" value="空白代表未填；0 代表已確認為零。" vertex="1">
+          <mxGeometry height="45" width="300" x="480" y="535" as="geometry" />
+        </mxCell>
+        <mxCell id="p2next" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=15;" value="已填 2 項｜下一步 ›" vertex="1">
+          <mxGeometry height="58" width="300" x="480" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="740" width="360" x="860" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p3h" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" value="‹　確認回報" vertex="1">
+          <mxGeometry height="50" width="330" x="875" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="p3who" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontStyle=1;" value="台北大同電器&#xa;經銷商自行回報" vertex="1">
+          <mxGeometry height="80" width="300" x="890" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="p3sum" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" value="本次共回報 2 項商品&#xa;&#xa;GN-B372PL　實銷 2｜陳列 1&#xa;WD-S13VDW　實銷 0｜陳列 2" vertex="1">
+          <mxGeometry height="150" width="300" x="890" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="p3source" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=12;" value="送出後 EntrySourceType = DEALER&#xa;CreatedByUserAccountId 保存實際經銷商帳號" vertex="1">
+          <mxGeometry height="68" width="300" x="890" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="p3submit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=16;" value="確認送出" vertex="1">
+          <mxGeometry height="58" width="300" x="890" y="650" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="740" width="360" x="1270" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p4ok" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=42;fontStyle=1;" value="✓" vertex="1">
+          <mxGeometry height="110" width="110" x="1395" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="p4text" parent="1" style="text;html=1;fontSize=18;fontStyle=1;align=center;verticalAlign=middle;" value="回報已送出&#xa;&#xa;感謝提供實銷與陳列資料" vertex="1">
+          <mxGeometry height="100" width="280" x="1310" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="p4view" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=16;" value="查看本次回報" vertex="1">
+          <mxGeometry height="58" width="300" x="1300" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="p4home" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=14;" value="返回經銷商首頁" vertex="1">
+          <mxGeometry height="48" width="300" x="1300" y="615" as="geometry" />
+        </mxCell>
+        <mxCell id="rule" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#d79b00;align=left;verticalAlign=top;spacing=14;fontSize=14;" value="經銷商端不顯示：其他經銷商搜尋、業務工作台、公司任務、業務入口連結。後端所有 API 以 Session 中的 UserAccount.DealerId 限制資料範圍。" vertex="1">
+          <mxGeometry height="80" width="1590" x="40" y="870" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="ui-states" name="06_共用限制與錯誤狀態">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="手機巡店｜限制、錯誤與空狀態" style="text;html=1;fontSize=24;fontStyle=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="900" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="locked" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="60" y="90" width="360" height="700" as="geometry" />
+        </mxCell>
+        <mxCell id="lockedhead" value="‹　巡店詳細" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" vertex="1" parent="1">
+          <mxGeometry x="75" y="130" width="330" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lockedstatus" value="已鎖定｜修改期限已於 08/02 14:35 結束" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="205" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lockedbody" value="台北大同電器&#xa;回報：2026/07/30 14:35&#xa;&#xa;GN-B372PL｜實銷 2｜陳列 1&#xa;WD-S13VDW｜實銷 0｜陳列 2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="90" y="280" width="300" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="lockedmsg" value="一般使用者已無法修改。&#xa;如需更正，請聯絡管理人員。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="90" y="510" width="300" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="lockedlabel" value="VISIT-M-09｜逾期唯讀" style="text;html=1;fontStyle=1;fontSize=14;align=center;" vertex="1" parent="1">
+          <mxGeometry x="60" y="805" width="360" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="errorbox" value="共用錯誤／提示元件" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=18;align=left;spacingLeft=14;" vertex="1" parent="1">
+          <mxGeometry x="500" y="90" width="1000" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="err1" value="輸入錯誤&#xa;&#xa;實銷數量不可小於 0。&#xa;&#xa;　　　　　　　　　[返回修改]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;align=left;verticalAlign=top;spacing=14;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="500" y="170" width="300" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="err2" value="資料已被修改&#xa;&#xa;此回報已由其他使用者更新，請重新載入後再操作。&#xa;&#xa;　　　　　　　　　[重新載入]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;align=left;verticalAlign=top;spacing=14;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="840" y="170" width="300" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="err3" value="沒有存取權限&#xa;&#xa;此經銷商目前不在你的可存取範圍。&#xa;&#xa;　　　　　　　　　[回工作台]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;align=left;verticalAlign=top;spacing=14;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="170" width="300" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="err4" value="網路連線中斷&#xa;&#xa;目前無法送出。已輸入內容仍保留在此畫面。&#xa;&#xa;　　　　　　[稍後再試] [儲存草稿]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;align=left;verticalAlign=top;spacing=14;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="500" y="360" width="300" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="err5" value="沒有可回報商品&#xa;&#xa;目前沒有啟用中的商品可供回報。&#xa;&#xa;　　　　　　　　　[返回]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=14;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="840" y="360" width="300" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="err6" value="確認作廢回報？&#xa;&#xa;作廢後資料不再參與庫存計算，但仍保留歷史。&#xa;&#xa;　　　　　　　[取消] [確認作廢]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;align=left;verticalAlign=top;spacing=14;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="1180" y="360" width="300" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="rules" value="狀態處理原則" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=16;align=left;spacingLeft=12;" vertex="1" parent="1">
+          <mxGeometry x="500" y="570" width="980" height="42" as="geometry" />
+        </mxCell>
+        <mxCell id="rulesbody" value="• 後端權限結果優先，不能只依前端按鈕是否顯示。&#xa;• 逾期後欄位唯讀，不以停用按鈕掩蓋既有資料。&#xa;• 作廢屬管理操作，需二次確認並說明對庫存計算的影響。&#xa;• 是否支援離線／本機草稿尚待決定；若不支援，移除「儲存草稿」選項。" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;align=left;verticalAlign=top;spacing=14;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="500" y="612" width="980" height="140" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="ui-photo-modes" name="07_任務拍照_三種介面">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2100" pageHeight="2150" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/><mxCell id="1" parent="0"/>
+        <mxCell id="title" value="VisitTaskPhoto｜任務拍照三種 UI（Wireframe v0.3）" style="text;html=1;fontSize=24;fontStyle=1;align=left;" vertex="1" parent="1"><mxGeometry x="40" y="20" width="1200" height="40" as="geometry"/></mxCell>
+        <mxCell id="subtitle" value="比較：有核准樣本、沒有樣本、樣本任務建立中。拍照介面依任務狀態呈現不同引導。" style="text;html=1;fontSize=14;fontColor=#666666;align=left;" vertex="1" parent="1"><mxGeometry x="40" y="60" width="1200" height="30" as="geometry"/></mxCell>
+
+        <mxCell id="zone1" value="A｜有樣本任務：一般業務依核准樣本逐項拍攝" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=17;align=left;spacingLeft=14;" vertex="1" parent="1"><mxGeometry x="40" y="105" width="620" height="48" as="geometry"/></mxCell>
+        <mxCell id="aPhone" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="70" y="175" width="360" height="760" as="geometry"/></mxCell>
+        <mxCell id="aHead" value="×　① 跳跳牌照片　　 1／3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#555555;fontColor=#ffffff;fontStyle=1;fontSize=15;" vertex="1" parent="1"><mxGeometry x="85" y="210" width="330" height="50" as="geometry"/></mxCell>
+        <mxCell id="aCamera" value="1 : 1 即時取景框&#xa;輸出 1200 × 1200 px&#xa;&#xa;┌ ─ ─ 樣本構圖參考框 ─ ─ ┐&#xa;│　　　　　　　　　　　　│&#xa;└ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#82b366;strokeWidth=2;fontColor=#ffffff;fontSize=15;verticalAlign=middle;" vertex="1" parent="1"><mxGeometry x="85" y="260" width="330" height="330" as="geometry"/></mxCell>
+        <mxCell id="aSample" value="樣本縮圖&#xa;[核准樣本照片]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1"><mxGeometry x="100" y="280" width="105" height="85" as="geometry"/></mxCell>
+        <mxCell id="aHint" value="請比照樣本拍攝跳跳牌全貌&#xa;直拍或橫拍皆置入正方形取景框" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#777777;fontColor=#ffffff;fontSize=12;" vertex="1" parent="1"><mxGeometry x="105" y="620" width="290" height="55" as="geometry"/></mxCell>
+        <mxCell id="aGallery" value="▧" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#444444;strokeColor=#aaaaaa;fontColor=#ffffff;fontSize=24;" vertex="1" parent="1"><mxGeometry x="105" y="765" width="55" height="55" as="geometry"/></mxCell>
+        <mxCell id="aShutter" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dddddd;strokeWidth=6;" vertex="1" parent="1"><mxGeometry x="220" y="750" width="80" height="80" as="geometry"/></mxCell>
+        <mxCell id="aFlash" value="⚡" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#444444;strokeColor=#aaaaaa;fontColor=#ffffff;fontSize=22;" vertex="1" parent="1"><mxGeometry x="340" y="765" width="55" height="55" as="geometry"/></mxCell>
+        <mxCell id="aSpec" value="資料對應&#xa;一般照片.SampleTaskPhotoId&#xa;＝畫面所示樣本.TaskPhotoId&#xa;&#xa;照片說明與 SortOrder 從樣本讀取，業務不可修改。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f2fff2;strokeColor=#82b366;align=left;verticalAlign=top;spacing=12;fontSize=13;" vertex="1" parent="1"><mxGeometry x="455" y="250" width="190" height="190" as="geometry"/></mxCell>
+        <mxCell id="aPreview" value="拍照後預覽&#xa;&#xa;[本次照片]　[核准樣本]&#xa;　左右對照／滑動比較&#xa;&#xa;[重拍]　　　[使用照片]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;align=center;verticalAlign=middle;fontSize=14;" vertex="1" parent="1"><mxGeometry x="455" y="480" width="190" height="205" as="geometry"/></mxCell>
+
+        <mxCell id="zone2" value="B｜沒有樣本任務：一般拍照，不建立樣本照片對應" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=17;align=left;spacingLeft=14;" vertex="1" parent="1"><mxGeometry x="725" y="105" width="620" height="48" as="geometry"/></mxCell>
+        <mxCell id="bPhone" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="755" y="175" width="360" height="760" as="geometry"/></mxCell>
+        <mxCell id="bHead" value="×　拍攝任務照片　　　完成" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#555555;fontColor=#ffffff;fontStyle=1;fontSize=15;" vertex="1" parent="1"><mxGeometry x="770" y="210" width="330" height="50" as="geometry"/></mxCell>
+        <mxCell id="bCamera" value="1 : 1 即時取景框&#xa;輸出 1200 × 1200 px&#xa;&#xa;畫面顯示水平線與九宮格&#xa;沒有樣本縮圖或構圖框" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#777777;fontColor=#ffffff;fontSize=15;verticalAlign=middle;" vertex="1" parent="1"><mxGeometry x="770" y="260" width="330" height="330" as="geometry"/></mxCell>
+        <mxCell id="bHint" value="任務說明：拍攝完成後的展示全貌&#xa;直拍或橫拍皆使用正方形裁切" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#777777;fontColor=#ffffff;fontSize=12;" vertex="1" parent="1"><mxGeometry x="790" y="620" width="290" height="55" as="geometry"/></mxCell>
+        <mxCell id="bGallery" value="▧ 2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#444444;strokeColor=#aaaaaa;fontColor=#ffffff;fontSize=18;" vertex="1" parent="1"><mxGeometry x="790" y="765" width="55" height="55" as="geometry"/></mxCell>
+        <mxCell id="bShutter" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dddddd;strokeWidth=6;" vertex="1" parent="1"><mxGeometry x="905" y="750" width="80" height="80" as="geometry"/></mxCell>
+        <mxCell id="bFlash" value="⚡" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#444444;strokeColor=#aaaaaa;fontColor=#ffffff;fontSize=22;" vertex="1" parent="1"><mxGeometry x="1025" y="765" width="55" height="55" as="geometry"/></mxCell>
+        <mxCell id="bSpec" value="資料對應&#xa;VisitTaskPhoto.SampleTaskPhotoId = NULL&#xa;&#xa;此模式沒有逐項樣本限制；照片數量與是否允許此任務模式仍需由任務規則決定。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=12;fontSize=13;" vertex="1" parent="1"><mxGeometry x="1140" y="250" width="190" height="190" as="geometry"/></mxCell>
+        <mxCell id="bPreview" value="照片列&#xa;&#xa;[照片 1]　✓&#xa;[照片 2]　✓&#xa;＋ 再拍一張&#xa;&#xa;[刪除]　[完成]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d6b656;align=center;verticalAlign=middle;fontSize=14;" vertex="1" parent="1"><mxGeometry x="1140" y="480" width="190" height="205" as="geometry"/></mxCell>
+
+        <mxCell id="zone3" value="C｜樣本任務建立中：樣本製作者建立拍攝項目" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=17;align=left;spacingLeft=14;" vertex="1" parent="1"><mxGeometry x="1410" y="105" width="620" height="48" as="geometry"/></mxCell>
+        <mxCell id="cPhone" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="1440" y="175" width="360" height="760" as="geometry"/></mxCell>
+        <mxCell id="cHead" value="×　建立樣本照片　　 2／3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#555555;fontColor=#ffffff;fontStyle=1;fontSize=15;" vertex="1" parent="1"><mxGeometry x="1455" y="210" width="330" height="50" as="geometry"/></mxCell>
+        <mxCell id="cCamera" value="1 : 1 即時取景框&#xa;輸出 1200 × 1200 px&#xa;&#xa;拍攝將來提供所有業務&#xa;比照執行的核准樣本" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#9673a6;fontColor=#ffffff;fontSize=15;verticalAlign=middle;" vertex="1" parent="1"><mxGeometry x="1455" y="260" width="330" height="330" as="geometry"/></mxCell>
+        <mxCell id="cDesc" value="樣本項目名稱（必填）&#xa;[ 製冰盒照片　　　　　　　 ]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#9673a6;fontColor=#ffffff;align=left;verticalAlign=top;spacing=10;fontSize=13;" vertex="1" parent="1"><mxGeometry x="1475" y="630" width="290" height="70" as="geometry"/></mxCell>
+        <mxCell id="cHint" value="拍攝提示（畫面說明）&#xa;[ 須包含完整產品與價卡　　　 ]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#777777;fontColor=#ffffff;align=left;verticalAlign=top;spacing=10;fontSize=13;" vertex="1" parent="1"><mxGeometry x="1475" y="710" width="290" height="70" as="geometry"/></mxCell>
+        <mxCell id="cShutter" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dddddd;strokeWidth=6;" vertex="1" parent="1"><mxGeometry x="1580" y="805" width="80" height="80" as="geometry"/></mxCell>
+        <mxCell id="cSpec" value="建立樣本照片時&#xa;SampleTaskPhotoId = NULL&#xa;PhotoDescription 必填&#xa;SortOrder 必填&#xa;&#xa;完成後仍為「待核准」，尚不可供一般業務執行。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf7fb;strokeColor=#9673a6;align=left;verticalAlign=top;spacing=12;fontSize=13;" vertex="1" parent="1"><mxGeometry x="1825" y="250" width="190" height="210" as="geometry"/></mxCell>
+        <mxCell id="cPreview" value="拍照後&#xa;&#xa;[重拍]&#xa;[使用並設定項目]&#xa;&#xa;下一步：排序與送審" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;align=center;verticalAlign=middle;fontSize=14;" vertex="1" parent="1"><mxGeometry x="1825" y="500" width="190" height="180" as="geometry"/></mxCell>
+
+        <mxCell id="ruleTitle" value="拍照共通設計" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;fontSize=16;align=left;spacingLeft=12;" vertex="1" parent="1"><mxGeometry x="40" y="985" width="1990" height="42" as="geometry"/></mxCell>
+        <mxCell id="ruleBody" value="• 所有任務照片統一為 1:1，儲存解析度 1200 × 1200 px；來源為直式或橫式皆在預覽階段裁切。　• 拍照後先預覽，不立即上傳正式資料。&#xa;• 支援重拍、刪除、裝置相簿選取及上傳失敗重試。　• CapturedAt 使用照片拍攝時間；UploadedAt 使用伺服器接收時間。&#xa;• 圖片上傳前顯示壓縮進度；離開未完成畫面時提示。　• 一般照片不可修改由樣本帶入的 PhotoDescription 與 SortOrder。" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1"><mxGeometry x="40" y="1027" width="1990" height="105" as="geometry"/></mxCell>
+
+        <mxCell id="aPreviewTitle" value="07-A｜有樣本任務－拍照後預覽 UI（完整畫面）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=18;align=left;spacingLeft=14;" vertex="1" parent="1"><mxGeometry x="40" y="1180" width="1990" height="48" as="geometry"/></mxCell>
+        <mxCell id="apPhone" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="90" y="1260" width="390" height="760" as="geometry"/></mxCell>
+        <mxCell id="apHead" value="‹　預覽照片　　　　　1／3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#555555;fontColor=#ffffff;fontStyle=1;fontSize=16;" vertex="1" parent="1"><mxGeometry x="105" y="1300" width="360" height="50" as="geometry"/></mxCell>
+        <mxCell id="apName" value="① 跳跳牌照片" style="text;html=1;fontColor=#ffffff;fontStyle=1;fontSize=16;align=left;" vertex="1" parent="1"><mxGeometry x="120" y="1370" width="250" height="30" as="geometry"/></mxCell>
+        <mxCell id="apSquare" value="1 : 1 照片預覽／裁切區&#xa;1200 × 1200 px&#xa;&#xa;↔ 單指拖曳調整位置&#xa;⇱ 雙指縮放調整大小&#xa;&#xa;正方形以外的來源影像不會輸出" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#444444;strokeColor=#82b366;strokeWidth=3;fontColor=#ffffff;fontSize=15;verticalAlign=middle;" vertex="1" parent="1"><mxGeometry x="120" y="1410" width="330" height="330" as="geometry"/></mxCell>
+        <mxCell id="apSafe" value="─ 建議安全範圍 ─" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#d5e8d4;dashed=1;fontColor=#d5e8d4;fontSize=12;" vertex="1" parent="1"><mxGeometry x="155" y="1445" width="260" height="260" as="geometry"/></mxCell>
+        <mxCell id="apTools" value="↶ 旋轉　　⊞ 重設裁切　　☀ 亮度" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#777777;fontColor=#ffffff;fontSize=13;" vertex="1" parent="1"><mxGeometry x="120" y="1760" width="330" height="42" as="geometry"/></mxCell>
+        <mxCell id="apCompare" value="查看樣本對照" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#82b366;fontColor=#ffffff;fontSize=14;" vertex="1" parent="1"><mxGeometry x="120" y="1820" width="330" height="45" as="geometry"/></mxCell>
+        <mxCell id="apRetake" value="重拍" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#ffffff;fontColor=#ffffff;fontSize=15;" vertex="1" parent="1"><mxGeometry x="120" y="1890" width="145" height="55" as="geometry"/></mxCell>
+        <mxCell id="apUse" value="使用照片" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontColor=#000000;fontStyle=1;fontSize=15;" vertex="1" parent="1"><mxGeometry x="305" y="1890" width="145" height="55" as="geometry"/></mxCell>
+
+        <mxCell id="comparePhone" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="560" y="1260" width="430" height="760" as="geometry"/></mxCell>
+        <mxCell id="compareHead" value="‹　樣本對照　　　　　關閉" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;" vertex="1" parent="1"><mxGeometry x="575" y="1300" width="400" height="50" as="geometry"/></mxCell>
+        <mxCell id="compareSample" value="核准樣本&#xa;&#xa;[ 1:1 樣本照片 ]&#xa;&#xa;1200 × 1200" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;" vertex="1" parent="1"><mxGeometry x="595" y="1380" width="170" height="260" as="geometry"/></mxCell>
+        <mxCell id="compareCurrent" value="本次照片&#xa;&#xa;[ 1:1 裁切結果 ]&#xa;&#xa;1200 × 1200" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=15;" vertex="1" parent="1"><mxGeometry x="785" y="1380" width="170" height="260" as="geometry"/></mxCell>
+        <mxCell id="compareNote" value="拍攝要求&#xa;• 跳跳牌需完整入鏡&#xa;• 正面拍攝，避免過度傾斜&#xa;• 文字與產品不可被裁掉" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1"><mxGeometry x="595" y="1670" width="360" height="125" as="geometry"/></mxCell>
+        <mxCell id="compareBack" value="返回調整照片" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=15;" vertex="1" parent="1"><mxGeometry x="595" y="1830" width="170" height="55" as="geometry"/></mxCell>
+        <mxCell id="compareUse" value="確認使用照片" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=15;" vertex="1" parent="1"><mxGeometry x="785" y="1830" width="170" height="55" as="geometry"/></mxCell>
+
+        <mxCell id="apFlowTitle" value="預覽處理流程" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=16;align=left;spacingLeft=12;" vertex="1" parent="1"><mxGeometry x="1060" y="1260" width="930" height="45" as="geometry"/></mxCell>
+        <mxCell id="apF1" value="取得相機原圖&#xa;直式／橫式皆可" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1090" y="1350" width="170" height="70" as="geometry"/></mxCell>
+        <mxCell id="apF2" value="顯示 1:1&#xa;正方形裁切框" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1320" y="1350" width="170" height="70" as="geometry"/></mxCell>
+        <mxCell id="apF3" value="使用者移動／縮放&#xa;並與樣本比較" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1550" y="1350" width="180" height="70" as="geometry"/></mxCell>
+        <mxCell id="apF4" value="輸出並壓縮為&#xa;1200 × 1200 px" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1790" y="1350" width="170" height="70" as="geometry"/></mxCell>
+        <mxCell id="apE1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" edge="1" parent="1" source="apF1" target="apF2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="apE2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" edge="1" parent="1" source="apF2" target="apF3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="apE3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" edge="1" parent="1" source="apF3" target="apF4"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="apRules" value="預覽 UI 規則&#xa;&#xa;1. 預覽區必須是真正的正方形，不只是用遮罩模擬。&#xa;2. 來源照片不足 1200 × 1200 時禁止放大偽造解析度，提示重新拍攝。&#xa;3. 使用者確認前不寫入 VisitTaskPhoto。&#xa;4. 確認後產生 1200 × 1200 輸出，保留正確 EXIF 旋轉方向後再移除不必要的 EXIF。&#xa;5. 本次一般照片的 SampleTaskPhotoId 指向目前正在比照的核准樣本照片。&#xa;6. 報告畫面直接使用相同正方形縮圖排列，不再二次裁切。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;align=left;verticalAlign=top;spacing=14;fontSize=14;" vertex="1" parent="1"><mxGeometry x="1090" y="1490" width="870" height="285" as="geometry"/></mxCell>
+        <mxCell id="apDecision" value="建議：拍攝當下即顯示 1:1 取景框，但仍保留少量原圖範圍供拍後微調；正式上傳與報告只保存／使用確認後的 1200 × 1200 正方形版本。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f2fff2;strokeColor=#82b366;fontStyle=1;align=left;verticalAlign=top;spacing=14;fontSize=14;" vertex="1" parent="1"><mxGeometry x="1090" y="1820" width="870" height="90" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="ui-sample-build" name="08_樣本任務_建立與核准">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2100" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/><mxCell id="1" parent="0"/>
+        <mxCell id="title" value="樣本任務｜建立中、送審與核准 UI" style="text;html=1;fontSize=24;fontStyle=1;align=left;" vertex="1" parent="1"><mxGeometry x="40" y="20" width="1000" height="40" as="geometry"/></mxCell>
+        <mxCell id="flow1" value="樣本製作中" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="80" y="85" width="180" height="55" as="geometry"/></mxCell>
+        <mxCell id="flow2" value="樣本已送出／待核准" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="350" y="85" width="210" height="55" as="geometry"/></mxCell>
+        <mxCell id="flow3" value="樣本已核准" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="650" y="85" width="180" height="55" as="geometry"/></mxCell>
+        <mxCell id="flow4" value="一般業務可執行" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="920" y="85" width="190" height="55" as="geometry"/></mxCell>
+        <mxCell id="fe1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" edge="1" parent="1" source="flow1" target="flow2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="fe2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" edge="1" parent="1" source="flow2" target="flow3"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="fe3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;" edge="1" parent="1" source="flow3" target="flow4"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <mxCell id="p1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="40" y="180" width="420" height="740" as="geometry"/></mxCell>
+        <mxCell id="p1h" value="‹　樣本任務建立中" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=17;align=left;spacingLeft=15;" vertex="1" parent="1"><mxGeometry x="55" y="220" width="390" height="50" as="geometry"/></mxCell>
+        <mxCell id="p1task" value="新機上市布置&#xa;樣本執行經銷商：台北大同電器&#xa;樣本製作者：王小明" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1"><mxGeometry x="75" y="295" width="350" height="105" as="geometry"/></mxCell>
+        <mxCell id="p1item1" value="☷　① 跳跳牌照片　✓&#xa;　　[樣本縮圖]　[查看] [重拍]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1"><mxGeometry x="75" y="425" width="350" height="90" as="geometry"/></mxCell>
+        <mxCell id="p1item2" value="☷　② 製冰盒照片　✓&#xa;　　[樣本縮圖]　[查看] [重拍]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1"><mxGeometry x="75" y="530" width="350" height="90" as="geometry"/></mxCell>
+        <mxCell id="p1item3" value="☷　③ 鏡面烤漆照片　未完成&#xa;　　[拍攝樣本照片]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1"><mxGeometry x="75" y="635" width="350" height="90" as="geometry"/></mxCell>
+        <mxCell id="p1add" value="＋ 新增拍照項目" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;fontSize=14;" vertex="1" parent="1"><mxGeometry x="75" y="745" width="350" height="48" as="geometry"/></mxCell>
+        <mxCell id="p1submit" value="尚有 1 項未完成｜送出樣本審核" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontColor=#888888;fontStyle=1;fontSize=14;" vertex="1" parent="1"><mxGeometry x="75" y="820" width="350" height="58" as="geometry"/></mxCell>
+
+        <mxCell id="p2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="520" y="180" width="420" height="740" as="geometry"/></mxCell>
+        <mxCell id="p2h" value="‹　編輯樣本拍照項目" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=17;align=left;spacingLeft=15;" vertex="1" parent="1"><mxGeometry x="535" y="220" width="390" height="50" as="geometry"/></mxCell>
+        <mxCell id="p2photo" value="[ 1:1 樣本照片 ]&#xa;1200 × 1200 px&#xa;&#xa;點擊可重新拍攝或更換" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#9673a6;fontColor=#ffffff;fontSize=16;" vertex="1" parent="1"><mxGeometry x="590" y="295" width="280" height="280" as="geometry"/></mxCell>
+        <mxCell id="p2desc" value="照片項目名稱（PhotoDescription）＊&#xa;[ 製冰盒照片　　　　　　　　　　　 ]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1"><mxGeometry x="555" y="595" width="350" height="80" as="geometry"/></mxCell>
+        <mxCell id="p2order" value="顯示順序（SortOrder）＊&#xa;[ 2 ]　或回清單拖曳排序" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1"><mxGeometry x="555" y="690" width="350" height="80" as="geometry"/></mxCell>
+        <mxCell id="p2save" value="儲存拍照項目" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=16;" vertex="1" parent="1"><mxGeometry x="555" y="805" width="350" height="58" as="geometry"/></mxCell>
+
+        <mxCell id="p3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="1000" y="180" width="420" height="740" as="geometry"/></mxCell>
+        <mxCell id="p3h" value="‹　樣本審核" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=17;align=left;spacingLeft=15;" vertex="1" parent="1"><mxGeometry x="1015" y="220" width="390" height="50" as="geometry"/></mxCell>
+        <mxCell id="p3status" value="樣本已送出｜等待核准" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=14;" vertex="1" parent="1"><mxGeometry x="1035" y="295" width="350" height="45" as="geometry"/></mxCell>
+        <mxCell id="p3item1" value="① 跳跳牌照片&#xa;[樣本大圖]　說明與順序 ✓" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1"><mxGeometry x="1035" y="365" width="350" height="100" as="geometry"/></mxCell>
+        <mxCell id="p3item2" value="② 製冰盒照片&#xa;[樣本大圖]　說明與順序 ✓" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1"><mxGeometry x="1035" y="480" width="350" height="100" as="geometry"/></mxCell>
+        <mxCell id="p3item3" value="③ 鏡面烤漆照片&#xa;[樣本大圖]　說明與順序 ✓" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1"><mxGeometry x="1035" y="595" width="350" height="100" as="geometry"/></mxCell>
+        <mxCell id="p3reject" value="退回修改" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=15;" vertex="1" parent="1"><mxGeometry x="1035" y="750" width="165" height="55" as="geometry"/></mxCell>
+        <mxCell id="p3approve" value="核准樣本" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=15;" vertex="1" parent="1"><mxGeometry x="1220" y="750" width="165" height="55" as="geometry"/></mxCell>
+
+        <mxCell id="p4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1"><mxGeometry x="1480" y="180" width="520" height="740" as="geometry"/></mxCell>
+        <mxCell id="p4h" value="核准後的樣本關係" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=17;" vertex="1" parent="1"><mxGeometry x="1495" y="220" width="490" height="50" as="geometry"/></mxCell>
+        <mxCell id="sampleExec" value="VisitTask.SampleTaskExecutionId&#xa;→ 唯一樣本 VisitTaskExecution" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=14;" vertex="1" parent="1"><mxGeometry x="1545" y="310" width="390" height="80" as="geometry"/></mxCell>
+        <mxCell id="samplePhoto" value="樣本 VisitTaskPhoto&#xa;TaskPhotoId = 501&#xa;SampleTaskPhotoId = NULL&#xa;PhotoDescription = 跳跳牌照片&#xa;SortOrder = 1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1"><mxGeometry x="1525" y="445" width="200" height="170" as="geometry"/></mxCell>
+        <mxCell id="generalPhoto" value="一般業務 VisitTaskPhoto&#xa;TaskPhotoId = 8901&#xa;SampleTaskPhotoId = 501&#xa;&#xa;說明與順序由樣本 501 顯示，不可自行修改。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1"><mxGeometry x="1760" y="445" width="200" height="170" as="geometry"/></mxCell>
+        <mxCell id="rel" value="逐張對應" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;fontStyle=1;" edge="1" parent="1" source="samplePhoto" target="generalPhoto"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="approved" value="SampleApprovedAt 有值後&#xa;其他業務才可開始一般任務執行。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" vertex="1" parent="1"><mxGeometry x="1570" y="680" width="340" height="80" as="geometry"/></mxCell>
+
+        <mxCell id="decision" value="待補規格：目前資料規格描述「退回修改」所需的退回時間、退回者、退回原因與再次送審歷程欄位尚未定義；UI 先保留此操作供討論。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#d79b00;align=left;verticalAlign=top;spacing=14;fontSize=14;" vertex="1" parent="1"><mxGeometry x="40" y="970" width="1960" height="75" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
