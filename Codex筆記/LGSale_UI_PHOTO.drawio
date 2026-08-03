@@ -1,4 +1,4 @@
-<mxfile host="Electron" agent="Codex" compressed="false" pages="6">
+<mxfile host="Electron" agent="Codex" compressed="false" pages="5">
   <diagram id="photo-flow" name="00_任務照片流程總圖">
     <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1900" pageHeight="1050" math="0" shadow="0">
       <root>
@@ -86,7 +86,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="execution-created" name="01_建立VisitTaskExecution">
-    <mxGraphModel dx="1645" dy="849" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1750" pageHeight="1050" math="0" shadow="0">
+    <mxGraphModel dx="1732" dy="894" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1750" pageHeight="1050" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -135,34 +135,31 @@
         <mxCell id="p2start" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=16;" value="開始執行任務" vertex="1">
           <mxGeometry height="58" width="300" x="980" y="610" as="geometry" />
         </mxCell>
-        <mxCell id="p2cant" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;fontSize=14;" value="未拍照／填寫原因" vertex="1">
-          <mxGeometry height="48" width="300" x="980" y="685" as="geometry" />
-        </mxCell>
         <mxCell id="phone3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
           <mxGeometry height="760" width="360" x="1360" y="100" as="geometry" />
         </mxCell>
         <mxCell id="p3status" parent="1" style="text;html=1;fontSize=11;align=center;" value="9:41　　　　　　　　　●●●" vertex="1">
           <mxGeometry height="25" width="330" x="1375" y="110" as="geometry" />
         </mxCell>
-        <mxCell id="p3head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" value="‹　未拍照原因" vertex="1">
+        <mxCell id="p3head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" value="‹　不拍照完成" vertex="1">
           <mxGeometry height="50" width="330" x="1375" y="140" as="geometry" />
         </mxCell>
         <mxCell id="p3task" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" value="新機上市布置&#xa;台北大同電器&#xa;期限：2026/08/02" vertex="1">
           <mxGeometry height="95" width="300" x="1390" y="215" as="geometry" />
         </mxCell>
-        <mxCell id="p3notice" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="本次未提供照片&#xa;請填寫未拍照原因；送出後任務仍視為執行完成。" vertex="1">
+        <mxCell id="p3notice" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="你選定不拍照完成&#xa;請在下方方格說明無法執行這個拍照任務的原因。" vertex="1">
           <mxGeometry height="85" width="300" x="1390" y="330" as="geometry" />
         </mxCell>
-        <mxCell id="p3reason" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="執行說明（ExecutionNote）＊&#xa;[ 經銷商今日臨時休店，無法進場布置。　　　　]" vertex="1">
+        <mxCell id="p3reason" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="無法執行原因（ExecutionNote）＊&#xa;[ 經銷商目前沒有新機可以布置。　　　　　　　]" vertex="1">
           <mxGeometry height="200" width="300" x="1390" y="440" as="geometry" />
         </mxCell>
-        <mxCell id="p3confirm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f2fff2;strokeColor=#82b366;fontSize=12;" value="照片可為 0 張；送出後正常完成任務並寫入 SubmittedAt。" vertex="1">
+        <mxCell id="p3confirm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#d6b656;fontSize=12;" value="原因為必填；確認後將以 0 張照片完成任務。" vertex="1">
           <mxGeometry height="48" width="300" x="1390" y="665" as="geometry" />
         </mxCell>
         <mxCell id="p3cancel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=14;" value="返回任務" vertex="1">
           <mxGeometry height="52" width="145" x="1390" y="745" as="geometry" />
         </mxCell>
-        <mxCell id="p3submit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" value="確認完成" vertex="1">
+        <mxCell id="p3submit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d79b00;fontStyle=1;fontSize=14;" value="確認不拍照完成" vertex="1">
           <mxGeometry height="52" width="145" x="1545" y="745" as="geometry" />
         </mxCell>
         <mxCell id="arrow" edge="1" parent="1" source="server" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;strokeWidth=2;" target="phone1">
@@ -172,7 +169,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="with-sample" name="02_有樣本_拍照與預覽">
-    <mxGraphModel dx="2192" dy="1092" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="2000" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -188,7 +185,7 @@
         <mxCell id="p1adddisabled" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#cccccc;fontColor=#999999;fontStyle=1;fontSize=14;" value="＋ 新增照片" vertex="1">
           <mxGeometry height="48" width="145" x="70" y="792" as="geometry" />
         </mxCell>
-        <mxCell id="p1complete" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=15;" value="完成任務" vertex="1">
+        <mxCell id="p1complete" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#cccccc;fontColor=#999999;fontStyle=1;fontSize=14;" value="照片上傳中" vertex="1">
           <mxGeometry height="48" width="145" x="225" y="792" as="geometry" />
         </mxCell>
         <mxCell id="phone2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
@@ -251,6 +248,9 @@
         <mxCell id="p1item" parent="1" style="text;html=1;fontStyle=1;fontSize=14;align=left;container=0;" value="跳跳牌照片" vertex="1">
           <mxGeometry height="22" width="300" x="70" y="195" as="geometry" />
         </mxCell>
+        <mxCell id="p1uploadstatus1" parent="1" style="text;html=1;fontStyle=1;fontColor=#4f8a4c;fontSize=12;align=right;container=0;" value="✓ 已上傳" vertex="1">
+          <mxGeometry height="22" width="115" x="255" y="195" as="geometry" />
+        </mxCell>
         <mxCell id="p1sample" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;container=0;" value="[1:1 本次照片]&lt;br&gt;點擊放大" vertex="1">
           <mxGeometry height="150" width="150" x="70" y="225" as="geometry" />
         </mxCell>
@@ -262,6 +262,9 @@
         </mxCell>
         <mxCell id="p1item2" parent="1" style="text;html=1;fontStyle=1;fontSize=14;align=left;container=0;" value="製冰盒照片" vertex="1">
           <mxGeometry height="22" width="300" x="70" y="394" as="geometry" />
+        </mxCell>
+        <mxCell id="p1uploadstatus2" parent="1" style="text;html=1;fontStyle=1;fontColor=#3d73a8;fontSize=12;align=right;container=0;" value="上傳中 68%" vertex="1">
+          <mxGeometry height="22" width="115" x="255" y="394" as="geometry" />
         </mxCell>
         <mxCell id="p1current2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;container=0;" value="[1:1 本次照片]&lt;br&gt;點擊放大" vertex="1">
           <mxGeometry height="150" width="150" x="70" y="424" as="geometry" />
@@ -275,6 +278,9 @@
         <mxCell id="p1item3" parent="1" style="text;html=1;fontStyle=1;fontSize=14;align=left;container=0;" value="鏡面烤漆照片" vertex="1">
           <mxGeometry height="22" width="300" x="70" y="593" as="geometry" />
         </mxCell>
+        <mxCell id="p1uploadstatus3" parent="1" style="text;html=1;fontStyle=1;fontColor=#999999;fontSize=12;align=right;container=0;" value="等待上傳" vertex="1">
+          <mxGeometry height="22" width="115" x="255" y="593" as="geometry" />
+        </mxCell>
         <mxCell id="p1current3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;container=0;" value="[1:1 本次照片]&lt;br&gt;點擊放大" vertex="1">
           <mxGeometry height="150" width="150" x="70" y="623" as="geometry" />
         </mxCell>
@@ -287,248 +293,133 @@
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram id="no-sample" name="03_無樣本_一般拍照">
-    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1650" pageHeight="1050" math="0" shadow="0">
+  <diagram id="igsQDzzGjfRdAtibjEYK" name="03_無樣本_一般拍照">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="2150" pageHeight="1050" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="title" parent="1" style="text;html=1;fontSize=24;fontStyle=1;align=left;" value="無樣本任務｜一般拍照流程" vertex="1">
-          <mxGeometry height="40" width="900" x="40" y="20" as="geometry" />
+        <mxCell id="title" parent="1" style="text;html=1;fontSize=24;fontStyle=1;align=left;" value="無既有樣本｜新增任務照片、說明、預覽與裁切" vertex="1">
+          <mxGeometry height="40" width="1300" x="40" y="20" as="geometry" />
         </mxCell>
         <mxCell id="phone1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
           <mxGeometry height="760" width="360" x="40" y="100" as="geometry" />
         </mxCell>
-        <mxCell id="p1head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" value="‹　展示區檢查" vertex="1">
+        <mxCell id="p1head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=15;" value="‹　新機上市布置（0/0）" vertex="1">
           <mxGeometry height="50" width="330" x="55" y="140" as="geometry" />
         </mxCell>
-        <mxCell id="p1info" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=14;fontSize=14;" value="無樣本模式&#xa;&#xa;任務要求：拍攝展示完成後的全貌。&#xa;可連續拍攝多張照片。" vertex="1">
-          <mxGeometry height="135" width="300" x="70" y="220" as="geometry" />
+        <mxCell id="p1add" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" value="＋ 新增圖片" vertex="1">
+          <mxGeometry height="50" width="145" x="70" y="790" as="geometry" />
         </mxCell>
-        <mxCell id="p1photos" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=14;" value="目前照片（0）&#xa;&#xa;尚未拍攝照片" vertex="1">
-          <mxGeometry height="110" width="300" x="70" y="385" as="geometry" />
-        </mxCell>
-        <mxCell id="p1capture" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=16;" value="開啟相機" vertex="1">
-          <mxGeometry height="58" width="300" x="70" y="550" as="geometry" />
-        </mxCell>
-        <mxCell id="p1album" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=14;" value="從相簿選擇" vertex="1">
-          <mxGeometry height="48" width="300" x="70" y="625" as="geometry" />
-        </mxCell>
-        <mxCell id="phone2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
-          <mxGeometry height="760" width="360" x="450" y="100" as="geometry" />
-        </mxCell>
-        <mxCell id="p2head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#555555;fontColor=#ffffff;fontStyle=1;fontSize=15;" value="×　拍攝任務照片　　　 完成" vertex="1">
-          <mxGeometry height="50" width="330" x="465" y="140" as="geometry" />
-        </mxCell>
-        <mxCell id="p2square" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#777777;strokeWidth=3;fontColor=#ffffff;fontSize=15;" value="1 : 1 即時取景框&#xa;&#xa;[ 相機即時畫面 ]&#xa;&#xa;無樣本縮圖&#xa;顯示水平線與九宮格" vertex="1">
-          <mxGeometry height="330" width="330" x="465" y="210" as="geometry" />
-        </mxCell>
-        <mxCell id="p2hint" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#777777;fontColor=#ffffff;fontSize=12;" value="快門後自動裁切為 1:1；必要時再微調" vertex="1">
-          <mxGeometry height="48" width="290" x="485" y="565" as="geometry" />
-        </mxCell>
-        <mxCell id="p2count" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#444444;strokeColor=#aaaaaa;fontColor=#ffffff;fontSize=18;" value="▧ 2" vertex="1">
-          <mxGeometry height="55" width="55" x="485" y="690" as="geometry" />
-        </mxCell>
-        <mxCell id="p2shutter" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dddddd;strokeWidth=6;" value="" vertex="1">
-          <mxGeometry height="85" width="85" x="590" y="675" as="geometry" />
-        </mxCell>
-        <mxCell id="p2flash" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#444444;strokeColor=#aaaaaa;fontColor=#ffffff;fontSize=22;" value="⚡" vertex="1">
-          <mxGeometry height="55" width="55" x="720" y="690" as="geometry" />
-        </mxCell>
-        <mxCell id="phone3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
-          <mxGeometry height="760" width="360" x="860" y="100" as="geometry" />
-        </mxCell>
-        <mxCell id="p3head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" value="‹　任務照片（2）" vertex="1">
-          <mxGeometry height="50" width="330" x="875" y="140" as="geometry" />
-        </mxCell>
-        <mxCell id="p3photo1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" value="[1:1 照片 1]&#xa;1200 × 1200&#xa;[重拍] [刪除]" vertex="1">
-          <mxGeometry height="240" width="240" x="920" y="200" as="geometry" />
-        </mxCell>
-        <mxCell id="p3photo2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" value="[1:1 照片 2]&#xa;1200 × 1200&#xa;[重拍] [刪除]" vertex="1">
-          <mxGeometry height="240" width="240" x="920" y="450" as="geometry" />
-        </mxCell>
-        <mxCell id="p3add" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=14;" value="＋ 再拍一張" vertex="1">
-          <mxGeometry height="52" width="155" x="880" y="785" as="geometry" />
-        </mxCell>
-        <mxCell id="p3note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="執行說明（正式送出必填）&#xa;[　　　　　　　　　　　　　]" vertex="1">
-          <mxGeometry height="65" width="320" x="880" y="705" as="geometry" />
-        </mxCell>
-        <mxCell id="p3submit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=16;" value="確認送出" vertex="1">
-          <mxGeometry height="52" width="155" x="1045" y="785" as="geometry" />
-        </mxCell>
-        <mxCell id="rule" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=14;fontSize=14;" value="無樣本模式：VisitTaskPhoto.SampleTaskPhotoId = NULL。是否允許無樣本任務、最低／最高照片數量，需由正式任務規則決定。" vertex="1">
-          <mxGeometry height="125" width="300" x="1280" y="150" as="geometry" />
-        </mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
-  <diagram id="sample-building" name="04_樣本任務_建立中">
-    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2000" pageHeight="1100" math="0" shadow="0">
-      <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-        <mxCell id="title" value="樣本任務建立中｜建立拍照項目、樣本照片與順序" style="text;html=1;fontSize=24;fontStyle=1;align=left;" vertex="1" parent="1">
-          <mxGeometry x="40" y="20" width="1100" height="40" as="geometry" />
-        </mxCell>
-        <mxCell id="phone1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
-          <mxGeometry x="40" y="100" width="360" height="760" as="geometry" />
-        </mxCell>
-        <mxCell id="p1head" value="‹　樣本任務建立中" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" vertex="1" parent="1">
-          <mxGeometry x="55" y="140" width="330" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="p1info" value="新機上市布置&#xa;樣本執行：台北大同電器" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=14;" vertex="1" parent="1">
-          <mxGeometry x="70" y="215" width="300" height="80" as="geometry" />
-        </mxCell>
-        <mxCell id="p1i1" value="☷ ① 跳跳牌照片　✓&#xa;　[樣本縮圖]　[重拍]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacing=10;fontSize=13;" vertex="1" parent="1">
-          <mxGeometry x="70" y="320" width="300" height="85" as="geometry" />
-        </mxCell>
-        <mxCell id="p1i2" value="☷ ② 製冰盒照片　✓&#xa;　[樣本縮圖]　[重拍]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacing=10;fontSize=13;" vertex="1" parent="1">
-          <mxGeometry x="70" y="420" width="300" height="85" as="geometry" />
-        </mxCell>
-        <mxCell id="p1i3" value="☷ ③ 鏡面烤漆照片　未完成&#xa;　[拍攝樣本]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=10;fontSize=13;" vertex="1" parent="1">
-          <mxGeometry x="70" y="520" width="300" height="85" as="geometry" />
-        </mxCell>
-        <mxCell id="p1add" value="＋ 新增拍照項目" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#9673a6;fontSize=14;" vertex="1" parent="1">
-          <mxGeometry x="70" y="625" width="300" height="48" as="geometry" />
-        </mxCell>
-        <mxCell id="p1submit" value="尚有 1 項未完成｜送出審核" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#999999;fontColor=#888888;fontStyle=1;fontSize=13;" vertex="1" parent="1">
-          <mxGeometry x="70" y="710" width="300" height="58" as="geometry" />
-        </mxCell>
-        <mxCell id="phone2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
-          <mxGeometry x="450" y="100" width="360" height="760" as="geometry" />
-        </mxCell>
-        <mxCell id="p2head" value="×　建立樣本照片　　　 3／3" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#555555;fontColor=#ffffff;fontStyle=1;fontSize=15;" vertex="1" parent="1">
-          <mxGeometry x="465" y="140" width="330" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="p2square" value="1 : 1 即時取景框&#xa;&#xa;樣本也必須使用相同規格&#xa;&#xa;輸出 1200 × 1200 px" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#9673a6;strokeWidth=3;fontColor=#ffffff;fontSize=15;" vertex="1" parent="1">
-          <mxGeometry x="465" y="210" width="330" height="330" as="geometry" />
-        </mxCell>
-        <mxCell id="p2desc" value="照片項目名稱＊&#xa;[ 鏡面烤漆照片　　　　　　 ]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#9673a6;fontColor=#ffffff;align=left;verticalAlign=top;spacing=10;fontSize=13;" vertex="1" parent="1">
-          <mxGeometry x="485" y="565" width="290" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="p2shutter" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dddddd;strokeWidth=6;" vertex="1" parent="1">
-          <mxGeometry x="590" y="680" width="85" height="85" as="geometry" />
-        </mxCell>
-        <mxCell id="phone3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
-          <mxGeometry x="860" y="100" width="360" height="760" as="geometry" />
-        </mxCell>
-        <mxCell id="p3head" value="‹　設定樣本拍照項目" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" vertex="1" parent="1">
-          <mxGeometry x="875" y="140" width="330" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="p3photo" value="[ 1:1 樣本照片 ]&#xa;1200 × 1200" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#9673a6;fontColor=#ffffff;fontSize=15;" vertex="1" parent="1">
-          <mxGeometry x="910" y="220" width="260" height="260" as="geometry" />
-        </mxCell>
-        <mxCell id="p3desc" value="PhotoDescription＊&#xa;[ 鏡面烤漆照片　　　　　 ]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=10;fontSize=13;" vertex="1" parent="1">
-          <mxGeometry x="890" y="510" width="300" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="p3order" value="SortOrder＊&#xa;[ 3 ]　可回清單拖曳排序" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=10;fontSize=13;" vertex="1" parent="1">
-          <mxGeometry x="890" y="600" width="300" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="p3retake" value="重拍" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=14;" vertex="1" parent="1">
-          <mxGeometry x="890" y="705" width="140" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="p3save" value="儲存項目" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;fontSize=14;" vertex="1" parent="1">
-          <mxGeometry x="1050" y="705" width="140" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="phone4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" vertex="1" parent="1">
-          <mxGeometry x="1270" y="100" width="360" height="760" as="geometry" />
-        </mxCell>
-        <mxCell id="p4head" value="‹　樣本審核" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" vertex="1" parent="1">
-          <mxGeometry x="1285" y="140" width="330" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="p4status" value="樣本已送出｜等待核准" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontStyle=1;fontSize=13;" vertex="1" parent="1">
-          <mxGeometry x="1300" y="215" width="300" height="42" as="geometry" />
-        </mxCell>
-        <mxCell id="p4photos" value="① [樣本] 跳跳牌照片&#xa;② [樣本] 製冰盒照片&#xa;③ [樣本] 鏡面烤漆照片&#xa;&#xa;每張均為 1200 × 1200" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=14;fontSize=14;" vertex="1" parent="1">
-          <mxGeometry x="1300" y="285" width="300" height="190" as="geometry" />
-        </mxCell>
-        <mxCell id="p4reject" value="退回修改" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#b85450;fontSize=14;" vertex="1" parent="1">
-          <mxGeometry x="1300" y="690" width="140" height="55" as="geometry" />
-        </mxCell>
-        <mxCell id="p4approve" value="核准樣本" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" vertex="1" parent="1">
-          <mxGeometry x="1460" y="690" width="140" height="55" as="geometry" />
-        </mxCell>
-        <mxCell id="rule" value="樣本照片：SampleTaskPhotoId = NULL、PhotoDescription 必填、SortOrder 必填。SampleApprovedAt 有值後，一般業務才可依樣本執行。" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#faf7fb;strokeColor=#9673a6;align=left;verticalAlign=top;spacing=14;fontSize=14;" vertex="1" parent="1">
-          <mxGeometry x="40" y="910" width="1590" height="70" as="geometry" />
-        </mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
-  <diagram id="upload-submit" name="05_上傳完成與送出">
-    <mxGraphModel dx="1653" dy="849" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1750" pageHeight="1050" math="0" shadow="0">
-      <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-        <mxCell id="title" parent="1" style="text;html=1;fontSize=24;fontStyle=1;align=left;" value="照片上傳、失敗重試與任務正式送出" vertex="1">
-          <mxGeometry height="40" width="1000" x="40" y="20" as="geometry" />
-        </mxCell>
-        <mxCell id="phone1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
-          <mxGeometry height="760" width="360" x="40" y="100" as="geometry" />
-        </mxCell>
-        <mxCell id="p1head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" value="‹　任務照片上傳中" vertex="1">
-          <mxGeometry height="50" width="330" x="55" y="140" as="geometry" />
-        </mxCell>
-        <mxCell id="p1photo1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="① 跳跳牌照片　✓ 已上傳&#xa;[1:1 縮圖]　1200 × 1200" vertex="1">
-          <mxGeometry height="90" width="300" x="70" y="220" as="geometry" />
-        </mxCell>
-        <mxCell id="p1photo2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="② 製冰盒照片　上傳 68%&#xa;[███████░░░]" vertex="1">
-          <mxGeometry height="90" width="300" x="70" y="330" as="geometry" />
-        </mxCell>
-        <mxCell id="p1photo3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="③ 鏡面烤漆照片　等待上傳" vertex="1">
-          <mxGeometry height="70" width="300" x="70" y="440" as="geometry" />
-        </mxCell>
-        <mxCell id="p1hint" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" value="請保持網路連線，完成前不要關閉此頁。" vertex="1">
-          <mxGeometry height="48" width="300" x="70" y="550" as="geometry" />
+        <mxCell id="p1complete" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;fontColor=#b06b00;fontStyle=1;fontSize=14;" value="不拍照完成" vertex="1">
+          <mxGeometry height="50" width="145" x="225" y="790" as="geometry" />
         </mxCell>
         <mxCell id="phone2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
           <mxGeometry height="760" width="360" x="450" y="100" as="geometry" />
         </mxCell>
-        <mxCell id="p2head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" value="‹　上傳失敗" vertex="1">
+        <mxCell id="p2head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=15;" value="‹　新機上市布置（1/1）" vertex="1">
           <mxGeometry height="50" width="330" x="465" y="140" as="geometry" />
         </mxCell>
-        <mxCell id="p2msg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#d79b00;fontSize=14;" value="網路連線中斷&#xa;&#xa;已完成的照片仍保留；尚未成功的照片可重新上傳，不需重新拍攝。" vertex="1">
-          <mxGeometry height="130" width="300" x="480" y="230" as="geometry" />
+        <mxCell id="p2desc" parent="1" style="text;html=1;fontStyle=1;fontSize=14;align=left;" value="跳跳牌照片" vertex="1">
+          <mxGeometry height="22" width="300" x="480" y="205" as="geometry" />
         </mxCell>
-        <mxCell id="p2photo" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="③ 鏡面烤漆照片　上傳失敗&#xa;[1:1 本機預覽仍保留]" vertex="1">
-          <mxGeometry height="95" width="300" x="480" y="390" as="geometry" />
+        <mxCell id="p2uploadstatus" parent="1" style="text;html=1;fontStyle=1;fontColor=#4f8a4c;fontSize=12;align=right;" value="✓ 已上傳" vertex="1">
+          <mxGeometry height="22" width="115" x="665" y="205" as="geometry" />
         </mxCell>
-        <mxCell id="p2retry" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=16;" value="重新上傳" vertex="1">
-          <mxGeometry height="58" width="300" x="480" y="560" as="geometry" />
+        <mxCell id="p2photo" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" value="[1:1 本次照片]&#xa;點擊放大" vertex="1">
+          <mxGeometry height="180" width="180" x="480" y="235" as="geometry" />
         </mxCell>
-        <mxCell id="p2later" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=14;" value="稍後再試" vertex="1">
-          <mxGeometry height="48" width="300" x="480" y="635" as="geometry" />
+        <mxCell id="p2edit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" value="修改照片／說明" vertex="1">
+          <mxGeometry height="52" width="115" x="660" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="p2add" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" value="＋ 新增圖片" vertex="1">
+          <mxGeometry height="50" width="145" x="480" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="p2complete" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" value="完成任務" vertex="1">
+          <mxGeometry height="50" width="145" x="635" y="790" as="geometry" />
         </mxCell>
         <mxCell id="phone3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
           <mxGeometry height="760" width="360" x="860" y="100" as="geometry" />
         </mxCell>
-        <mxCell id="p3head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=16;align=left;spacingLeft=15;" value="‹　確認任務回報" vertex="1">
+        <mxCell id="p3head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontStyle=1;fontSize=15;" value="‹　新機上市布置（2/2）" vertex="1">
           <mxGeometry height="50" width="330" x="875" y="140" as="geometry" />
         </mxCell>
-        <mxCell id="p3status" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=14;" value="照片已完整上傳　3／3" vertex="1">
-          <mxGeometry height="45" width="300" x="890" y="215" as="geometry" />
+        <mxCell id="p3desc1" parent="1" style="text;html=1;fontStyle=1;fontSize=14;align=left;" value="跳跳牌照片" vertex="1">
+          <mxGeometry height="22" width="300" x="890" y="205" as="geometry" />
         </mxCell>
-        <mxCell id="p3photos" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;fontSize=13;" value="[照片 1]　[照片 2]　[照片 3]&#xa;皆為 1:1、1200 × 1200" vertex="1">
-          <mxGeometry height="100" width="300" x="890" y="285" as="geometry" />
+        <mxCell id="p3uploadstatus1" parent="1" style="text;html=1;fontStyle=1;fontColor=#4f8a4c;fontSize=12;align=right;" value="✓ 已上傳" vertex="1">
+          <mxGeometry height="22" width="115" x="1075" y="205" as="geometry" />
         </mxCell>
-        <mxCell id="p3note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#999999;align=left;verticalAlign=top;spacing=12;fontSize=13;" value="ExecutionNote（必填）&#xa;[ 已依樣本完成現場展示布置。　　　　]" vertex="1">
-          <mxGeometry height="95" width="300" x="890" y="420" as="geometry" />
+        <mxCell id="p3photo1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="[1:1 本次照片]&#xa;點擊放大" vertex="1">
+          <mxGeometry height="180" width="180" x="890" y="235" as="geometry" />
         </mxCell>
-        <mxCell id="p3submit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=16;" value="正式送出任務" vertex="1">
-          <mxGeometry height="58" width="300" x="890" y="650" as="geometry" />
+        <mxCell id="p3edit1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;" value="修改照片／說明" vertex="1">
+          <mxGeometry height="52" width="115" x="1070" y="235" as="geometry" />
         </mxCell>
-        <mxCell id="phone4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+        <mxCell id="p3desc2" parent="1" style="text;html=1;fontStyle=1;fontSize=14;align=left;" value="製冰盒照片" vertex="1">
+          <mxGeometry height="22" width="300" x="890" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="p3uploadstatus2" parent="1" style="text;html=1;fontStyle=1;fontColor=#3d73a8;fontSize=12;align=right;" value="上傳中 68%" vertex="1">
+          <mxGeometry height="22" width="115" x="1075" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="p3photo2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="[1:1 本次照片]&#xa;點擊放大" vertex="1">
+          <mxGeometry height="180" width="180" x="890" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="p3edit2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=13;" value="修改照片／說明" vertex="1">
+          <mxGeometry height="52" width="115" x="1070" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="p3add" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;fontSize=14;" value="＋ 新增圖片" vertex="1">
+          <mxGeometry height="50" width="145" x="890" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="p3complete" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eeeeee;strokeColor=#cccccc;fontColor=#999999;fontStyle=1;fontSize=14;" value="照片上傳中" vertex="1">
+          <mxGeometry height="50" width="145" x="1045" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="phone4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
           <mxGeometry height="760" width="360" x="1270" y="100" as="geometry" />
         </mxCell>
-        <mxCell id="p4ok" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=42;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="110" width="110" x="1395" y="230" as="geometry" />
+        <mxCell id="p4head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#555555;fontColor=#ffffff;fontStyle=1;fontSize=15;" value="×　新增任務照片" vertex="1">
+          <mxGeometry height="50" width="330" x="1285" y="140" as="geometry" />
         </mxCell>
-        <mxCell id="p4text" parent="1" style="text;html=1;fontSize=18;fontStyle=1;align=center;verticalAlign=middle;" value="任務已送出&#xa;&#xa;照片 3 張&#xa;SubmittedAt：2026/07/30 15:20" vertex="1">
-          <mxGeometry height="125" width="280" x="1310" y="380" as="geometry" />
+        <mxCell id="p4desc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#6c8ebf;fontColor=#ffffff;align=left;verticalAlign=top;spacing=10;fontSize=13;" value="照片說明（PhotoDescription）＊&#xa;[ 跳跳牌照片　　　　　　　　 ]" vertex="1">
+          <mxGeometry height="65" width="300" x="1300" y="205" as="geometry" />
         </mxCell>
-        <mxCell id="p4view" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=16;" value="查看任務回報" vertex="1">
-          <mxGeometry height="58" width="300" x="1300" y="580" as="geometry" />
+        <mxCell id="p4camera" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#82b366;strokeWidth=3;fontColor=#ffffff;fontSize=15;" value="1 : 1 即時取景框&#xa;&#xa;[ 相機即時畫面 ]&#xa;&#xa;正方形安全框內為輸出範圍&#xa;直式／橫式持機皆可" vertex="1">
+          <mxGeometry height="300" width="300" x="1300" y="285" as="geometry" />
         </mxCell>
-        <mxCell id="p4home" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=14;" value="返回任務清單" vertex="1">
-          <mxGeometry height="48" width="300" x="1300" y="655" as="geometry" />
+        <mxCell id="p4album" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#444444;strokeColor=#aaaaaa;fontColor=#ffffff;fontSize=12;" value="相簿" vertex="1">
+          <mxGeometry height="60" width="60" x="1315" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="p4shutter" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#dddddd;strokeWidth=6;" value="" vertex="1">
+          <mxGeometry height="82" width="82" x="1409" y="678" as="geometry" />
+        </mxCell>
+        <mxCell id="p4flash" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#444444;strokeColor=#aaaaaa;fontColor=#ffffff;fontSize=22;" value="⚡" vertex="1">
+          <mxGeometry height="60" width="60" x="1525" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="phone5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#111111;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
+          <mxGeometry height="760" width="360" x="1680" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="p5head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#555555;fontColor=#ffffff;fontStyle=1;fontSize=15;" value="‹　預覽與裁切" vertex="1">
+          <mxGeometry height="50" width="330" x="1695" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="p5desc" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#6c8ebf;fontColor=#ffffff;align=left;verticalAlign=top;spacing=10;fontSize=13;" value="照片說明（PhotoDescription）＊&#xa;[ 跳跳牌照片　　　　　　　　 ]" vertex="1">
+          <mxGeometry height="65" width="300" x="1710" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="p5crop" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#444444;strokeColor=#82b366;strokeWidth=3;fontColor=#ffffff;fontSize=15;" value="1 : 1 自動裁切結果&#xa;輸出 1200 × 1200 px&#xa;&#xa;單指移動｜雙指縮放" vertex="1">
+          <mxGeometry height="300" width="300" x="1710" y="285" as="geometry" />
+        </mxCell>
+        <mxCell id="p5tools" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#777777;fontColor=#ffffff;fontSize=13;" value="↶ 旋轉　　▣ 裁切　　比較樣本（停用）" vertex="1">
+          <mxGeometry height="45" width="300" x="1710" y="605" as="geometry" />
+        </mxCell>
+        <mxCell id="p5nosample" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#777777;fontColor=#999999;fontSize=12;" value="目前沒有核准樣本，無法使用樣本比較。" vertex="1">
+          <mxGeometry height="40" width="300" x="1710" y="660" as="geometry" />
+        </mxCell>
+        <mxCell id="p5retake" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#222222;strokeColor=#ffffff;fontColor=#ffffff;fontSize=15;" value="重拍" vertex="1">
+          <mxGeometry height="55" width="140" x="1710" y="725" as="geometry" />
+        </mxCell>
+        <mxCell id="p5use" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;fontSize=15;" value="使用照片" vertex="1">
+          <mxGeometry height="55" width="140" x="1870" y="725" as="geometry" />
+        </mxCell>
+        <mxCell id="rule" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffaf0;strokeColor=#d6b656;align=left;verticalAlign=top;spacing=14;fontSize=14;" value="資料規則：目前沒有既有樣本時，可自行新增照片；每張 VisitTaskPhoto 的 PhotoDescription 必填，清單順序寫入 SortOrder，SampleTaskPhotoId 為 NULL。若此 VisitTaskExecution 日後被指定為 VisitTask.SampleTaskExecutionId，這些照片即成為核准前的樣本照片項目。" vertex="1">
+          <mxGeometry height="80" width="2000" x="40" y="910" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
@@ -541,7 +432,6 @@
         <mxCell id="title" parent="1" style="text;html=1;fontSize=24;fontStyle=1;align=left;" value="任務完成畫面｜未拍照、有樣本與無樣本任務" vertex="1">
           <mxGeometry height="40" width="1200" x="40" y="20" as="geometry" />
         </mxCell>
-
         <mxCell id="phone1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
           <mxGeometry height="760" width="360" x="40" y="100" as="geometry" />
         </mxCell>
@@ -563,7 +453,6 @@
         <mxCell id="p1back" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=14;" value="返回任務清單" vertex="1">
           <mxGeometry height="48" width="300" x="70" y="725" as="geometry" />
         </mxCell>
-
         <mxCell id="phone2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
           <mxGeometry height="760" width="360" x="450" y="100" as="geometry" />
         </mxCell>
@@ -585,7 +474,6 @@
         <mxCell id="p2back" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=14;" value="返回任務清單" vertex="1">
           <mxGeometry height="48" width="300" x="480" y="725" as="geometry" />
         </mxCell>
-
         <mxCell id="phone3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
           <mxGeometry height="760" width="360" x="860" y="100" as="geometry" />
         </mxCell>
@@ -607,7 +495,6 @@
         <mxCell id="p3back" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=14;" value="返回任務" vertex="1">
           <mxGeometry height="48" width="300" x="890" y="725" as="geometry" />
         </mxCell>
-
         <mxCell id="phone4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#333333;strokeWidth=2;" value="" vertex="1">
           <mxGeometry height="760" width="360" x="1270" y="100" as="geometry" />
         </mxCell>
@@ -629,7 +516,6 @@
         <mxCell id="p4back" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=14;" value="返回任務清單" vertex="1">
           <mxGeometry height="48" width="300" x="1300" y="725" as="geometry" />
         </mxCell>
-
         <mxCell id="rule" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#999999;align=left;verticalAlign=top;spacing=14;fontSize=14;" value="完成規則：無照片時須填寫未執行原因；有樣本且已執行時，所有樣本項目都必須有對應照片並完成上傳；無樣本任務依實際上傳照片完成。成功送出後寫入 VisitTaskExecution.SubmittedAt。" vertex="1">
           <mxGeometry height="70" width="1590" x="40" y="910" as="geometry" />
         </mxCell>
