@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+
+# Runtime uploads and generated files
+storage/photos/
+storage/uploads/
+storage/temp/
+storage/exports/

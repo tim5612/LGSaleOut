@@ -1,0 +1,29 @@
+1.DB ERD~LGSale_ERD_標準drawio
+2.程式邏輯：整合式人員經銷商庫存巡店資料庫設計規格.md
+3.UI：手機任務：LGSale_UI_PHOTO.drawio
+4.UI：實銷與陳列：LGSale_UI_Wireframe.drawio
+5.UI：桌機板：LGSale_UI_Desktop.drawio
+
+
+我之前因為 Demo，有新增一些 LGSaleOut.py，以及 index.html。是不是全部移除掉重新新增會比較好？你幫我看一下
+
+
+
+那這樣，請幫我做出三個TSQL的檔案出來，按照 LGSale_ERD_標準.drawio 所規劃的資料庫 
+資料請存在 【TSQL資料】 資料夾裡面
+
+檔案有三個：
+1.CreateDB.sql第一個是建立料庫。DB 的名子叫做 LGSaleOut ，並建立一個使用者叫 Tim，如果 LGSaleOut 已存在，請將已存在的檔案刪除
+2.第二個檔案室幫我建立一些假資料，用 Insert 的語法幫我建立一些假的資料。檔名叫做 DummyFile.sql
+3.第三個檔案室將所有假資料刪除。檔名叫做 EraseDummy.sql
+
+或是我之前在沒有AI的年代，會用 Excel 建立假資料，並且用VBA組合成 TSQL 語法文字。這樣的好處就是我可以自己很容易建立一些假資料來測試
+
+兩種方法，你覺得哪種比較好。先研究。下一步再執行
+
+
+
+下一個，請幫我建立 Python 檔案 LGSale.py，以及
+LGSale_UI_Desktop.drawio 的html檔案，請建立在SalesCodex 共用資夾的目錄裡面。
+以及 LGSale_UI_Wireframe.drawio 手機介面
+以及 LGSale_UI_PHOTO.drawio 手機任務介面。

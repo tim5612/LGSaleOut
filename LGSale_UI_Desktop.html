@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>LGSale｜通路任務管理</title>
+  <style>
+    :root{--nav:#17324d;--nav2:#27577d;--blue:#1769aa;--ink:#172b3a;--muted:#667085;--line:#d9e1e8;--bg:#f5f7fa;--ok:#087a55;--warn:#b54708;--danger:#b42318}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Segoe UI","Noto Sans TC",sans-serif}button,input,select,textarea{font:inherit}
+    button{cursor:pointer}.app{min-height:100vh;display:grid;grid-template-columns:232px 1fr}.side{position:sticky;top:0;height:100vh;background:var(--nav);color:white;padding:24px 12px;display:flex;flex-direction:column}.brand{padding:0 14px 28px;font-size:22px;font-weight:700}.brand small{display:block;color:#a9c0d4;font-size:12px;font-weight:400}.nav{display:grid;gap:5px}.nav button{border:0;background:transparent;color:#c8d6e3;padding:13px 16px;border-radius:8px;text-align:left}.nav button.active,.nav button:hover{background:var(--nav2);color:white}.profile{margin-top:auto;padding:12px 14px;background:#10283c;border-radius:8px;color:#dde8f0;font-size:12px}
+    main{padding:32px 40px 56px;min-width:0}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}.top h1{font-size:28px;margin:0}.top p{margin:3px 0 0;color:var(--muted)}.btn{border:1px solid var(--blue);background:white;color:var(--blue);padding:10px 16px;border-radius:8px;font-weight:600}.btn.primary{background:var(--blue);color:white}.btn.danger{border-color:#f1b8b4;color:var(--danger)}.btn:disabled{opacity:.45;cursor:not-allowed}
+    .panel{background:#fff;border:1px solid var(--line);border-radius:10px}.tabs{display:flex;gap:24px;padding:0 18px;border-bottom:1px solid var(--line)}.tabs button{border:0;background:none;padding:16px 2px;color:#475467}.tabs button.active{color:var(--blue);font-weight:700;border-bottom:3px solid var(--blue)}.tools{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}.field{border:1px solid #ccd6e0;background:white;border-radius:8px;padding:10px 12px;color:#475467}.tools .search{min-width:320px;flex:1}
+    .table{overflow:hidden}.thead,.row{display:grid;grid-template-columns:minmax(260px,2fr) 130px 160px 170px 90px 100px;gap:16px;align-items:center;padding:14px 20px}.thead{background:#f0f4f7;color:var(--muted);font-size:12px;font-weight:700}.row{min-height:92px;border-top:1px solid #e7ecf0}.row:first-of-type{border-top:0}.row strong{display:block}.sub{color:var(--muted);font-size:12px}.status{display:inline-block;padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700}.ACTIVE{background:#e8f2fb;color:var(--blue)}.UPCOMING{background:#f2f4f7;color:#475467}.CLOSED{background:#fff4e5;color:var(--warn)}.VOIDED{background:#feeceb;color:var(--danger)}.bar{height:7px;background:#e7ecf0;border-radius:9px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--blue)}.link{border:0;background:none;color:var(--blue);font-weight:600}.empty{padding:55px;text-align:center;color:var(--muted)}
+    .grid2{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:20px}.form{padding:24px}.form h2{margin:0 0 4px}.form .desc{color:var(--muted);margin:0 0 24px}.label{display:block;font-weight:600;margin:16px 0 7px}.input{width:100%;border:1px solid #98a2b3;border-radius:8px;padding:11px 12px;background:white}.dates{display:grid;grid-template-columns:1fr 1fr;gap:16px}.summary{padding:22px}.summary h2{margin-top:0}.box{padding:16px;background:#f7fafc;border:1px solid var(--line);border-radius:8px;margin:14px 0}.notice{padding:14px 16px;background:#eaf4fb;border:1px solid #b8d7ec;border-radius:8px;color:#285a7d;margin-bottom:16px}
+    .assign{display:grid;grid-template-columns:260px minmax(430px,1fr) 290px;gap:18px}.people,.editor,.impact{padding:18px}.people-list{display:grid;gap:7px;margin-top:15px}.person{border:1px solid transparent;background:white;border-radius:8px;padding:10px;text-align:left}.person.active{border-color:#7fb6d9;background:#eaf4fb}.mode{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.mode button{padding:12px;border:1px solid var(--line);border-radius:8px;background:#f7fafc}.mode button.active{border-color:var(--blue);color:var(--blue);background:#eaf4fb}.dealer-list{margin-top:12px;border:1px solid var(--line);border-radius:8px;overflow:hidden}.dealer{display:grid;grid-template-columns:26px 1fr 100px;padding:10px;border-top:1px solid var(--line)}.dealer:first-child{border:0}.event{padding:13px;border-left:3px solid var(--blue);background:#f7fafc;margin:10px 0}.warn{background:#fff8e8;border:1px solid #f3d58b;color:#694a00;padding:12px;border-radius:8px}.toast{position:fixed;right:28px;bottom:28px;background:#172b3a;color:white;padding:13px 18px;border-radius:8px;box-shadow:0 8px 30px #0003;opacity:0;transform:translateY(12px);transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:none}
+    [hidden]{display:none!important}@media(max-width:1050px){.app{grid-template-columns:82px 1fr}.side{padding:20px 8px}.brand{font-size:17px;padding:0 4px 20px}.brand small,.nav span,.profile{display:none}.nav button{text-align:center;padding:13px 4px}.thead,.row{grid-template-columns:minmax(220px,2fr) 120px 150px 90px}.thead>*:nth-child(4),.row>*:nth-child(4),.thead>*:nth-child(6),.row>*:nth-child(6){display:none}.assign{grid-template-columns:220px 1fr}.impact{grid-column:1/-1}.grid2{grid-template-columns:1fr}}@media(max-width:720px){main{padding:22px 16px}.app{display:block}.side{display:none}.thead{display:none}.row{grid-template-columns:1fr 90px;padding:15px}.row>*:not(:first-child):not(:nth-child(5)){display:none}.tools .search{min-width:100%}.assign{grid-template-columns:1fr}.dates{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand">LGSale<small>通路任務管理</small></div>
+    <nav class="nav">
+      <button><b>▣</b> <span>總覽</span></button>
+      <button class="active" data-view="tasks"><b>✓</b> <span>巡店任務</span></button>
+      <button data-view="assignment"><b>⇄</b> <span>人員與經銷商</span></button>
+      <button onclick="location.href='/mobile'"><b>▤</b> <span>手機巡店介面</span></button>
+      <button onclick="location.href='/photo'"><b>▧</b> <span>手機任務介面</span></button>
+    </nav>
+    <div class="profile">林怡君　系統管理員　⌄</div>
+  </aside>
+  <main>
+    <section id="tasksView">
+      <div class="top"><div><h1>巡店任務</h1><p>建立、追蹤與管理經銷商執行進度</p></div><button class="btn primary" id="newTask">＋ 新增任務</button></div>
+      <div class="panel tabs" id="phaseTabs">
+        <button class="active" data-phase="ALL">全部</button><button data-phase="UPCOMING">未開始</button><button data-phase="ACTIVE">執行中</button><button data-phase="CLOSED">已截止</button><button data-phase="VOIDED">已作廢</button>
+      </div>
+      <div class="tools"><input class="field search" id="taskSearch" placeholder="⌕ 搜尋任務名稱或代碼"><select class="field" id="sampleFilter"><option value="ALL">樣本狀態：全部</option><option value="APPROVED">已核准</option><option value="PENDING">待指定</option><option value="NONE">無樣本</option></select><select class="field"><option>更新時間：新到舊</option></select></div>
+      <div class="panel table"><div class="thead"><span>任務</span><span>執行期間</span><span>樣本狀態</span><span>完成進度</span><span>狀態</span><span>操作</span></div><div id="taskRows"></div></div>
+    </section>
+
+    <section id="createView" hidden>
+      <div class="top"><div><button class="link" id="backTasks">‹ 返回任務清單</button><h1>新增巡店任務</h1><p>發布後依生效日的負責關係建立各經銷商待辦</p></div></div>
+      <div class="grid2">
+        <form class="panel form" id="taskForm"><h2>1. 任務內容</h2><p class="desc">業務與經銷商會在手機端看到以下內容</p>
+          <label class="label">任務標題 *</label><input class="input" name="title" value="新機上市展示布置" required>
+          <label class="label">詳細說明 *</label><textarea class="input" name="instruction" rows="5" required>請依陳列規範完成新品布置，依序拍攝跳跳牌、製冰盒與鏡面烤漆區域。</textarea>
+          <div class="dates"><div><label class="label">開始執行日期 *</label><input class="input" type="date" name="validFrom" value="2026-08-10" required></div><div><label class="label">完成期限 *</label><input class="input" type="date" name="dueDate" value="2026-08-22" required></div></div>
+          <label class="label">執行範圍</label><select class="input" name="total"><option value="32">全部有效經銷商（32 家）</option><option value="18">台北一處（18 家）</option><option value="10">新竹處（10 家）</option></select>
+        </form>
+        <aside class="panel summary"><h2>發布摘要</h2><div class="box"><b>由目前表單建立任務</b><p>發布時依有效的 DealerAssignmentHistory 建立待辦，任務建立者固定為林怡君。</p></div><div class="warn"><b>樣本流程</b><br>發布時可先不指定樣本。收到回報後，可在桌機版指定並核准樣本。</div><p><button class="btn" type="button">儲存草稿</button> <button class="btn primary" type="submit" form="taskForm">確認發布</button></p></aside>
+      </div>
+    </section>
+
+    <section id="assignmentView" hidden>
+      <div class="top"><div><h1>配對與異動工作台</h1><p>安排業務所屬處所，或調整經銷商負責關係</p></div><button class="btn">查看異動紀錄</button></div>
+      <div class="notice"><b>配對原則</b>　「業務換處所」與「經銷商換線」彼此獨立；歷史銷售、巡店與任務快照不會被改寫。</div>
+      <div class="assign">
+        <aside class="panel people"><h2>1. 選擇對象</h2><input class="input" placeholder="搜尋姓名、員編"><div class="people-list"><button class="person active"><b>王小明</b><br><span class="sub">S0128・業務・台北一處・12 家</span></button><button class="person"><b>李小華</b><br><span class="sub">S0096・業務・台北一處・8 家</span></button><button class="person"><b>陳美玲</b><br><span class="sub">D0007・處長・台北一處・3 家</span></button><button class="person"><b>張志豪</b><br><span class="sub">S0144・業務・新竹處・10 家</span></button></div></aside>
+        <section class="panel editor"><h2>2. 安排異動內容</h2><p class="sub">目前編輯：王小明（S0128）</p><div class="mode"><button class="active">一起移動</button><button>只換處所</button><button>只做換線</button></div>
+          <label class="label">業務與處所配對</label><div class="dates"><div class="box">目前處所<br><b>台北一處</b></div><div><select class="input" id="newOrg"><option>新竹處</option><option>台中處</option><option>高雄處</option></select></div></div>
+          <label class="label">經銷商與業務配對</label><select class="input" id="receiver"><option>李小華｜台北一處・業務</option><option>張志豪｜新竹處・業務</option><option>陳美玲｜台北一處・處長</option></select>
+          <div class="dealer-list" id="dealerList"><label class="dealer"><input type="checkbox" checked><span><b>光華家電</b><br><small>D1024・台北市</small></span><span>王小明</span></label><label class="dealer"><input type="checkbox" checked><span><b>三民電器</b><br><small>D1088・新竹市</small></span><span>王小明</span></label><label class="dealer"><input type="checkbox"><span><b>東區生活館</b><br><small>D1142・新竹縣</small></span><span>王小明</span></label></div>
+          <label class="label">生效時間 *</label><input class="input" id="effectiveAt" type="datetime-local" value="2026-08-10T09:00">
+        </section>
+        <aside class="panel impact"><h2>3. 影響預覽</h2><div class="status ACTIVE">● 期間無重疊</div><div class="event"><b>王小明移至新竹處</b><br><span class="sub">台北一處結束 → 新竹處開始</span></div><div class="event"><b><span id="selectedCount">2</span> 家經銷商改由李小華負責</b><br><span class="sub">舊關係結束與新關係同時開始</span></div><div class="warn"><b>不會連動</b><br>王小明職級維持「業務」；未勾選經銷商仍由原負責人負責。</div><label class="label">異動原因 *</label><input class="input" id="reason" value="北區人力重新配置"><p><button class="btn primary" id="saveAssignment">確認並建立異動</button></p></aside>
+      </div>
+    </section>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+  const state={tasks:[],phase:'ALL'};
+  const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+  const toast=t=>{const x=$('#toast');x.textContent=t;x.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>x.classList.remove('show'),2400)};
+  const phaseName={ACTIVE:'執行中',UPCOMING:'未開始',CLOSED:'已截止',VOIDED:'已作廢'};
+  const sampleName=t=>t.sampleStatus==='APPROVED'?'● 已核准｜'+t.sampleDealer+'・'+t.samplePhotos+' 張':t.sampleStatus==='PENDING'?'○ 待指定樣本':'— 尚無樣本';
+  async function loadTasks(){try{state.tasks=await fetch('/api/tasks').then(r=>r.json());renderTasks()}catch(e){$('#taskRows').innerHTML='<div class="empty">請先執行 python LGSale.py 再開啟介面。</div>'}}
+  function renderTasks(){const q=$('#taskSearch').value.trim().toLowerCase(),sf=$('#sampleFilter').value;const rows=state.tasks.filter(t=>(state.phase==='ALL'||t.phase===state.phase)&&(sf==='ALL'||t.sampleStatus===sf)&&(!q||(t.title+t.code).toLowerCase().includes(q)));$('#taskRows').innerHTML=rows.length?rows.map(t=>'<div class="row"><div><strong>'+t.title+'</strong><span class="sub">'+t.code+' ・ 建立者：'+t.creator+'</span></div><div>'+t.validFrom.slice(5).replace('-','/')+' – '+t.dueDate.slice(5).replace('-','/')+'</div><div>'+sampleName(t)+'</div><div><b>'+t.completed+' / '+t.total+'</b> 家<div class="bar"><i style="width:'+t.progress+'%"></i></div><span class="sub">'+t.progress+'%</span></div><div><span class="status '+t.phase+'">'+phaseName[t.phase]+'</span></div><div><button class="link" onclick="toggleTask('+t.id+')">切換狀態</button></div></div>').join(''):'<div class="empty">找不到符合條件的任務</div>'}
+  async function toggleTask(id){const r=await fetch('/api/tasks/'+id+'/toggle',{method:'POST'});if(r.ok){toast('任務狀態已更新');loadTasks()}}
+  function show(view){['tasks','create','assignment'].forEach(v=>$('#'+v+'View').hidden=v!==view);$$('.nav [data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view))}
+  $('#newTask').onclick=()=>show('create');$('#backTasks').onclick=()=>show('tasks');$$('.nav [data-view]').forEach(b=>b.onclick=()=>show(b.dataset.view));
+  $$('#phaseTabs button').forEach(b=>b.onclick=()=>{$$('#phaseTabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.phase=b.dataset.phase;renderTasks()});
+  $('#taskSearch').oninput=renderTasks;$('#sampleFilter').onchange=renderTasks;
+  $('#taskForm').onsubmit=async e=>{e.preventDefault();const data=Object.fromEntries(new FormData(e.currentTarget));data.total=Number(data.total);const r=await fetch('/api/tasks',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const out=await r.json();if(!r.ok)return toast(out.error);toast('任務 '+out.code+' 已建立');show('tasks');loadTasks()};
+  $$('.person').forEach(p=>p.onclick=()=>{$$('.person').forEach(x=>x.classList.remove('active'));p.classList.add('active')});$$('.mode button').forEach(p=>p.onclick=()=>{$$('.mode button').forEach(x=>x.classList.remove('active'));p.classList.add('active')});
+  $$('#dealerList input').forEach(c=>c.onchange=()=>$('#selectedCount').textContent=$$('#dealerList input:checked').length);
+  $('#saveAssignment').onclick=async()=>{const data={employee:'王小明',newOrg:$('#newOrg').value,receiver:$('#receiver').value.split('｜')[0],dealerCount:$$('#dealerList input:checked').length,effectiveAt:$('#effectiveAt').value,reason:$('#reason').value};const r=await fetch('/api/assignments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const out=await r.json();toast(r.ok?'異動單 CHG-'+String(out.id).padStart(4,'0')+' 已建立':out.error)};
+  loadTasks();
+</script>
+</body>
+</html>
