@@ -16,16 +16,102 @@ environment variables; see lgsale_db.py.
 from __future__ import annotations
 
 import socket
-from datetime import datetime
+import argparse
+import os
+import secrets
+from datetime import datetime, timedelta
 from pathlib import Path
 
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, redirect, request, send_from_directory, session
 import lgsale_db as db
+import lgsale_auth as auth
 
 
 BASE_DIR = Path(__file__).resolve().parent
-PORT = 8097
+PORT = int(os.getenv("LGSALEOUT_PORT", "8098"))
 app = Flask(__name__)
+app.secret_key = os.getenv("LGSALEOUT_SESSION_SECRET") or secrets.token_hex(32)
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=auth.ORIGIN.startswith("https://"),
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=12),
+)
+
+
+@app.before_request
+def require_login():
+    public = request.endpoint in {
+        "health", "login_page", "register_page", "auth_register_options",
+        "auth_register_verify", "auth_login_options", "auth_login_verify",
+    }
+    if public or request.endpoint is None:
+        return None
+    user = session.get("user")
+    if user is None:
+        if request.path.startswith("/api/"):
+            return jsonify(error="請先使用 Passkey 登入"), 401
+        entry = "dealer" if request.path == "/mobile" else "employee"
+        return redirect(f"/login/{entry}")
+    dealer_allowed = {"/mobile", "/api/auth/me", "/api/auth/logout", "/api/dealers", "/api/products", "/api/visits"}
+    if user["type"] == "DEALER" and request.path not in dealer_allowed:
+        if request.path.startswith("/api/"):
+            return jsonify(error="經銷商帳號無權存取此功能"), 403
+        return redirect("/mobile")
+    return None
+
+
+@app.get("/login/<account_type>")
+def login_page(account_type: str):
+    if account_type not in {"employee", "dealer"}:
+        return "Not found", 404
+    if session.get("user"):
+        return redirect("/mobile" if session["user"]["type"] == "DEALER" else "/")
+    return send_from_directory(BASE_DIR, "LGSale_Auth.html")
+
+
+@app.get("/register")
+def register_page():
+    return send_from_directory(BASE_DIR, "LGSale_Auth.html")
+
+
+def _auth_call(func, *args):
+    try:
+        return jsonify(func(*args))
+    except Exception as exc:
+        return jsonify(error=str(exc)), 400
+
+
+@app.post("/api/auth/register/options")
+def auth_register_options():
+    return _auth_call(auth.registration_options, str((request.get_json(silent=True) or {}).get("token", "")))
+
+
+@app.post("/api/auth/register/verify")
+def auth_register_verify():
+    data = request.get_json(silent=True) or {}
+    return _auth_call(auth.finish_registration, data.get("credential") or {}, str(data.get("deviceName", "")))
+
+
+@app.post("/api/auth/login/options")
+def auth_login_options():
+    return _auth_call(auth.authentication_options, str((request.get_json(silent=True) or {}).get("accountType", "")))
+
+
+@app.post("/api/auth/login/verify")
+def auth_login_verify():
+    return _auth_call(auth.finish_authentication, (request.get_json(silent=True) or {}).get("credential") or {})
+
+
+@app.get("/api/auth/me")
+def auth_me():
+    return jsonify(session["user"])
+
+
+@app.post("/api/auth/logout")
+def auth_logout():
+    session.clear()
+    return jsonify(loggedOut=True)
 
 
 @app.get("/")
@@ -89,7 +175,8 @@ def toggle_task(task_id: int):
 @app.get("/api/dealers")
 def dealers():
     try:
-        return jsonify(db.dealers())
+        user = session["user"]
+        return jsonify(db.dealers(user["dealerId"] if user["type"] == "DEALER" else None))
     except Exception as exc:
         return jsonify(error="經銷商資料庫查詢失敗：" + str(exc)), 503
 
@@ -175,6 +262,11 @@ def create_assignment():
 @app.post("/api/visits")
 def create_visit():
     data = request.get_json(silent=True) or {}
+    user = session["user"]
+    if user["type"] == "DEALER":
+        data = {**data, "dealerId": user["dealerId"], "entrySourceType": "DEALER", "userAccountId": user["id"]}
+    else:
+        data = {**data, "entrySourceType": "EMPLOYEE", "userAccountId": user["id"]}
     if data.get("dealerId") is None or not data.get("details"):
         return jsonify(error="經銷商與至少一筆商品資料必填"), 400
     try:
@@ -233,6 +325,17 @@ def lan_ip() -> str | None:
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="LGSale server and Passkey bootstrap")
+    parser.add_argument("command", nargs="?", choices=["serve", "invite"], default="serve")
+    parser.add_argument("account_type", nargs="?", choices=["employee", "dealer"])
+    parser.add_argument("owner_ref", nargs="?", help="EmployeeNo or DealerCode")
+    args = parser.parse_args()
+    if args.command == "invite":
+        if not args.account_type or not args.owner_ref:
+            parser.error("invite requires account_type and owner_ref")
+        token = auth.create_invitation(args.account_type, args.owner_ref)
+        print(f"{auth.ORIGIN}/register?token={token}")
+        raise SystemExit(0)
     print(f"Desktop: http://127.0.0.1:{PORT}/")
     print(f"Mobile:  http://127.0.0.1:{PORT}/mobile")
     print(f"Photo:   http://127.0.0.1:{PORT}/photo")

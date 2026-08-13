@@ -4,10 +4,125 @@ from __future__ import annotations
 
 import os
 import uuid
+import base64
 from datetime import date, datetime
 from typing import Any
 
 import pytds
+
+
+def _b64url_decode(value: str) -> bytes:
+    return base64.urlsafe_b64decode(value + "=" * (-len(value) % 4))
+
+
+def passkey_invitation(token_hash: bytes) -> dict[str, Any] | None:
+    sql = """
+    SELECT i.InvitationId,a.UserAccountId,a.AccountType,
+           COALESCE(e.EmployeeNo,d.DealerCode),COALESCE(e.EmployeeName,d.DealerName)
+      FROM dbo.PasskeyRegistrationInvitation i
+      JOIN dbo.UserAccount a ON a.UserAccountId=i.UserAccountId
+      LEFT JOIN dbo.Employee e ON e.EmployeeId=a.EmployeeId
+      LEFT JOIN dbo.Dealer d ON d.DealerId=a.DealerId
+     WHERE i.TokenHash=%s AND i.UsedAt IS NULL AND i.RevokedAt IS NULL
+       AND i.ExpiresAt>SYSDATETIME() AND a.IsLoginEnabled=1 AND a.AccountStatus='ACTIVE'
+    """
+    with connect() as conn:
+        row = _one(conn.cursor(), sql, (pytds.Binary(token_hash),))
+    if row is None:
+        return None
+    return {"invitationId": int(row[0]), "userAccountId": int(row[1]), "accountType": row[2],
+            "accountLabel": f"{row[2]}:{row[3]}", "displayName": row[4]}
+
+
+def passkey_credentials(user_account_id: int) -> list[dict[str, Any]]:
+    with connect() as conn:
+        cur = conn.cursor()
+        cur.execute("SELECT PasskeyCredentialId,CredentialId,DeviceName,CreatedAt,LastUsedAt,RevokedAt FROM dbo.PasskeyCredential WHERE UserAccountId=%s ORDER BY CreatedAt DESC", (user_account_id,))
+        return [{"id": int(r[0]), "credentialId": bytes(r[1]), "deviceName": r[2],
+                 "createdAt": r[3].isoformat(), "lastUsedAt": r[4].isoformat() if r[4] else None,
+                 "revokedAt": r[5].isoformat() if r[5] else None} for r in cur.fetchall()]
+
+
+def save_passkey(*, invitation_id: int, user_account_id: int, credential_id: bytes,
+                 public_key: bytes, sign_count: int, transports: str | None, device_name: str) -> None:
+    conn = connect()
+    try:
+        cur = conn.cursor()
+        cur.execute("""INSERT dbo.PasskeyCredential(UserAccountId,CredentialId,PublicKey,SignCount,Transports,DeviceName)
+                       VALUES(%s,%s,%s,%s,%s,%s)""",
+                    (user_account_id, pytds.Binary(credential_id), pytds.Binary(public_key), sign_count, transports, device_name))
+        cur.execute("""UPDATE dbo.PasskeyRegistrationInvitation SET UsedAt=SYSDATETIME()
+                        WHERE InvitationId=%s AND UserAccountId=%s AND UsedAt IS NULL AND RevokedAt IS NULL AND ExpiresAt>SYSDATETIME()""",
+                    (invitation_id, user_account_id))
+        if cur.rowcount != 1:
+            raise ValueError("註冊邀請已失效")
+        conn.commit()
+    except Exception:
+        conn.rollback(); raise
+    finally:
+        conn.close()
+
+
+def passkey_for_login(raw_credential_id: str, account_type: str) -> dict[str, Any] | None:
+    credential_id = _b64url_decode(raw_credential_id)
+    sql = """
+    SELECT p.PasskeyCredentialId,p.UserAccountId,p.PublicKey,p.SignCount,a.AccountType,
+           a.EmployeeId,a.DealerId,COALESCE(e.EmployeeName,d.DealerName)
+      FROM dbo.PasskeyCredential p
+      JOIN dbo.UserAccount a ON a.UserAccountId=p.UserAccountId
+      LEFT JOIN dbo.Employee e ON e.EmployeeId=a.EmployeeId
+      LEFT JOIN dbo.Dealer d ON d.DealerId=a.DealerId
+     WHERE p.CredentialId=%s AND p.RevokedAt IS NULL AND a.AccountType=%s
+       AND a.IsLoginEnabled=1 AND a.AccountStatus='ACTIVE'
+    """
+    with connect() as conn:
+        row = _one(conn.cursor(), sql, (pytds.Binary(credential_id), account_type))
+    if row is None:
+        return None
+    return {"passkeyCredentialId": int(row[0]), "userAccountId": int(row[1]),
+            "publicKey": bytes(row[2]), "signCount": int(row[3]), "accountType": row[4],
+            "employeeId": int(row[5]) if row[5] is not None else None,
+            "dealerId": int(row[6]) if row[6] is not None else None, "displayName": row[7]}
+
+
+def record_passkey_login(passkey_id: int, account_id: int, new_sign_count: int) -> None:
+    with connect() as conn:
+        cur = conn.cursor()
+        cur.execute("UPDATE dbo.PasskeyCredential SET SignCount=CASE WHEN %s>SignCount THEN %s ELSE SignCount END,LastUsedAt=SYSDATETIME() WHERE PasskeyCredentialId=%s", (new_sign_count, new_sign_count, passkey_id))
+        cur.execute("UPDATE dbo.UserAccount SET LastLoginAt=SYSDATETIME() WHERE UserAccountId=%s", (account_id,))
+        conn.commit()
+
+
+def create_passkey_invitation(account_type: str, owner_ref: str, token_hash: bytes) -> None:
+    if account_type not in {"EMPLOYEE", "DEALER"}:
+        raise ValueError("account type must be EMPLOYEE or DEALER")
+    conn = connect()
+    try:
+        cur = conn.cursor()
+        if account_type == "EMPLOYEE":
+            owner = _one(cur, "SELECT EmployeeId FROM dbo.Employee WHERE EmployeeNo=%s", (owner_ref,))
+            owner_column = "EmployeeId"
+        else:
+            owner = _one(cur, "SELECT DealerId FROM dbo.Dealer WHERE DealerCode=%s", (owner_ref,))
+            owner_column = "DealerId"
+        if owner is None:
+            raise ValueError(f"找不到 {owner_ref}")
+        account = _one(cur, f"SELECT UserAccountId FROM dbo.UserAccount WHERE {owner_column}=%s", (owner[0],))
+        if account is None:
+            cur.execute(f"INSERT dbo.UserAccount(AccountType,{owner_column}) VALUES(%s,%s)", (account_type, owner[0]))
+            account = _one(cur, f"SELECT UserAccountId FROM dbo.UserAccount WHERE {owner_column}=%s", (owner[0],))
+        creator = _one(cur, "SELECT TOP 1 EmployeeId FROM dbo.Employee WHERE TerminationDate IS NULL ORDER BY EmployeeId")
+        if creator is None:
+            raise ValueError("沒有可用的邀請建立人")
+        cur.execute("""UPDATE dbo.PasskeyRegistrationInvitation SET RevokedAt=SYSDATETIME()
+                       WHERE UserAccountId=%s AND UsedAt IS NULL AND RevokedAt IS NULL""", (account[0],))
+        cur.execute("""INSERT dbo.PasskeyRegistrationInvitation(UserAccountId,TokenHash,ExpiresAt,CreatedByEmployeeId)
+                       VALUES(%s,%s,DATEADD(minute,15,SYSDATETIME()),%s)""", (account[0], pytds.Binary(token_hash), creator[0]))
+        conn.commit()
+    except Exception:
+        conn.rollback(); raise
+    finally:
+        conn.close()
 
 
 POSITION_TO_UI = {"SALES": "業務", "DIRECTOR": "處長", "MANAGER": "經理"}
@@ -130,7 +245,7 @@ def toggle_task(task_id: int) -> bool:
         conn.close()
 
 
-def dealers() -> list[dict[str, Any]]:
+def dealers(dealer_id: int | None = None) -> list[dict[str, Any]]:
     sql = """
     SELECT d.DealerId,d.DealerCode,d.DealerName,COALESCE(l.DealerStatus,'—'),COALESCE(e.EmployeeName,'未指派'),MAX(v.ReportDateTime)
       FROM dbo.Dealer d
@@ -138,11 +253,12 @@ def dealers() -> list[dict[str, Any]]:
       LEFT JOIN dbo.DealerAssignmentHistory a ON a.DealerId=d.DealerId AND a.EndDateTime IS NULL
       LEFT JOIN dbo.Employee e ON e.EmployeeId=a.EmployeeId
       LEFT JOIN dbo.StoreVisit v ON v.DealerId=d.DealerId AND v.RecordStatus='ACTIVE'
+     WHERE (%s IS NULL OR d.DealerId=%s)
      GROUP BY d.DealerId,d.DealerCode,d.DealerName,l.DealerStatus,e.EmployeeName
      ORDER BY d.DealerId
     """
     with connect() as conn:
-        cur=conn.cursor(); cur.execute(sql)
+        cur=conn.cursor(); cur.execute(sql, (dealer_id, dealer_id))
         return [{"id":int(r[0]),"code":r[1],"name":r[2],"level":r[3],"employee":r[4],"lastVisit":r[5].date().isoformat() if r[5] else None} for r in cur.fetchall()]
 
 
@@ -273,7 +389,7 @@ def complete_execution(execution_id:int,note:str|None) -> datetime:
 def create_visit(data:dict[str,Any]) -> tuple[int,datetime]:
     conn=connect()
     try:
-        cur=conn.cursor();dealer_id=int(data["dealerId"]);assignment=_one(cur,"SELECT DealerAssignmentId FROM dbo.DealerAssignmentHistory WHERE DealerId=%s AND EndDateTime IS NULL",(dealer_id,));account=_one(cur,"SELECT TOP 1 UserAccountId FROM dbo.UserAccount WHERE AccountType='EMPLOYEE' AND IsLoginEnabled=1 ORDER BY UserAccountId")
+        cur=conn.cursor();dealer_id=int(data["dealerId"]);assignment=_one(cur,"SELECT DealerAssignmentId FROM dbo.DealerAssignmentHistory WHERE DealerId=%s AND EndDateTime IS NULL",(dealer_id,));account=(data.get("userAccountId"),) if data.get("userAccountId") else _one(cur,"SELECT TOP 1 UserAccountId FROM dbo.UserAccount WHERE AccountType='EMPLOYEE' AND IsLoginEnabled=1 ORDER BY UserAccountId")
         if account is None:raise ValueError("找不到可用的員工帳號")
         row=_one(cur,"""INSERT dbo.StoreVisit(DealerId,DealerAssignmentId,EntrySourceType,CreatedByUserAccountId) OUTPUT inserted.StoreVisitId,inserted.ReportDateTime VALUES(%s,%s,%s,%s)""",(dealer_id,assignment[0] if assignment else None,data.get("entrySourceType","EMPLOYEE"),account[0]));visit_id=int(row[0])
         for item in data["details"]:

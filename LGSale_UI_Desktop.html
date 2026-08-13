@@ -29,7 +29,7 @@
       <button onclick="location.href='/mobile'"><b>▤</b> <span>手機巡店介面</span></button>
       <button onclick="location.href='/photo'"><b>▧</b> <span>手機任務介面</span></button>
     </nav>
-    <div class="profile">林怡君　系統管理員　⌄</div>
+    <div class="profile" id="signedInProfile">Passkey 已登入<br><button class="link" id="logoutButton" style="color:#fff;padding:8px 0">登出</button></div>
   </aside>
   <main>
     <section id="tasksView">
@@ -106,6 +106,8 @@
   const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const toast=t=>{const x=$('#toast');x.textContent=t;x.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>x.classList.remove('show'),2400)};
+  fetch('/api/auth/me').then(r=>r.json()).then(u=>$('#signedInProfile').firstChild.textContent=u.name+'｜Passkey 已登入');
+  $('#logoutButton').onclick=async()=>{await fetch('/api/auth/logout',{method:'POST'});location.href='/login/employee'};
   const phaseName={ACTIVE:'執行中',UPCOMING:'未開始',CLOSED:'已截止',VOIDED:'已作廢'};
   const sampleName=t=>t.sampleStatus==='APPROVED'?'● 已核准｜'+t.sampleDealer+'・'+t.samplePhotos+' 張':t.sampleStatus==='PENDING'?'○ 待指定樣本':'— 尚無樣本';
   async function loadTasks(){try{state.tasks=await fetch('/api/tasks').then(r=>r.json());renderTasks()}catch(e){$('#taskRows').innerHTML='<div class="empty">請先執行 python LGSale.py 再開啟介面。</div>'}}

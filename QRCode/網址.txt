@@ -1,0 +1,7 @@
+完成後，開發機 A 的網址是：
+https://lgdeva.superb-supplies.com.tw/
+手機頁面：
+https://lgdeva.superb-supplies.com.tw/mobile
+https://lgdeva.superb-supplies.com.tw/photo
+
+https://lgdeva.superb-supplies.com.tw/login/employee

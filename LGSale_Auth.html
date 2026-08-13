@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>LGSale Passkey</title>
+  <style>
+    :root{--blue:#1769aa;--ink:#172b3a;--muted:#667085;--line:#d9e1e8;--bg:#f5f7fa;--danger:#b42318}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--ink);font:15px/1.55 "Segoe UI","Noto Sans TC",sans-serif}.card{width:min(430px,calc(100% - 32px));background:#fff;border:1px solid var(--line);border-radius:18px;padding:34px;box-shadow:0 18px 50px #17324d17}.brand{font-size:25px;font-weight:750;color:#17324d}.badge{display:inline-block;margin-top:18px;padding:5px 10px;border-radius:999px;background:#eaf4fb;color:var(--blue);font-size:12px;font-weight:700}h1{font-size:27px;margin:13px 0 5px}p{color:var(--muted)}label{display:block;font-weight:650;margin:22px 0 7px}.input{width:100%;padding:12px;border:1px solid #98a2b3;border-radius:9px;font:inherit}.btn{width:100%;border:0;border-radius:10px;padding:13px 16px;background:var(--blue);color:#fff;font:inherit;font-weight:700;cursor:pointer;margin-top:18px}.btn:disabled{opacity:.5;cursor:wait}.notice{margin-top:18px;padding:12px 14px;border-radius:9px;background:#f2f4f7;color:#475467;font-size:13px}.error{background:#feeceb;color:var(--danger)}.ok{background:#e8f7f0;color:#087a55}.small{text-align:center;font-size:12px;margin-top:22px}
+  </style>
+</head>
+<body><main class="card">
+  <div class="brand">LGSale</div><div class="badge" id="badge">PASSKEY</div>
+  <h1 id="title">安全登入</h1><p id="subtitle">使用 Face ID、Touch ID、Windows Hello 或裝置解鎖來核准。</p>
+  <div id="registerFields" hidden><label for="deviceName">這把 Passkey 的名稱</label><input class="input" id="deviceName" maxlength="100" placeholder="例如：王小明的 iPhone"></div>
+  <button class="btn" id="action">使用 Passkey 登入</button><div class="notice" id="notice">本系統不會取得或保存你的臉部、指紋與裝置密碼。</div>
+  <p class="small">不提供帳號密碼登入</p>
+</main><script>
+const qs=new URLSearchParams(location.search), isRegister=location.pathname==='/register', type=(location.pathname.split('/').pop()||'employee').toUpperCase();
+const $=s=>document.querySelector(s), action=$('#action'), notice=$('#notice');
+function bytes(value){const s=value.replace(/-/g,'+').replace(/_/g,'/');return Uint8Array.from(atob(s+'='.repeat((4-s.length%4)%4)),c=>c.charCodeAt(0))}
+function b64(value){let s='';new Uint8Array(value).forEach(x=>s+=String.fromCharCode(x));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function serialize(c){return{id:c.id,type:c.type,rawId:b64(c.rawId),authenticatorAttachment:c.authenticatorAttachment,response:{clientDataJSON:b64(c.response.clientDataJSON),attestationObject:c.response.attestationObject?b64(c.response.attestationObject):undefined,authenticatorData:c.response.authenticatorData?b64(c.response.authenticatorData):undefined,signature:c.response.signature?b64(c.response.signature):undefined,userHandle:c.response.userHandle?b64(c.response.userHandle):null,transports:c.response.getTransports?c.response.getTransports():undefined},clientExtensionResults:c.getClientExtensionResults()}}
+async function api(url,body){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})}),j=await r.json();if(!r.ok)throw Error(j.error||'操作失敗');return j}
+function fail(e){notice.textContent=e.name==='NotAllowedError'?'已取消或逾時，請再試一次。':e.message;notice.className='notice error';action.disabled=false}
+if(!window.PublicKeyCredential){action.disabled=true;notice.textContent='此瀏覽器不支援 Passkey，請改用最新版 Safari、Chrome 或 Edge。';notice.className='notice error'}
+if(isRegister){$('#title').textContent='設定 Passkey';$('#subtitle').textContent='完成後即可用這部裝置安全登入。';$('#registerFields').hidden=false;action.textContent='建立 Passkey';action.onclick=async()=>{try{action.disabled=true;const o=await api('/api/auth/register/options',{token:qs.get('token')});$('#badge').textContent=o.account.type==='EMPLOYEE'?'業務帳號':'經銷商帳號';o.challenge=bytes(o.challenge);o.user.id=bytes(o.user.id);(o.excludeCredentials||[]).forEach(x=>x.id=bytes(x.id));const c=await navigator.credentials.create({publicKey:o});await api('/api/auth/register/verify',{credential:serialize(c),deviceName:$('#deviceName').value});notice.textContent='Passkey 設定完成，現在可以登入。';notice.className='notice ok';action.textContent='前往登入';action.disabled=false;action.onclick=()=>location.href='/login/'+o.account.type.toLowerCase()}catch(e){fail(e)}}
+}else{const label=type==='DEALER'?'經銷商':'業務';$('#badge').textContent=label+'端';$('#title').textContent=label+' Passkey 登入';action.onclick=async()=>{try{action.disabled=true;const o=await api('/api/auth/login/options',{accountType:type});o.challenge=bytes(o.challenge);(o.allowCredentials||[]).forEach(x=>x.id=bytes(x.id));const c=await navigator.credentials.get({publicKey:o});await api('/api/auth/login/verify',{credential:serialize(c)});location.href=type==='DEALER'?'/mobile':'/'}catch(e){fail(e)}}}
+  </script></body></html>

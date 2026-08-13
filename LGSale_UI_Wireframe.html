@@ -25,10 +25,11 @@
     <section id="review" hidden><button class="back" data-go="visit">‹ 返回修改</button><h1>送出前確認</h1><div class="notice">確認送出後才會正式建立巡店紀錄，並由伺服器寫入回報時間；一般使用者可修改 72 小時。</div><div class="card"><h2 id="reviewDealer">台北大同電器</h2><div id="reviewRows"></div></div><button class="btn primary" id="submitVisit">確認並送出</button></section>
     <section id="success" hidden><div class="success"><div class="check">✓</div><h1>巡店回報已送出</h1><p id="successText">已建立巡店紀錄</p><button class="btn primary" data-go="home">返回工作台</button></div></section>
   </main>
-  <nav class="bottom"><button class="active" data-go="home"><b>⌂</b>首頁</button><button data-go="dealers"><b>▣</b>經銷商</button><button onclick="location.href='/photo'"><b>✓</b>任務</button><button><b>●</b>我的</button></nav>
+  <nav class="bottom"><button class="active" data-go="home"><b>⌂</b>首頁</button><button data-go="dealers"><b>▣</b>經銷商</button><button onclick="location.href='/photo'"><b>✓</b>任務</button><button id="logoutButton"><b>●</b>登出</button></nav>
 </div>
 <div class="toast" id="toast"></div>
 <script>
+  document.querySelector('#logoutButton').onclick=async()=>{const me=await fetch('/api/auth/me').then(r=>r.json());await fetch('/api/auth/logout',{method:'POST'});location.href='/login/'+me.type.toLowerCase()};
   const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];let dealers=[],products=[],selectedDealer=null;
   const toast=t=>{const x=$('#toast');x.textContent=t;x.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>x.classList.remove('show'),2200)};
   function show(id){$$('main section').forEach(x=>x.hidden=x.id!==id);$$('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));$$('.bottom button[data-go]').forEach(b=>b.classList.toggle('active',b.dataset.go===id))}
