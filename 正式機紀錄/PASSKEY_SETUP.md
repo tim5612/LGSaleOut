@@ -13,12 +13,12 @@ powershell -ExecutionPolicy Bypass -File ".\正式機紀錄\啟動測試機Passk
 ## 本機測試
 
 1. 安裝套件：`.venv\Scripts\python.exe -m pip install -r requirements.txt`
-2. 啟動：`.venv\Scripts\python.exe LGSale.py`（預設使用 8098，避免與既有 8097 正式服務衝突）
+2. 啟動：`.venv\Scripts\python.exe LGSale.py`（此測試專案預設使用 `lgdeva` 與 8097）
 3. 為員工建立 15 分鐘有效的一次性邀請：
    `.venv\Scripts\python.exe LGSale.py invite employee <EmployeeNo>`
 4. 為經銷商建立邀請：
    `.venv\Scripts\python.exe LGSale.py invite dealer <DealerCode>`
-5. 用同一台電腦的瀏覽器開啟命令輸出的 `http://localhost:8098/register?...`。
+5. 用 iPhone Safari 開啟命令輸出的 `https://lgdeva.superb-supplies.com.tw/register?...`。
 
 業務登入入口為 `/login/employee`，經銷商登入入口為 `/login/dealer`。兩個入口會在後端核對 `UserAccount.AccountType`，不可交叉登入。
 

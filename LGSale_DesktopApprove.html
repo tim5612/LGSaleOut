@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>LGSale｜授權桌機登入</title>
+  <style>
+    :root{--blue:#1769aa;--ink:#172b3a;--muted:#667085;--line:#d9e1e8;--bg:#f5f7fa;--danger:#b42318}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--ink);font:15px/1.55 "Segoe UI","Noto Sans TC",sans-serif}.card{width:min(430px,calc(100% - 32px));background:#fff;border:1px solid var(--line);border-radius:18px;padding:30px;box-shadow:0 18px 50px #17324d17}.brand{font-size:24px;font-weight:750}.badge{display:inline-block;margin-top:16px;padding:5px 10px;border-radius:999px;background:#eaf4fb;color:var(--blue);font-size:12px;font-weight:700}h1{font-size:25px;margin:12px 0 5px}p{color:var(--muted)}.target{margin:20px 0;padding:16px;border:1px solid var(--line);border-radius:10px;background:#f8fafc}.target b{display:block;font-size:17px;margin-bottom:6px}.warn{padding:12px;border-radius:9px;background:#fff4e5;color:#7a4b00}.btn{width:100%;border:0;border-radius:10px;padding:14px;background:var(--blue);color:#fff;font:inherit;font-weight:700;margin-top:18px}.btn:disabled{opacity:.55}.notice{margin-top:16px;padding:12px;border-radius:9px;background:#f2f4f7;color:#475467}.error{background:#feeceb;color:var(--danger)}.ok{background:#e8f7f0;color:#087a55}
+  </style>
+</head>
+<body><main class="card"><div class="brand">LGSale</div><div class="badge">桌機登入授權</div><h1>是否允許這部桌機登入？</h1><p>授權後，桌機將以你目前的業務帳號進入 LGSale。</p><div class="target"><b id="device">正在載入…</b><span>發起時間：<span id="createdAt">—</span></span></div><div class="warn">只有在你確實要授權這部電腦時才按確認。若 QR Code 來源不明，請直接關閉本頁。</div><button class="btn" id="approve" disabled>確認授權桌機登入</button><div class="notice" id="notice">QR Code 只能使用一次，並將於兩分鐘內失效。</div></main>
+<script>
+const $=s=>document.querySelector(s),token=new URLSearchParams(location.search).get('token'),notice=$('#notice'),approve=$('#approve');let verificationFresh=false;
+const fmt=value=>new Date(value).toLocaleString('zh-TW',{hour12:false});
+function bytes(value){const s=value.replace(/-/g,'+').replace(/_/g,'/');return Uint8Array.from(atob(s+'='.repeat((4-s.length%4)%4)),c=>c.charCodeAt(0))}
+function b64(value){let s='';new Uint8Array(value).forEach(x=>s+=String.fromCharCode(x));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function serialize(c){return{id:c.id,type:c.type,rawId:b64(c.rawId),authenticatorAttachment:c.authenticatorAttachment,response:{clientDataJSON:b64(c.response.clientDataJSON),authenticatorData:b64(c.response.authenticatorData),signature:b64(c.response.signature),userHandle:c.response.userHandle?b64(c.response.userHandle):null},clientExtensionResults:c.getClientExtensionResults()}}
+async function api(url,body){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body||{})}),j=await r.json();if(!r.ok)throw Error(j.error||'操作失敗');return j}
+async function verifyPasskey(){const o=await api('/api/auth/login/options',{accountType:'EMPLOYEE'});o.challenge=bytes(o.challenge);(o.allowCredentials||[]).forEach(x=>x.id=bytes(x.id));const credential=await navigator.credentials.get({publicKey:o});await api('/api/auth/login/verify',{credential:serialize(credential)});verificationFresh=true}
+async function load(){try{if(!token)throw Error('缺少桌機授權碼');const r=await fetch('/api/auth/desktop-approval/info?token='+encodeURIComponent(token)),j=await r.json();if(!r.ok)throw Error(j.error||'授權碼已失效');$('#device').textContent=j.deviceName;$('#createdAt').textContent=fmt(j.createdAt);verificationFresh=!!j.verificationFresh;if(j.approved)throw Error('此授權碼已經使用');approve.disabled=false}catch(e){notice.textContent=e.message;notice.className='notice error'}}
+approve.onclick=async()=>{try{approve.disabled=true;if(!verificationFresh){notice.textContent='請使用 Passkey／Face ID 確認本次授權…';notice.className='notice';await verifyPasskey()}const r=await fetch('/api/auth/desktop-approval/approve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})}),j=await r.json();if(!r.ok)throw Error(j.error||'授權失敗');notice.textContent='已授權「'+j.desktop+'」以 '+j.user+' 登入。現在可關閉本頁。';notice.className='notice ok';approve.textContent='授權完成'}catch(e){notice.textContent=e.name==='NotAllowedError'?'已取消 Face ID／Passkey 驗證。':e.message;notice.className='notice error';approve.disabled=false}};
+load();
+</script></body></html>

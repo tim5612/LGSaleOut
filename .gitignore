@@ -4,3 +4,4 @@
 **/.tmp_sheet_inspect/
 *.log
 .env
+uploads/task_photos/
