@@ -325,6 +325,50 @@ def dealers():
         return jsonify(error="經銷商資料庫查詢失敗：" + str(exc)), 503
 
 
+def _dealer_payload(data: dict) -> dict:
+    required = {"code":"經銷商代碼","name":"經銷商名稱","taxId":"統一編號","area":"區域","level":"經銷商級別","condition":"狀況"}
+    missing = [label for key,label in required.items() if not str(data.get(key, "")).strip()]
+    if missing:
+        raise ValueError("缺少欄位：" + "、".join(missing))
+    tax_id = str(data["taxId"]).strip()
+    if len(tax_id) != 8 or not tax_id.isdigit():
+        raise ValueError("統一編號必須是 8 位數字")
+    level = str(data["level"]).strip().upper()
+    if level not in {"A","B","C","D","E","Z"}:
+        raise ValueError("經銷商級別不正確")
+    condition = str(data["condition"]).strip().upper()
+    if condition not in {"ACTIVE","PENDING","CLOSED"}:
+        raise ValueError("經銷商狀況不正確")
+    return {"code":str(data["code"]).strip().upper(),"name":str(data["name"]).strip(),"taxId":tax_id,
+            "area":str(data["area"]).strip(),"level":level,"condition":condition,
+            "employeeId":int(data["employeeId"]) if data.get("employeeId") else None}
+
+
+@app.post("/api/dealers")
+def create_dealer():
+    try:
+        payload = _dealer_payload(request.get_json(silent=True) or {})
+        dealer_id = db.create_dealer(payload)
+        return jsonify(next(row for row in db.dealers() if row["id"] == dealer_id)), 201
+    except ValueError as exc:
+        return jsonify(error=str(exc)), 400
+    except Exception as exc:
+        return jsonify(error="經銷商建立失敗：" + str(exc)), 500
+
+
+@app.put("/api/dealers/<int:dealer_id>")
+def update_dealer(dealer_id: int):
+    try:
+        payload = _dealer_payload(request.get_json(silent=True) or {})
+        if not db.update_dealer(dealer_id, payload):
+            return jsonify(error="找不到經銷商"), 404
+        return jsonify(next(row for row in db.dealers() if row["id"] == dealer_id))
+    except ValueError as exc:
+        return jsonify(error=str(exc)), 400
+    except Exception as exc:
+        return jsonify(error="經銷商更新失敗：" + str(exc)), 500
+
+
 @app.get("/api/mobile-dashboard")
 def mobile_dashboard():
     try:

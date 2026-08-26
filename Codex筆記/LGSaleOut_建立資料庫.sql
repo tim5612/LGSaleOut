@@ -143,11 +143,17 @@ CREATE TABLE dbo.Dealer
     DealerId    bigint IDENTITY(1,1) NOT NULL,
     DealerCode  varchar(30) NOT NULL,
     DealerName  nvarchar(150) NOT NULL,
+    TaxId       varchar(20) NULL,
+    Area        nvarchar(100) NULL,
+    DealerCondition varchar(20) NOT NULL
+        CONSTRAINT DF_Dealer_Condition DEFAULT ('ACTIVE'),
     CreatedAt   datetime2(0) NOT NULL
         CONSTRAINT DF_Dealer_CreatedAt DEFAULT (sysdatetime()),
 
     CONSTRAINT PK_Dealer PRIMARY KEY CLUSTERED (DealerId),
-    CONSTRAINT UQ_Dealer_DealerCode UNIQUE (DealerCode)
+    CONSTRAINT UQ_Dealer_DealerCode UNIQUE (DealerCode),
+    CONSTRAINT CK_Dealer_Condition
+        CHECK (DealerCondition IN ('ACTIVE','PENDING','CLOSED'))
 );
 GO
 

@@ -342,19 +342,77 @@ def toggle_task(task_id: int) -> bool:
 
 def dealers(dealer_id: int | None = None) -> list[dict[str, Any]]:
     sql = """
-    SELECT d.DealerId,d.DealerCode,d.DealerName,COALESCE(l.DealerStatus,'—'),COALESCE(e.EmployeeName,'未指派'),MAX(v.ReportDateTime)
+    SELECT d.DealerId,d.DealerCode,d.DealerName,COALESCE(l.DealerStatus,'—'),COALESCE(e.EmployeeName,'未指派'),MAX(v.ReportDateTime),
+           d.TaxId,d.Area,d.DealerCondition
       FROM dbo.Dealer d
       LEFT JOIN dbo.DealerLevelHistory l ON l.DealerId=d.DealerId AND l.EndDateTime IS NULL
       LEFT JOIN dbo.DealerAssignmentHistory a ON a.DealerId=d.DealerId AND a.EndDateTime IS NULL
       LEFT JOIN dbo.Employee e ON e.EmployeeId=a.EmployeeId
       LEFT JOIN dbo.StoreVisit v ON v.DealerId=d.DealerId AND v.RecordStatus='ACTIVE'
      WHERE (%s IS NULL OR d.DealerId=%s)
-     GROUP BY d.DealerId,d.DealerCode,d.DealerName,l.DealerStatus,e.EmployeeName
+     GROUP BY d.DealerId,d.DealerCode,d.DealerName,l.DealerStatus,e.EmployeeName,d.TaxId,d.Area,d.DealerCondition
      ORDER BY d.DealerId
     """
     with connect() as conn:
         cur=conn.cursor(); cur.execute(sql, (dealer_id, dealer_id))
-        return [{"id":int(r[0]),"code":r[1],"name":r[2],"level":r[3],"employee":r[4],"lastVisit":r[5].date().isoformat() if r[5] else None} for r in cur.fetchall()]
+        return [{"id":int(r[0]),"code":r[1],"name":r[2],"level":r[3],"employee":r[4],"lastVisit":r[5].date().isoformat() if r[5] else None,
+                 "taxId":r[6] or "","area":r[7] or "","condition":r[8]} for r in cur.fetchall()]
+
+
+def create_dealer(data: dict[str, Any]) -> int:
+    conn = connect()
+    try:
+        cur = conn.cursor(); creator_id = _creator_id(cur)
+        row = _one(cur, """INSERT dbo.Dealer(DealerCode,DealerName,TaxId,Area,DealerCondition)
+                           OUTPUT inserted.DealerId VALUES(%s,%s,%s,%s,%s)""",
+                   (data["code"], data["name"], data["taxId"], data["area"], data["condition"]))
+        dealer_id = int(row[0])
+        cur.execute("""INSERT dbo.DealerLevelHistory(DealerId,DealerStatus,StartDateTime,ChangeReason)
+                       VALUES(%s,%s,SYSDATETIME(),%s)""", (dealer_id, data["level"], "建立經銷商主檔"))
+        employee_id = data.get("employeeId")
+        if employee_id:
+            cur.execute("""INSERT dbo.DealerAssignmentHistory
+                           (DealerId,EmployeeId,StartDateTime,ChangeReason,CreatedByEmployeeId)
+                           VALUES(%s,%s,SYSDATETIME(),%s,%s)""",
+                        (dealer_id, int(employee_id), "建立經銷商並指派負責業務", creator_id))
+        conn.commit(); return dealer_id
+    except Exception:
+        conn.rollback(); raise
+    finally:
+        conn.close()
+
+
+def update_dealer(dealer_id: int, data: dict[str, Any]) -> bool:
+    conn = connect()
+    try:
+        cur = conn.cursor(); creator_id = _creator_id(cur)
+        cur.execute("""UPDATE dbo.Dealer SET DealerCode=%s,DealerName=%s,TaxId=%s,Area=%s,DealerCondition=%s
+                        WHERE DealerId=%s""",
+                    (data["code"], data["name"], data["taxId"], data["area"], data["condition"], dealer_id))
+        if cur.rowcount == 0:
+            conn.rollback(); return False
+        current_level = _one(cur, "SELECT DealerLevelHistoryId,DealerStatus FROM dbo.DealerLevelHistory WHERE DealerId=%s AND EndDateTime IS NULL", (dealer_id,))
+        if current_level is None or current_level[1] != data["level"]:
+            if current_level is not None:
+                cur.execute("UPDATE dbo.DealerLevelHistory SET EndDateTime=SYSDATETIME() WHERE DealerLevelHistoryId=%s", (current_level[0],))
+            cur.execute("INSERT dbo.DealerLevelHistory(DealerId,DealerStatus,StartDateTime,ChangeReason) VALUES(%s,%s,SYSDATETIME(),%s)",
+                        (dealer_id, data["level"], "經銷商基本資料維護"))
+        requested_employee = int(data["employeeId"]) if data.get("employeeId") else None
+        current_owner = _one(cur, "SELECT DealerAssignmentId,EmployeeId FROM dbo.DealerAssignmentHistory WHERE DealerId=%s AND EndDateTime IS NULL", (dealer_id,))
+        current_employee = int(current_owner[1]) if current_owner else None
+        if current_employee != requested_employee:
+            if current_owner:
+                cur.execute("UPDATE dbo.DealerAssignmentHistory SET EndDateTime=SYSDATETIME() WHERE DealerAssignmentId=%s", (current_owner[0],))
+            if requested_employee is not None:
+                cur.execute("""INSERT dbo.DealerAssignmentHistory
+                               (DealerId,EmployeeId,StartDateTime,ChangeReason,CreatedByEmployeeId)
+                               VALUES(%s,%s,SYSDATETIME(),%s,%s)""",
+                            (dealer_id, requested_employee, "經銷商基本資料維護", creator_id))
+        conn.commit(); return True
+    except Exception:
+        conn.rollback(); raise
+    finally:
+        conn.close()
 
 
 def products() -> list[dict[str, Any]]:
@@ -766,8 +824,11 @@ def create_change(data:dict[str,Any]) -> dict[str,int]:
             receiver_id=int(data['receiverEmployeeId']);dealer_ids=[int(x) for x in data.get('dealerIds') or []]
             for dealer_id in dealer_ids:
                 current=_one(cur,"SELECT DealerAssignmentId,EmployeeId FROM dbo.DealerAssignmentHistory WHERE DealerId=%s AND EndDateTime IS NULL",(dealer_id,))
-                if current is None or int(current[1]) != employee_id:raise ValueError(f"經銷商 {dealer_id} 的目前負責人已變更，請重新載入")
-                cur.execute("UPDATE dbo.DealerAssignmentHistory SET EndDateTime=%s WHERE DealerAssignmentId=%s",(effective,current[0]))
+                if current is not None and int(current[1]) != employee_id:raise ValueError(f"經銷商 {dealer_id} 的目前負責人已變更，請重新載入")
+                if current is not None and int(current[1]) == receiver_id:
+                    continue
+                if current is not None:
+                    cur.execute("UPDATE dbo.DealerAssignmentHistory SET EndDateTime=%s WHERE DealerAssignmentId=%s",(effective,current[0]))
                 cur.execute("INSERT dbo.DealerAssignmentHistory(DealerId,EmployeeId,StartDateTime,ChangeReason,CreatedByEmployeeId) VALUES(%s,%s,%s,%s,%s)",(dealer_id,receiver_id,effective,reason,creator_id));dealer_changed+=1
         conn.commit();return {'orgChanged':org_changed,'dealerChanged':dealer_changed}
     except Exception:conn.rollback();raise
