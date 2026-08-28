@@ -262,7 +262,7 @@ def tasks() -> list[dict[str, Any]]:
            creator.EmployeeName,
            t.SampleTaskExecutionId,t.SampleApprovedAt,sampleDealer.DealerName,
            COUNT(DISTINCT e.TaskExecutionId),
-           COUNT(DISTINCT CASE WHEN e.SubmittedAt IS NOT NULL THEN e.TaskExecutionId END),
+           COUNT(DISTINCT CASE WHEN e.SubmittedAt IS NOT NULL OR p.TaskPhotoId IS NOT NULL THEN e.TaskExecutionId END),
            COUNT(DISTINCT p.TaskPhotoId),
            COUNT(DISTINCT samplePhoto.TaskPhotoId)
       FROM dbo.VisitTask t
@@ -519,16 +519,20 @@ def photo_tasks(employee_id: int | None = None) -> list[dict[str,Any]]:
                 cur.execute("SELECT TaskPhotoId,PhotoDescription,StoredFileName,StoredFilePath,SortOrder FROM dbo.VisitTaskPhoto WHERE TaskExecutionId=%s ORDER BY SortOrder,TaskPhotoId",(r[9],));samples=[{"photoId":int(x[0]),"description":x[1] or "樣本照片","fileName":x[2],"filePath":x[3],"sortOrder":int(x[4])} for x in cur.fetchall()]
             cur.execute("SELECT TaskPhotoId,PhotoDescription,StoredFileName,StoredFilePath,SortOrder,SampleTaskPhotoId FROM dbo.VisitTaskPhoto WHERE TaskExecutionId=%s ORDER BY SortOrder,TaskPhotoId",(r[0],))
             photos=[{"photoId":int(x[0]),"description":x[1] or "照片","fileName":x[2],"filePath":x[3],"sortOrder":int(x[4]),"samplePhotoId":int(x[5]) if x[5] else None} for x in cur.fetchall()]
-            result.append({"executionId":int(r[0]),"taskId":int(r[1]),"title":r[2],"instruction":r[3],"dealerId":int(r[4]),"dealer":r[5],"validFrom":r[6].isoformat(),"dueDate":r[7].isoformat(),"sample":samples,"photos":photos,"completed":r[8] is not None,"submittedAt":r[8].isoformat(timespec="minutes") if r[8] else None,"executionNote":r[10]})
+            edit_until = r[8] + timedelta(hours=72) if r[8] else None
+            result.append({"executionId":int(r[0]),"taskId":int(r[1]),"title":r[2],"instruction":r[3],"dealerId":int(r[4]),"dealer":r[5],"validFrom":r[6].isoformat(),"dueDate":r[7].isoformat(),"sample":samples,"photos":photos,"completed":r[8] is not None,"submittedAt":r[8].isoformat(timespec="minutes") if r[8] else None,"editUntil":edit_until.isoformat(timespec="minutes") if edit_until else None,"canEdit":r[8] is None or datetime.now() < edit_until,"executionNote":r[10]})
         return result
 
 
-def add_photo(execution_id:int,description:str,stored_file_name:str|None=None,stored_file_path:str|None=None,sample_photo_id:int|None=None,employee_id:int|None=None,replace_photo_id:int|None=None) -> int:
+def add_photo(execution_id:int,description:str,stored_file_name:str|None=None,stored_file_path:str|None=None,sample_photo_id:int|None=None,employee_id:int|None=None,replace_photo_id:int|None=None) -> tuple[int,datetime]:
     conn=connect()
     try:
         token=stored_file_name or uuid.uuid4().hex+".jpg";path=stored_file_path or "prototype://"+token;cur=conn.cursor()
-        allowed=_one(cur,"SELECT 1 FROM dbo.VisitTaskExecution WHERE TaskExecutionId=%s AND SubmittedAt IS NULL AND (%s IS NULL OR ResponsibleEmployeeId=%s)",(execution_id,employee_id,employee_id))
-        if allowed is None:raise PermissionError("此任務不存在、已完成或不屬於目前登入人員")
+        allowed=_one(cur,"""SELECT SubmittedAt FROM dbo.VisitTaskExecution
+                            WHERE TaskExecutionId=%s
+                              AND (%s IS NULL OR ResponsibleEmployeeId=%s)
+                              AND (SubmittedAt IS NULL OR DATEADD(hour,72,SubmittedAt)>SYSDATETIME())""",(execution_id,employee_id,employee_id))
+        if allowed is None:raise PermissionError("此任務不存在、不屬於目前登入人員或已超過 72 小時修改期限")
         if replace_photo_id is not None:
             row=_one(cur,"""UPDATE dbo.VisitTaskPhoto SET SampleTaskPhotoId=%s,PhotoDescription=%s,
                        StoredFileName=%s,StoredFilePath=%s,CapturedAt=SYSDATETIME()
@@ -537,7 +541,12 @@ def add_photo(execution_id:int,description:str,stored_file_name:str|None=None,st
             if row is None:raise LookupError("找不到要重拍的照片")
         else:
             row=_one(cur,"""INSERT dbo.VisitTaskPhoto(TaskExecutionId,SampleTaskPhotoId,PhotoDescription,StoredFileName,StoredFilePath,CapturedAt,SortOrder) OUTPUT inserted.TaskPhotoId VALUES(%s,%s,%s,%s,%s,SYSDATETIME(),(SELECT COUNT(*) FROM dbo.VisitTaskPhoto WHERE TaskExecutionId=%s))""",(execution_id,sample_photo_id,description,token,path,execution_id))
-        conn.commit();return int(row[0])
+        completed_by=employee_id or _one(cur,"SELECT ResponsibleEmployeeId FROM dbo.VisitTaskExecution WHERE TaskExecutionId=%s",(execution_id,))[0]
+        submitted=_one(cur,"""UPDATE dbo.VisitTaskExecution
+                              SET CompletedByEmployeeId=COALESCE(CompletedByEmployeeId,%s),
+                                  SubmittedAt=COALESCE(SubmittedAt,SYSDATETIME())
+                              OUTPUT inserted.SubmittedAt WHERE TaskExecutionId=%s""",(completed_by,execution_id))
+        conn.commit();return int(row[0]),submitted[0]
     except Exception:conn.rollback();raise
     finally:conn.close()
 
@@ -551,8 +560,9 @@ def complete_execution(execution_id:int,note:str|None,employee_id:int|None=None)
             (SELECT COUNT(*) FROM dbo.VisitTaskPhoto p WHERE p.TaskExecutionId=e.TaskExecutionId)
             FROM dbo.VisitTaskExecution e JOIN dbo.VisitTask t ON t.VisitTaskId=e.VisitTaskId WHERE e.TaskExecutionId=%s""",(execution_id,))
         if state is None:raise LookupError("找不到任務執行資料")
-        if state[2] is not None:raise ValueError("此任務已完成")
         if employee_id is not None and int(state[1]) != employee_id:raise PermissionError("此任務不屬於目前登入人員")
+        if state[2] is not None:
+            return state[2]
         if note is None and state[0] is not None and int(state[4]) < int(state[3]):raise ValueError("尚有樣本對應照片未完成")
         if note is None and int(state[5]) == 0:raise ValueError("請至少上傳一張照片，或填寫不拍照原因")
         if note is not None and int(state[5]) > 0:raise ValueError("已有上傳照片，不能改用不拍照完成")
@@ -749,7 +759,8 @@ def task_detail(task_id: int) -> dict[str, Any] | None:
     with connect() as conn:
         cur=conn.cursor();cur.execute("""
             SELECT e.TaskExecutionId,d.DealerId,d.DealerCode,d.DealerName,emp.EmployeeName,
-                   e.SubmittedAt,e.ExecutionNote,CASE WHEN t.SampleTaskExecutionId=e.TaskExecutionId THEN 1 ELSE 0 END
+                   COALESCE(e.SubmittedAt,(SELECT MIN(p.UploadedAt) FROM dbo.VisitTaskPhoto p WHERE p.TaskExecutionId=e.TaskExecutionId)),
+                   e.ExecutionNote,CASE WHEN t.SampleTaskExecutionId=e.TaskExecutionId THEN 1 ELSE 0 END
               FROM dbo.VisitTaskExecution e JOIN dbo.VisitTask t ON t.VisitTaskId=e.VisitTaskId
               JOIN dbo.Dealer d ON d.DealerId=e.DealerId JOIN dbo.Employee emp ON emp.EmployeeId=e.ResponsibleEmployeeId
              WHERE e.VisitTaskId=%s ORDER BY e.SubmittedAt DESC,d.DealerName

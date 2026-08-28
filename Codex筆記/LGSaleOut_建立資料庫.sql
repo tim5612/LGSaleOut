@@ -664,12 +664,7 @@ CREATE TABLE dbo.VisitTaskExecution
         CHECK
         (
             SubmittedAt IS NULL
-            OR
-            (
-                CompletedByEmployeeId IS NOT NULL
-                AND ExecutionNote IS NOT NULL
-                AND LEN(LTRIM(RTRIM(ExecutionNote))) > 0
-            )
+            OR CompletedByEmployeeId IS NOT NULL
         )
 );
 GO

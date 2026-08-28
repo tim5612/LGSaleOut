@@ -564,11 +564,12 @@ def upload_photo(execution_id: int):
             filename=secrets.token_hex(16)+extension
             upload.save(UPLOAD_DIR/filename)
             stored_path=f"uploads/task_photos/{filename}"
-            photo_id=db.add_photo(execution_id,description,filename,stored_path,sample_id,session["user"].get("employeeId"),replace_photo_id)
+            photo_id,submitted_at=db.add_photo(execution_id,description,filename,stored_path,sample_id,session["user"].get("employeeId"),replace_photo_id)
         else:
-            photo_id = db.add_photo(execution_id, description,sample_photo_id=sample_id,employee_id=session["user"].get("employeeId"),replace_photo_id=replace_photo_id)
+            photo_id,submitted_at = db.add_photo(execution_id, description,sample_photo_id=sample_id,employee_id=session["user"].get("employeeId"),replace_photo_id=replace_photo_id)
             stored_path=None
-        return jsonify(taskPhotoId=photo_id, executionId=execution_id, description=description,fileUrl=("/"+stored_path) if stored_path else None), 201
+        return jsonify(taskPhotoId=photo_id, executionId=execution_id, description=description,fileUrl=("/"+stored_path) if stored_path else None,
+                       submittedAt=submitted_at.isoformat(timespec="seconds"),editUntil=(submitted_at+timedelta(hours=72)).isoformat(timespec="seconds")), 201
     except Exception as exc:
         status=403 if isinstance(exc,PermissionError) else 404 if isinstance(exc,LookupError) else 500
         return jsonify(error="照片資料建立失敗：" + str(exc)), status
@@ -583,7 +584,8 @@ def task_photo_file(filename:str):
 def complete_execution(execution_id: int):
     data = request.get_json(silent=True) or {}
     photo_count = int(data.get("photoCount", 0))
-    note = str(data.get("executionNote", "")).strip()
+    raw_note = data.get("executionNote")
+    note = "" if raw_note is None else str(raw_note).strip()
     if photo_count == 0 and not note:
         return jsonify(error="不拍照完成時必須填寫原因"), 400
     try:
@@ -628,4 +630,17 @@ if __name__ == "__main__":
     print(f"Photo:   http://127.0.0.1:{PORT}/photo")
     if address := lan_ip():
         print(f"LAN:     http://{address}:{PORT}/mobile")
-    app.run(host="0.0.0.0", port=PORT, debug=False)
+    # 測試環境可透過 LGSALE_DEV_RELOAD=1 啟用程式碼自動重載。
+    # 僅啟用 reloader，不開啟 Flask debugger，避免對外暴露除錯介面。
+    dev_reload = os.getenv("LGSALE_DEV_RELOAD", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    app.run(
+        host="0.0.0.0",
+        port=PORT,
+        debug=False,
+        use_reloader=dev_reload,
+    )
