@@ -166,14 +166,20 @@ GO
 
 CREATE TABLE dbo.Dealer
 (
-    DealerId    bigint IDENTITY(1,1) NOT NULL,
-    DealerCode  varchar(30) NOT NULL,
-    DealerName  nvarchar(150) NOT NULL,
-    CreatedAt   datetime2(0) NOT NULL
+    DealerId       bigint IDENTITY(1,1) NOT NULL,
+    DealerCode     varchar(30) NOT NULL,
+    DealerName     nvarchar(150) NOT NULL,
+    TaxId          varchar(20) NULL,
+    Area           nvarchar(100) NULL,
+    DealerCondition varchar(20) NOT NULL
+        CONSTRAINT DF_Dealer_Condition DEFAULT ('ACTIVE'),
+    CreatedAt      datetime2(0) NOT NULL
         CONSTRAINT DF_Dealer_CreatedAt DEFAULT (sysdatetime()),
 
     CONSTRAINT PK_Dealer PRIMARY KEY CLUSTERED (DealerId),
-    CONSTRAINT UQ_Dealer_DealerCode UNIQUE (DealerCode)
+    CONSTRAINT UQ_Dealer_DealerCode UNIQUE (DealerCode),
+    CONSTRAINT CK_Dealer_Condition
+        CHECK (DealerCondition IN ('ACTIVE','PENDING','CLOSED'))
 );
 GO
 
@@ -240,6 +246,43 @@ GO
 
 CREATE INDEX IX_DealerAssignmentHistory_DealerPeriod
     ON dbo.DealerAssignmentHistory (DealerId, StartDateTime, EndDateTime);
+GO
+
+CREATE TABLE dbo.DealerTransferReview
+(
+    DealerTransferReviewId bigint IDENTITY(1,1) NOT NULL,
+    DealerId                bigint NOT NULL,
+    SourceDealerAssignmentId bigint NULL,
+    SourceEmployeeId        bigint NULL,
+    TriggerType             varchar(30) NOT NULL,
+    FromOrgUnitId           bigint NULL,
+    ToOrgUnitId             bigint NULL,
+    TriggeredAt             datetime2(0) NOT NULL,
+    ReviewStatus            varchar(20) NOT NULL
+        CONSTRAINT DF_DealerTransferReview_Status DEFAULT ('OPEN'),
+    ResolvedEmployeeId      bigint NULL,
+    ResolvedAt              datetime2(0) NULL,
+    ResolvedByEmployeeId    bigint NULL,
+    ResolutionNote          nvarchar(500) NULL,
+    CreatedAt               datetime2(0) NOT NULL
+        CONSTRAINT DF_DealerTransferReview_CreatedAt DEFAULT (sysdatetime()),
+
+    CONSTRAINT PK_DealerTransferReview PRIMARY KEY CLUSTERED (DealerTransferReviewId),
+    CONSTRAINT FK_DealerTransferReview_Dealer FOREIGN KEY (DealerId) REFERENCES dbo.Dealer (DealerId),
+    CONSTRAINT FK_DealerTransferReview_SourceAssignment FOREIGN KEY (SourceDealerAssignmentId) REFERENCES dbo.DealerAssignmentHistory (DealerAssignmentId),
+    CONSTRAINT FK_DealerTransferReview_SourceEmployee FOREIGN KEY (SourceEmployeeId) REFERENCES dbo.Employee (EmployeeId),
+    CONSTRAINT FK_DealerTransferReview_FromOrg FOREIGN KEY (FromOrgUnitId) REFERENCES dbo.OrganizationUnit (OrgUnitId),
+    CONSTRAINT FK_DealerTransferReview_ToOrg FOREIGN KEY (ToOrgUnitId) REFERENCES dbo.OrganizationUnit (OrgUnitId),
+    CONSTRAINT FK_DealerTransferReview_ResolvedEmployee FOREIGN KEY (ResolvedEmployeeId) REFERENCES dbo.Employee (EmployeeId),
+    CONSTRAINT FK_DealerTransferReview_ResolvedBy FOREIGN KEY (ResolvedByEmployeeId) REFERENCES dbo.Employee (EmployeeId),
+    CONSTRAINT CK_DealerTransferReview_Trigger CHECK (TriggerType IN ('ORG_MOVE','TERMINATION','MANUAL_UNASSIGNED')),
+    CONSTRAINT CK_DealerTransferReview_Status CHECK (ReviewStatus IN ('OPEN','RETAINED','TRANSFERRED'))
+);
+GO
+
+CREATE UNIQUE INDEX UX_DealerTransferReview_Open
+    ON dbo.DealerTransferReview (DealerId)
+    WHERE ReviewStatus = 'OPEN';
 GO
 
 /* =========================================================
@@ -641,7 +684,7 @@ CREATE TABLE dbo.StoreVisitProductDetail
     CONSTRAINT CK_StoreVisitProductDetail_SellOutQuantity
         CHECK (SellOutQuantity IS NULL OR SellOutQuantity BETWEEN 1 AND 10),
     CONSTRAINT CK_StoreVisitProductDetail_DisplayQuantity
-        CHECK (DisplayQuantity IS NULL OR DisplayQuantity = 1),
+        CHECK (DisplayQuantity IS NULL OR DisplayQuantity BETWEEN 1 AND 10),
     CONSTRAINT CK_StoreVisitProductDetail_SellOutPair
         CHECK
         (
@@ -804,7 +847,6 @@ SELECT
 FROM sys.tables
 WHERE is_ms_shipped = 0;
 
-IF (SELECT COUNT(*) FROM sys.tables WHERE is_ms_shipped = 0) <> 20
-    THROW 50020, N'資料表數量不是 ERD 預期的 20 張。', 1;
+IF (SELECT COUNT(*) FROM sys.tables WHERE is_ms_shipped = 0) <> 21
+    THROW 50020, N'資料表數量不是 ERD 預期的 21 張。', 1;
 GO
-

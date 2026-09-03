@@ -30,11 +30,12 @@ from werkzeug.utils import secure_filename
 import qrcode
 import lgsale_db as db
 import lgsale_auth as auth
+from lgsale_config import required
 
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / "uploads" / "task_photos"
-PORT = int(os.getenv("LGSALEOUT_PORT", "8097"))
+PORT = int(required("LGSALEOUT_PORT"))
 app = Flask(__name__)
 app.secret_key = os.getenv("LGSALEOUT_SESSION_SECRET") or secrets.token_hex(32)
 app.config.update(
@@ -477,6 +478,26 @@ def create_change():
     try:return jsonify(db.create_change(data)),201
     except ValueError as exc:return jsonify(error=str(exc)),409
     except Exception as exc:return jsonify(error="異動建立失敗："+str(exc)),500
+
+
+@app.get("/api/dealer-transfer-candidates")
+def dealer_transfer_candidates():
+    try:return jsonify(db.dealer_transfer_candidates())
+    except Exception as exc:return jsonify(error="經銷商轉移清單載入失敗："+str(exc)),503
+
+
+@app.post("/api/dealer-transfers")
+def transfer_dealers():
+    try:return jsonify(changed=db.transfer_dealers(request.get_json(silent=True) or {})),201
+    except ValueError as exc:return jsonify(error=str(exc)),409
+    except Exception as exc:return jsonify(error="經銷商轉移失敗："+str(exc)),500
+
+
+@app.post("/api/dealer-transfers/retain")
+def retain_dealers():
+    try:return jsonify(changed=db.retain_dealers(request.get_json(silent=True) or {}))
+    except ValueError as exc:return jsonify(error=str(exc)),409
+    except Exception as exc:return jsonify(error="經銷商保留確認失敗："+str(exc)),500
 
 
 @app.post("/api/visits")

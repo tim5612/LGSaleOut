@@ -26,11 +26,12 @@ from webauthn.helpers.structs import (
 )
 
 import lgsale_db as db
+from lgsale_config import required
 
 
-RP_ID = os.getenv("LGSALEOUT_RP_ID", "lgdeva.superb-supplies.com.tw")
+RP_ID = required("LGSALEOUT_RP_ID")
 RP_NAME = os.getenv("LGSALEOUT_RP_NAME", "LGSale")
-ORIGIN = os.getenv("LGSALEOUT_ORIGIN", "https://lgdeva.superb-supplies.com.tw")
+ORIGIN = required("LGSALEOUT_ORIGIN")
 DESKTOP_APPROVAL_TTL_SECONDS = 120
 _desktop_approval_lock = threading.Lock()
 _desktop_approvals: dict[str, dict[str, Any]] = {}

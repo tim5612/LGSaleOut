@@ -222,6 +222,40 @@ CREATE INDEX IX_DealerAssignmentHistory_DealerPeriod
     ON dbo.DealerAssignmentHistory (DealerId, StartDateTime, EndDateTime);
 GO
 
+CREATE TABLE dbo.DealerTransferReview
+(
+    DealerTransferReviewId bigint IDENTITY(1,1) NOT NULL,
+    DealerId                bigint NOT NULL,
+    SourceDealerAssignmentId bigint NULL,
+    SourceEmployeeId        bigint NULL,
+    TriggerType             varchar(30) NOT NULL,
+    FromOrgUnitId           bigint NULL,
+    ToOrgUnitId             bigint NULL,
+    TriggeredAt             datetime2(0) NOT NULL,
+    ReviewStatus            varchar(20) NOT NULL DEFAULT ('OPEN'),
+    ResolvedEmployeeId      bigint NULL,
+    ResolvedAt              datetime2(0) NULL,
+    ResolvedByEmployeeId    bigint NULL,
+    ResolutionNote          nvarchar(500) NULL,
+    CreatedAt               datetime2(0) NOT NULL DEFAULT (sysdatetime()),
+    CONSTRAINT PK_DealerTransferReview PRIMARY KEY CLUSTERED (DealerTransferReviewId),
+    CONSTRAINT FK_DealerTransferReview_Dealer FOREIGN KEY (DealerId) REFERENCES dbo.Dealer (DealerId),
+    CONSTRAINT FK_DealerTransferReview_SourceAssignment FOREIGN KEY (SourceDealerAssignmentId) REFERENCES dbo.DealerAssignmentHistory (DealerAssignmentId),
+    CONSTRAINT FK_DealerTransferReview_SourceEmployee FOREIGN KEY (SourceEmployeeId) REFERENCES dbo.Employee (EmployeeId),
+    CONSTRAINT FK_DealerTransferReview_FromOrg FOREIGN KEY (FromOrgUnitId) REFERENCES dbo.OrganizationUnit (OrgUnitId),
+    CONSTRAINT FK_DealerTransferReview_ToOrg FOREIGN KEY (ToOrgUnitId) REFERENCES dbo.OrganizationUnit (OrgUnitId),
+    CONSTRAINT FK_DealerTransferReview_ResolvedEmployee FOREIGN KEY (ResolvedEmployeeId) REFERENCES dbo.Employee (EmployeeId),
+    CONSTRAINT FK_DealerTransferReview_ResolvedBy FOREIGN KEY (ResolvedByEmployeeId) REFERENCES dbo.Employee (EmployeeId),
+    CONSTRAINT CK_DealerTransferReview_Trigger CHECK (TriggerType IN ('ORG_MOVE','TERMINATION','MANUAL_UNASSIGNED')),
+    CONSTRAINT CK_DealerTransferReview_Status CHECK (ReviewStatus IN ('OPEN','RETAINED','TRANSFERRED'))
+);
+GO
+
+CREATE UNIQUE INDEX UX_DealerTransferReview_Open
+    ON dbo.DealerTransferReview (DealerId)
+    WHERE ReviewStatus = 'OPEN';
+GO
+
 /* =========================================================
    3. User accounts and passkeys
    ========================================================= */
@@ -559,7 +593,7 @@ CREATE TABLE dbo.StoreVisitProductDetail
     CONSTRAINT CK_StoreVisitProductDetail_SellOutQuantity
         CHECK (SellOutQuantity IS NULL OR SellOutQuantity >= 0),
     CONSTRAINT CK_StoreVisitProductDetail_DisplayQuantity
-        CHECK (DisplayQuantity IS NULL OR DisplayQuantity >= 0),
+        CHECK (DisplayQuantity IS NULL OR DisplayQuantity BETWEEN 1 AND 10),
     CONSTRAINT CK_StoreVisitProductDetail_HasValue
         CHECK
         (

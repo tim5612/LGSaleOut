@@ -27,7 +27,7 @@
 
 ### 2.1 資料表
 
-目前依最新版 ERD 建立 20 張資料表：
+目前依最新版 ERD 建立 21 張資料表：
 
 #### 人員與組織
 
@@ -41,36 +41,38 @@
 5. `Dealer`
 6. `DealerLevelHistory`
 7. `DealerAssignmentHistory`
+8. `DealerTransferReview`
 
 #### 統一登入與 Passkey
 
-8. `UserAccount`
-9. `PasskeyCredential`
-10. `PasskeyRegistrationInvitation`
+9. `UserAccount`
+10. `PasskeyCredential`
+11. `PasskeyRegistrationInvitation`
 
 #### 商品、匯入與庫存
 
-11. `Product`
-12. `ImportBatch`
-13. `MonthlyOpeningInventoryDetail`
-14. `OpeningInventoryProductExclusion`
-15. `SellInTransaction`
+12. `Product`
+13. `ImportBatch`
+14. `MonthlyOpeningInventoryDetail`
+15. `OpeningInventoryProductExclusion`
+16. `SellInTransaction`
 
 #### 巡店回報
 
-16. `StoreVisit`
-17. `StoreVisitProductDetail`
+17. `StoreVisit`
+18. `StoreVisitProductDetail`
 
 #### 公司任務與照片
 
-18. `VisitTask`
-19. `VisitTaskExecution`
-20. `VisitTaskPhoto`
+19. `VisitTask`
+20. `VisitTaskExecution`
+21. `VisitTaskPhoto`
 
 ### 2.2 重要資料規則
 
 - 員工職級、員工處所及經銷商負責關係均保留歷史期間。
 - 同一時間只能有一筆有效的員工職級、員工處所及經銷商負責關係。
+- 人員換處所不自動換線，改由 `DealerTransferReview` 建立逐家待確認事項；離職則先結束目前負責關係，再建立待移轉事項。
 - 經銷商等級允許 `A`、`B`、`C`、`D`、`E`、`Z`。
 - `UserAccount` 分為 `EMPLOYEE` 與 `DEALER`，只能對應其中一種身分。
 - 期初庫存排除範圍分為：
@@ -78,7 +80,7 @@
   - `DEALER`：只適用指定經銷商，`DealerId` 必填。
 - `StoreVisit.RecordStatus` 使用 `ACTIVE` 或 `VOIDED`。
 - `SellOutQuantity` 只能是 `NULL` 或 `1～10`。
-- `DisplayQuantity` 只能是 `NULL` 或 `1`。
+- `DisplayQuantity` 只能是 `NULL` 或 `1～10`。
 - `SellOutQuantity` 與 `SellOutDate` 必須同時有值或同時為 `NULL`。
 - 任務截止日 `DueDate` 不得早於開始日 `ValidFrom`。
 - 同一任務、同一家經銷商只能有一筆 `VisitTaskExecution`。
@@ -88,7 +90,7 @@
 ## 3. DummyFile.sql 重點
 
 - 使用 `SET XACT_ABORT ON` 與 Transaction；發生錯誤時會整批回復。
-- 為全部 20 張資料表建立測試資料。
+- 為全部 21 張資料表建立測試資料。
 - 如果主要資料表已有資料，會停止執行並提示先執行 `EraseDummy.sql`。
 - 測試資料包含：
   - 台北、新竹及台中處所。

@@ -4,4 +4,9 @@
 **/.tmp_sheet_inspect/
 *.log
 .env
+.env.local
+.lgdevb-session-secret
+.lgsale-session-secret
+.venv/
+runtime/
 uploads/task_photos/

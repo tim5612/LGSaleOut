@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import os
 import uuid
 import base64
 from datetime import date, datetime, timedelta
 from typing import Any
 
 import pytds
+from lgsale_config import required
 
 
 def _b64url_decode(value: str) -> bytes:
@@ -226,11 +226,11 @@ POSITION_TO_DB = {value: key for key, value in POSITION_TO_UI.items()}
 
 def connect():
     return pytds.connect(
-        os.getenv("LGSALEOUT_DB_HOST", "127.0.0.1"),
-        port=int(os.getenv("LGSALEOUT_DB_PORT", "49172")),
-        database=os.getenv("LGSALEOUT_DB_NAME", "LGSaleOut"),
-        user=os.getenv("LGSALEOUT_DB_USER", "Tim"),
-        password=os.getenv("LGSALEOUT_DB_PASSWORD", "561202"),
+        required("LGSALEOUT_DB_HOST"),
+        port=int(required("LGSALEOUT_DB_PORT")),
+        database=required("LGSALEOUT_DB_NAME"),
+        user=required("LGSALEOUT_DB_USER"),
+        password=required("LGSALEOUT_DB_PASSWORD"),
         login_timeout=8,
         timeout=15,
     )
@@ -239,6 +239,29 @@ def connect():
 def _one(cur, sql: str, params=()):
     cur.execute(sql, params)
     return cur.fetchone()
+
+
+def _optional_quantity(item: dict[str, Any], key: str, label: str) -> int | None:
+    raw = item.get(key)
+    if raw is None or raw == "":
+        return None
+    try:
+        value = int(raw)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{label}數量必須是整數") from exc
+    if not 1 <= value <= 10:
+        raise ValueError(f"{label}數量只能是 1～10")
+    return value
+
+
+def _parse_effective(value: Any) -> datetime:
+    try:
+        effective = datetime.fromisoformat(str(value).strip())
+    except (TypeError, ValueError) as exc:
+        raise ValueError("生效時間格式不正確") from exc
+    if effective.tzinfo is not None:
+        effective = effective.astimezone().replace(tzinfo=None)
+    return effective.replace(second=0, microsecond=0)
 
 
 def _creator_id(cur) -> int:
@@ -310,6 +333,7 @@ def create_task(data: dict[str, Any]) -> dict[str, Any]:
             SELECT TOP (%s) d.DealerId,a.EmployeeId
               FROM dbo.Dealer d
               JOIN dbo.DealerAssignmentHistory a ON a.DealerId=d.DealerId AND a.EndDateTime IS NULL
+              JOIN dbo.Employee e ON e.EmployeeId=a.EmployeeId AND e.TerminationDate IS NULL
              ORDER BY d.DealerId
         """, (limit,))
         assignments = cur.fetchall()
@@ -394,7 +418,11 @@ def update_dealer(dealer_id: int, data: dict[str, Any]) -> bool:
         current_level = _one(cur, "SELECT DealerLevelHistoryId,DealerStatus FROM dbo.DealerLevelHistory WHERE DealerId=%s AND EndDateTime IS NULL", (dealer_id,))
         if current_level is None or current_level[1] != data["level"]:
             if current_level is not None:
-                cur.execute("UPDATE dbo.DealerLevelHistory SET EndDateTime=SYSDATETIME() WHERE DealerLevelHistoryId=%s", (current_level[0],))
+                cur.execute("""UPDATE dbo.DealerLevelHistory
+                                  SET EndDateTime=CASE WHEN SYSDATETIME()<=StartDateTime
+                                                       THEN DATEADD(second,1,StartDateTime)
+                                                       ELSE SYSDATETIME() END
+                                WHERE DealerLevelHistoryId=%s""", (current_level[0],))
             cur.execute("INSERT dbo.DealerLevelHistory(DealerId,DealerStatus,StartDateTime,ChangeReason) VALUES(%s,%s,SYSDATETIME(),%s)",
                         (dealer_id, data["level"], "經銷商基本資料維護"))
         requested_employee = int(data["employeeId"]) if data.get("employeeId") else None
@@ -402,7 +430,11 @@ def update_dealer(dealer_id: int, data: dict[str, Any]) -> bool:
         current_employee = int(current_owner[1]) if current_owner else None
         if current_employee != requested_employee:
             if current_owner:
-                cur.execute("UPDATE dbo.DealerAssignmentHistory SET EndDateTime=SYSDATETIME() WHERE DealerAssignmentId=%s", (current_owner[0],))
+                cur.execute("""UPDATE dbo.DealerAssignmentHistory
+                                  SET EndDateTime=CASE WHEN SYSDATETIME()<=StartDateTime
+                                                       THEN DATEADD(second,1,StartDateTime)
+                                                       ELSE SYSDATETIME() END
+                                WHERE DealerAssignmentId=%s""", (current_owner[0],))
             if requested_employee is not None:
                 cur.execute("""INSERT dbo.DealerAssignmentHistory
                                (DealerId,EmployeeId,StartDateTime,ChangeReason,CreatedByEmployeeId)
@@ -490,7 +522,34 @@ def create_employee(data: dict[str, Any]) -> int:
 def update_employee(employee_id:int,data:dict[str,Any]) -> bool:
     conn=connect()
     try:
-        cur=conn.cursor(); cur.execute("UPDATE dbo.Employee SET EmployeeNo=%s,EmployeeName=%s,HireDate=%s,TerminationDate=%s WHERE EmployeeId=%s",(data["number"],data["name"],data["hireDate"],data.get("endDate"),employee_id)); changed=cur.rowcount>0; conn.commit(); return changed
+        cur=conn.cursor();current=_one(cur,"SELECT TerminationDate FROM dbo.Employee WHERE EmployeeId=%s",(employee_id,))
+        if current is None:return False
+        end_date=data.get("endDate") or None
+        if current[0] is not None and end_date is None:raise ValueError("已離職員工不可直接取消離職，請建立復職流程")
+        terminating=current[0] is None and end_date is not None
+        cur.execute("UPDATE dbo.Employee SET EmployeeNo=%s,EmployeeName=%s,HireDate=%s,TerminationDate=%s WHERE EmployeeId=%s",(data["number"],data["name"],data["hireDate"],end_date,employee_id));changed=cur.rowcount>0
+        if terminating:
+            effective=datetime.now().replace(microsecond=0);creator_id=_creator_id(cur)
+            org_row=_one(cur,"SELECT OrgUnitId FROM dbo.EmployeeOrgAssignmentHistory WHERE EmployeeId=%s AND EndDateTime IS NULL",(employee_id,))
+            cur.execute("""UPDATE dbo.EmployeePositionHistory SET EndDateTime=CASE WHEN %s<=StartDateTime THEN DATEADD(second,1,StartDateTime) ELSE %s END WHERE EmployeeId=%s AND EndDateTime IS NULL""",(effective,effective,employee_id))
+            cur.execute("""UPDATE dbo.EmployeeOrgAssignmentHistory SET EndDateTime=CASE WHEN %s<=StartDateTime THEN DATEADD(second,1,StartDateTime) ELSE %s END WHERE EmployeeId=%s AND EndDateTime IS NULL""",(effective,effective,employee_id))
+            cur.execute("SELECT DealerAssignmentId,DealerId,StartDateTime FROM dbo.DealerAssignmentHistory WHERE EmployeeId=%s AND EndDateTime IS NULL",(employee_id,));assignments=cur.fetchall()
+            for assignment_id,dealer_id,start_at in assignments:
+                closed_at=effective if effective>start_at else start_at+timedelta(seconds=1)
+                cur.execute("UPDATE dbo.DealerAssignmentHistory SET EndDateTime=%s WHERE DealerAssignmentId=%s",(closed_at,assignment_id))
+                cur.execute("""UPDATE dbo.DealerTransferReview
+                                  SET SourceDealerAssignmentId=%s,SourceEmployeeId=%s,TriggerType='TERMINATION',
+                                      FromOrgUnitId=%s,ToOrgUnitId=NULL,TriggeredAt=%s
+                                WHERE DealerId=%s AND ReviewStatus='OPEN'""",
+                            (assignment_id,employee_id,org_row[0] if org_row else None,closed_at,dealer_id))
+                cur.execute("""IF NOT EXISTS(SELECT 1 FROM dbo.DealerTransferReview WHERE DealerId=%s AND ReviewStatus='OPEN')
+                               INSERT dbo.DealerTransferReview(DealerId,SourceDealerAssignmentId,SourceEmployeeId,TriggerType,FromOrgUnitId,TriggeredAt)
+                               VALUES(%s,%s,%s,'TERMINATION',%s,%s)""",(dealer_id,dealer_id,assignment_id,employee_id,org_row[0] if org_row else None,closed_at))
+            account=_one(cur,"SELECT UserAccountId FROM dbo.UserAccount WHERE EmployeeId=%s",(employee_id,))
+            if account:
+                cur.execute("UPDATE dbo.UserAccount SET IsLoginEnabled=0,AccountStatus='DISABLED' WHERE UserAccountId=%s",(account[0],))
+                cur.execute("UPDATE dbo.PasskeyRegistrationInvitation SET RevokedAt=SYSDATETIME() WHERE UserAccountId=%s AND UsedAt IS NULL AND RevokedAt IS NULL",(account[0],))
+        conn.commit();return changed
     except Exception: conn.rollback(); raise
     finally: conn.close()
 
@@ -581,7 +640,7 @@ def create_visit(data:dict[str,Any]) -> tuple[int,datetime]:
         if account is None:raise ValueError("找不到可用的員工帳號")
         row=_one(cur,"""INSERT dbo.StoreVisit(DealerId,DealerAssignmentId,EntrySourceType,CreatedByUserAccountId) OUTPUT inserted.StoreVisitId,inserted.ReportDateTime VALUES(%s,%s,%s,%s)""",(dealer_id,assignment[0] if assignment else None,data.get("entrySourceType","EMPLOYEE"),account[0]));visit_id=int(row[0])
         for item in data["details"]:
-            sell=int(item["sellOutQuantity"]) if item.get("sellOutQuantity") else None;display=int(item["displayQuantity"]) if item.get("displayQuantity") else None
+            sell=_optional_quantity(item,"sellOutQuantity","實銷");display=_optional_quantity(item,"displayQuantity","陳列")
             cur.execute("INSERT dbo.StoreVisitProductDetail(StoreVisitId,ProductId,SellOutQuantity,SellOutDate,DisplayQuantity) VALUES(%s,%s,%s,%s,%s)",(visit_id,int(item["productId"]),sell,item.get("sellOutDate") if sell else None,display))
         conn.commit();return visit_id,row[1]
     except Exception:conn.rollback();raise
@@ -742,8 +801,8 @@ def update_visit(visit_id: int, details: list[dict[str, Any]], *, account_id: in
         if account_type=='DEALER' and int(row[1]) != account_id:raise PermissionError("只能修改由自己的帳號建立的回報")
         cur.execute("DELETE dbo.StoreVisitProductDetail WHERE StoreVisitId=%s",(visit_id,))
         for item in details:
-            sell=int(item['sellOutQuantity']) if item.get('sellOutQuantity') else None
-            display=int(item['displayQuantity']) if item.get('displayQuantity') else None
+            sell=_optional_quantity(item,'sellOutQuantity','實銷')
+            display=_optional_quantity(item,'displayQuantity','陳列')
             if sell is None and display is None:continue
             cur.execute("""INSERT dbo.StoreVisitProductDetail(StoreVisitId,ProductId,SellOutQuantity,SellOutDate,DisplayQuantity)
                            VALUES(%s,%s,%s,%s,%s)""",(visit_id,int(item['productId']),sell,item.get('sellOutDate') if sell else None,display))
@@ -822,25 +881,129 @@ def create_change(data:dict[str,Any]) -> dict[str,int]:
     """Apply org and/or dealer assignment changes using one effective timestamp."""
     conn=connect()
     try:
-        cur=conn.cursor();creator_id=_creator_id(cur);employee_id=int(data['employeeId']);effective=data['effectiveAt'];reason=str(data.get('reason') or '').strip()
+        cur=conn.cursor();creator_id=_creator_id(cur);employee_id=int(data['employeeId']);reason=str(data.get('reason') or '').strip()
         if not reason:raise ValueError("異動原因必填")
+        effective=_parse_effective(data['effectiveAt'])
         org_changed=0;dealer_changed=0
         if data.get('moveOrg'):
             new_org_id=int(data['newOrgId']);current=_one(cur,"SELECT EmployeeOrgAssignmentId,OrgUnitId,StartDateTime FROM dbo.EmployeeOrgAssignmentHistory WHERE EmployeeId=%s AND EndDateTime IS NULL",(employee_id,))
             if current is None:raise ValueError("找不到員工目前有效的處所歷程")
             if int(current[1]) != new_org_id:
+                if effective <= current[2]:raise ValueError("生效時間必須晚於目前處所歷程的開始時間")
                 cur.execute("UPDATE dbo.EmployeeOrgAssignmentHistory SET EndDateTime=%s WHERE EmployeeOrgAssignmentId=%s",(effective,current[0]))
                 cur.execute("INSERT dbo.EmployeeOrgAssignmentHistory(EmployeeId,OrgUnitId,StartDateTime,ChangeReason,CreatedByEmployeeId) VALUES(%s,%s,%s,%s,%s)",(employee_id,new_org_id,effective,reason,creator_id));org_changed=1
+                cur.execute("""UPDATE r SET FromOrgUnitId=%s,ToOrgUnitId=%s,TriggeredAt=%s
+                                  FROM dbo.DealerTransferReview r
+                                  JOIN dbo.DealerAssignmentHistory a ON a.DealerId=r.DealerId AND a.EndDateTime IS NULL
+                                 WHERE r.ReviewStatus='OPEN' AND r.TriggerType='ORG_MOVE' AND a.EmployeeId=%s""",
+                            (current[1],new_org_id,effective,employee_id))
+                cur.execute("""INSERT dbo.DealerTransferReview(DealerId,SourceDealerAssignmentId,SourceEmployeeId,TriggerType,FromOrgUnitId,ToOrgUnitId,TriggeredAt)
+                               SELECT a.DealerId,a.DealerAssignmentId,a.EmployeeId,'ORG_MOVE',%s,%s,%s
+                                 FROM dbo.DealerAssignmentHistory a
+                                WHERE a.EmployeeId=%s AND a.EndDateTime IS NULL
+                                  AND NOT EXISTS(SELECT 1 FROM dbo.DealerTransferReview r WHERE r.DealerId=a.DealerId AND r.ReviewStatus='OPEN')""",(current[1],new_org_id,effective,employee_id))
         if data.get('moveDealers'):
             receiver_id=int(data['receiverEmployeeId']);dealer_ids=[int(x) for x in data.get('dealerIds') or []]
             for dealer_id in dealer_ids:
-                current=_one(cur,"SELECT DealerAssignmentId,EmployeeId FROM dbo.DealerAssignmentHistory WHERE DealerId=%s AND EndDateTime IS NULL",(dealer_id,))
+                current=_one(cur,"SELECT DealerAssignmentId,EmployeeId,StartDateTime FROM dbo.DealerAssignmentHistory WHERE DealerId=%s AND EndDateTime IS NULL",(dealer_id,))
                 if current is not None and int(current[1]) != employee_id:raise ValueError(f"經銷商 {dealer_id} 的目前負責人已變更，請重新載入")
                 if current is not None and int(current[1]) == receiver_id:
                     continue
                 if current is not None:
+                    if effective <= current[2]:raise ValueError(f"經銷商 {dealer_id} 的生效時間必須晚於目前負責歷程的開始時間")
                     cur.execute("UPDATE dbo.DealerAssignmentHistory SET EndDateTime=%s WHERE DealerAssignmentId=%s",(effective,current[0]))
                 cur.execute("INSERT dbo.DealerAssignmentHistory(DealerId,EmployeeId,StartDateTime,ChangeReason,CreatedByEmployeeId) VALUES(%s,%s,%s,%s,%s)",(dealer_id,receiver_id,effective,reason,creator_id));dealer_changed+=1
         conn.commit();return {'orgChanged':org_changed,'dealerChanged':dealer_changed}
+    except Exception:conn.rollback();raise
+    finally:conn.close()
+
+
+def dealer_transfer_candidates() -> list[dict[str,Any]]:
+    sql="""
+    SELECT d.DealerId,d.DealerCode,d.DealerName,d.Area,
+           a.DealerAssignmentId,a.EmployeeId,owner.EmployeeName,owner.EmployeeNo,owner.TerminationDate,
+           r.DealerTransferReviewId,r.TriggerType,r.SourceEmployeeId,source.EmployeeName,
+           fromOrg.OrgUnitName,toOrg.OrgUnitName,r.TriggeredAt,
+           lastOwner.EmployeeId,lastEmployee.EmployeeName
+      FROM dbo.Dealer d
+      LEFT JOIN dbo.DealerAssignmentHistory a ON a.DealerId=d.DealerId AND a.EndDateTime IS NULL
+      LEFT JOIN dbo.Employee owner ON owner.EmployeeId=a.EmployeeId
+      LEFT JOIN dbo.DealerTransferReview r ON r.DealerId=d.DealerId AND r.ReviewStatus='OPEN'
+      LEFT JOIN dbo.Employee source ON source.EmployeeId=r.SourceEmployeeId
+      LEFT JOIN dbo.OrganizationUnit fromOrg ON fromOrg.OrgUnitId=r.FromOrgUnitId
+      LEFT JOIN dbo.OrganizationUnit toOrg ON toOrg.OrgUnitId=r.ToOrgUnitId
+      OUTER APPLY(SELECT TOP 1 h.EmployeeId FROM dbo.DealerAssignmentHistory h WHERE h.DealerId=d.DealerId ORDER BY h.StartDateTime DESC,h.DealerAssignmentId DESC) lastOwner
+      LEFT JOIN dbo.Employee lastEmployee ON lastEmployee.EmployeeId=lastOwner.EmployeeId
+     ORDER BY CASE WHEN r.DealerTransferReviewId IS NOT NULL OR a.DealerAssignmentId IS NULL OR owner.TerminationDate IS NOT NULL THEN 0 ELSE 1 END,d.DealerId
+    """
+    with connect() as conn:
+        cur=conn.cursor();cur.execute(sql);rows=cur.fetchall()
+        cur.execute("""SELECT h.DealerId,e.EmployeeId,e.EmployeeNo,e.EmployeeName,
+                              h.StartDateTime,h.EndDateTime,h.ChangeReason
+                         FROM dbo.DealerAssignmentHistory h
+                         JOIN dbo.Employee e ON e.EmployeeId=h.EmployeeId
+                        ORDER BY h.DealerId,h.StartDateTime DESC,h.DealerAssignmentId DESC""")
+        history_rows=cur.fetchall()
+    histories:dict[int,list[dict[str,Any]]]={}
+    for h in history_rows:
+        histories.setdefault(int(h[0]),[]).append({
+            "employeeId":int(h[1]),"employeeNo":h[2],"employee":h[3],
+            "start":h[4].isoformat(sep=" ",timespec="minutes"),
+            "end":h[5].isoformat(sep=" ",timespec="minutes") if h[5] else None,
+            "reason":h[6] or "—",
+        })
+    result=[]
+    for x in rows:
+        trigger=x[10] or ("UNASSIGNED" if x[4] is None else "TERMINATED" if x[8] is not None else "NONE")
+        needs_attention=trigger!="NONE"
+        result.append({"id":int(x[0]),"code":x[1],"name":x[2],"area":x[3] or "—",
+                       "currentAssignmentId":int(x[4]) if x[4] else None,"currentEmployeeId":int(x[5]) if x[5] else None,
+                       "currentEmployee":x[6] or "未指派","currentEmployeeNo":x[7],"currentEmployeeTerminated":x[8].isoformat() if x[8] else None,
+                       "reviewId":int(x[9]) if x[9] else None,"triggerType":trigger,
+                       "sourceEmployeeId":int(x[11]) if x[11] else (int(x[16]) if x[16] else None),
+                       "sourceEmployee":x[12] or x[17] or x[6] or "—","fromOrg":x[13],"toOrg":x[14],
+                       "triggeredAt":x[15].isoformat(timespec="minutes") if x[15] else None,"needsAttention":needs_attention,
+                       "assignmentHistory":histories.get(int(x[0]),[])})
+    return result
+
+
+def transfer_dealers(data:dict[str,Any]) -> int:
+    dealer_ids=sorted({int(x) for x in data.get('dealerIds') or []})
+    if not dealer_ids:raise ValueError("請至少選擇一家經銷商")
+    receiver_id=int(data['receiverEmployeeId']);effective=_parse_effective(data['effectiveAt']);reason=str(data.get('reason') or '').strip()
+    if not reason:raise ValueError("轉移原因必填")
+    conn=connect()
+    try:
+        cur=conn.cursor();creator_id=_creator_id(cur);receiver=_one(cur,"SELECT 1 FROM dbo.Employee WHERE EmployeeId=%s AND TerminationDate IS NULL",(receiver_id,))
+        if receiver is None:raise ValueError("新負責員工不存在或已離職")
+        changed=0
+        for dealer_id in dealer_ids:
+            current=_one(cur,"SELECT DealerAssignmentId,EmployeeId,StartDateTime FROM dbo.DealerAssignmentHistory WHERE DealerId=%s AND EndDateTime IS NULL",(dealer_id,))
+            if current and int(current[1])==receiver_id:
+                raise ValueError(f"經銷商 {dealer_id} 已由所選員工負責")
+            if current:
+                if effective<=current[2]:raise ValueError(f"經銷商 {dealer_id} 的生效時間必須晚於目前負責歷程")
+                cur.execute("UPDATE dbo.DealerAssignmentHistory SET EndDateTime=%s WHERE DealerAssignmentId=%s",(effective,current[0]))
+            cur.execute("INSERT dbo.DealerAssignmentHistory(DealerId,EmployeeId,StartDateTime,ChangeReason,CreatedByEmployeeId) VALUES(%s,%s,%s,%s,%s)",(dealer_id,receiver_id,effective,reason,creator_id))
+            cur.execute("""UPDATE dbo.DealerTransferReview SET ReviewStatus='TRANSFERRED',ResolvedEmployeeId=%s,ResolvedAt=SYSDATETIME(),ResolvedByEmployeeId=%s,ResolutionNote=%s WHERE DealerId=%s AND ReviewStatus='OPEN'""",(receiver_id,creator_id,reason,dealer_id));changed+=1
+        conn.commit();return changed
+    except Exception:conn.rollback();raise
+    finally:conn.close()
+
+
+def retain_dealers(data:dict[str,Any]) -> int:
+    dealer_ids=sorted({int(x) for x in data.get('dealerIds') or []});reason=str(data.get('reason') or '').strip()
+    if not dealer_ids:raise ValueError("請至少選擇一家經銷商")
+    if not reason:raise ValueError("保留原因必填")
+    conn=connect()
+    try:
+        cur=conn.cursor();creator_id=_creator_id(cur);changed=0
+        for dealer_id in dealer_ids:
+            cur.execute("""UPDATE r SET ReviewStatus='RETAINED',ResolvedEmployeeId=r.SourceEmployeeId,ResolvedAt=SYSDATETIME(),ResolvedByEmployeeId=%s,ResolutionNote=%s
+                              FROM dbo.DealerTransferReview r
+                             WHERE r.DealerId=%s AND r.TriggerType='ORG_MOVE' AND r.ReviewStatus='OPEN'
+                               AND EXISTS(SELECT 1 FROM dbo.DealerAssignmentHistory a WHERE a.DealerId=r.DealerId AND a.EmployeeId=r.SourceEmployeeId AND a.EndDateTime IS NULL)""",(creator_id,reason,dealer_id));changed+=max(0,cur.rowcount)
+        if changed!=len(dealer_ids):raise ValueError("只有處所異動產生、且仍由原業務負責的待確認項目可以保留")
+        conn.commit();return changed
     except Exception:conn.rollback();raise
     finally:conn.close()
