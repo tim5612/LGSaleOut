@@ -494,14 +494,24 @@ CREATE TABLE dbo.MonthlyOpeningInventoryDetail
     CONSTRAINT UQ_MonthlyOpeningInventoryDetail
         UNIQUE (ImportBatchId, DealerId, ProductId),
     CONSTRAINT CK_MonthlyOpeningInventoryDetail_SourceRow
-        CHECK (SourceRowNumber > 0),
-    CONSTRAINT CK_MonthlyOpeningInventoryDetail_Quantity
-        CHECK (OpeningQuantity >= 0)
+        CHECK (SourceRowNumber > 0)
 );
 GO
 
 CREATE INDEX IX_MonthlyOpeningInventoryDetail_DealerProduct
     ON dbo.MonthlyOpeningInventoryDetail (DealerId, ProductId, ImportBatchId);
+GO
+
+CREATE TABLE dbo.OpeningInventoryCorrection (
+    CorrectionId bigint IDENTITY(1,1) NOT NULL PRIMARY KEY,
+    ImportBatchId bigint NOT NULL REFERENCES dbo.ImportBatch(ImportBatchId),
+    OpeningInventoryDetailId bigint NOT NULL REFERENCES dbo.MonthlyOpeningInventoryDetail(OpeningInventoryDetailId),
+    SourceRowNumber int NOT NULL,
+    PreviousQuantity int NOT NULL,
+    NewQuantity int NOT NULL,
+    CreatedAt datetime2(0) NOT NULL DEFAULT sysdatetime(),
+    CONSTRAINT UQ_OpeningInventoryCorrection UNIQUE(ImportBatchId,OpeningInventoryDetailId)
+);
 GO
 
 CREATE TABLE dbo.OpeningInventoryProductExclusion

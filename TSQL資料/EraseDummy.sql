@@ -1,7 +1,6 @@
-/*
-    DANGER: This development script deletes ALL rows from every LGSaleOut
-    business table, then resets all IDENTITY seeds. Tables and login/user remain.
-*/
+/* SSMS 手動執行：清空 LGSaleOut 全部測試資料，不備份、不刪除表結構。
+   執行前先停止本台 LGSale；不重設 IDENTITY，避免舊登入 cookie 對應新帳戶。
+   下一步：建立初始測試帳戶.sql → 產生初始Passkey註冊連結.sql。 */
 
 USE [LGSaleOut];
 GO
@@ -30,6 +29,8 @@ BEGIN TRY
     DELETE FROM dbo.StoreVisit;
 
     DELETE FROM dbo.SellInTransaction;
+    IF OBJECT_ID(N'dbo.OpeningInventoryCorrection',N'U') IS NOT NULL
+        EXEC(N'DELETE FROM dbo.OpeningInventoryCorrection;');
     DELETE FROM dbo.MonthlyOpeningInventoryDetail;
     DELETE FROM dbo.OpeningInventoryProductExclusion;
 
@@ -38,6 +39,7 @@ BEGIN TRY
     DELETE FROM dbo.UserAccount;
 
     DELETE FROM dbo.ImportBatch;
+    DELETE FROM dbo.DealerTransferReview;
     DELETE FROM dbo.DealerAssignmentHistory;
     DELETE FROM dbo.DealerLevelHistory;
     DELETE FROM dbo.EmployeeOrgAssignmentHistory;
@@ -48,30 +50,53 @@ BEGIN TRY
     DELETE FROM dbo.OrganizationUnit;
     DELETE FROM dbo.Employee;
 
-    DBCC CHECKIDENT ('dbo.VisitTaskPhoto', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.VisitTaskExecution', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.VisitTask', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.StoreVisitProductDetail', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.StoreVisit', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.SellInTransaction', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.MonthlyOpeningInventoryDetail', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.OpeningInventoryProductExclusion', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.PasskeyRegistrationInvitation', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.PasskeyCredential', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.UserAccount', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.ImportBatch', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.DealerAssignmentHistory', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.DealerLevelHistory', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.EmployeeOrgAssignmentHistory', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.EmployeePositionHistory', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.Product', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.Dealer', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.OrganizationUnit', RESEED, 0) WITH NO_INFOMSGS;
-    DBCC CHECKIDENT ('dbo.Employee', RESEED, 0) WITH NO_INFOMSGS;
 
     COMMIT TRANSACTION;
 
-    SELECT N'All LGSaleOut business data deleted; identity seeds reset.' AS Result;
+    SELECT N'全部測試資料已清空；表結構及 IDENTITY 序號保留。請繼續建立初始測試帳戶。' AS Result;
+    SELECT N'Employee' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.Employee
+    UNION ALL
+    SELECT N'OrganizationUnit' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.OrganizationUnit
+    UNION ALL
+    SELECT N'EmployeePositionHistory' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.EmployeePositionHistory
+    UNION ALL
+    SELECT N'EmployeeOrgAssignmentHistory' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.EmployeeOrgAssignmentHistory
+    UNION ALL
+    SELECT N'Dealer' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.Dealer
+    UNION ALL
+    SELECT N'DealerLevelHistory' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.DealerLevelHistory
+    UNION ALL
+    SELECT N'DealerAssignmentHistory' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.DealerAssignmentHistory
+    UNION ALL
+    SELECT N'DealerTransferReview' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.DealerTransferReview
+    UNION ALL
+    SELECT N'UserAccount' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.UserAccount
+    UNION ALL
+    SELECT N'PasskeyCredential' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.PasskeyCredential
+    UNION ALL
+    SELECT N'PasskeyRegistrationInvitation' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.PasskeyRegistrationInvitation
+    UNION ALL
+    SELECT N'Product' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.Product
+    UNION ALL
+    SELECT N'ImportBatch' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.ImportBatch
+    UNION ALL
+    SELECT N'MonthlyOpeningInventoryDetail' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.MonthlyOpeningInventoryDetail
+    UNION ALL
+    SELECT N'OpeningInventoryProductExclusion' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.OpeningInventoryProductExclusion
+    UNION ALL
+    SELECT N'SellInTransaction' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.SellInTransaction
+    UNION ALL
+    SELECT N'StoreVisit' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.StoreVisit
+    UNION ALL
+    SELECT N'StoreVisitProductDetail' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.StoreVisitProductDetail
+    UNION ALL
+    SELECT N'VisitTask' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.VisitTask
+    UNION ALL
+    SELECT N'VisitTaskExecution' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.VisitTaskExecution
+    UNION ALL
+    SELECT N'VisitTaskPhoto' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.VisitTaskPhoto;
+    IF OBJECT_ID(N'dbo.OpeningInventoryCorrection',N'U') IS NOT NULL
+        EXEC(N'SELECT N''OpeningInventoryCorrection'' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.OpeningInventoryCorrection;');
 END TRY
 BEGIN CATCH
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;

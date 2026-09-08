@@ -699,15 +699,15 @@ def dealer_summary(dealer_id: int) -> dict[str, Any]:
 def reportable_products(dealer_id: int) -> list[dict[str, Any]]:
     """Products in the latest effective Official opening-inventory batch."""
     sql = """
-    WITH LatestBatch AS (
-        SELECT TOP 1 ImportBatchId
+    WITH LatestMonth AS (
+        SELECT MAX(DataMonth) AS DataMonth
           FROM dbo.ImportBatch
          WHERE ImportType='OPENING_INVENTORY' AND ImportStatus='Official'
-         ORDER BY DataMonth DESC,ImportedAt DESC,ImportBatchId DESC
     )
-    SELECT p.ProductId,p.ProductCode,p.ProductName,COALESCE(p.CategoryLevel1,''),COALESCE(p.CategoryLevel2,'')
+    SELECT DISTINCT p.ProductId,p.ProductCode,p.ProductName,COALESCE(p.CategoryLevel1,''),COALESCE(p.CategoryLevel2,'')
       FROM dbo.MonthlyOpeningInventoryDetail d
-      JOIN LatestBatch b ON b.ImportBatchId=d.ImportBatchId
+      JOIN dbo.ImportBatch b ON b.ImportBatchId=d.ImportBatchId AND b.ImportType='OPENING_INVENTORY' AND b.ImportStatus='Official'
+      JOIN LatestMonth latest ON latest.DataMonth=b.DataMonth
       JOIN dbo.Product p ON p.ProductId=d.ProductId AND p.IsActive=1
      WHERE d.DealerId=%s
      ORDER BY p.ProductCode

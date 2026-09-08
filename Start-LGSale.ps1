@@ -1,4 +1,4 @@
-param(
+﻿param(
     [switch]$Hidden,
     [switch]$Development,
     [switch]$Restart

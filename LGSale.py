@@ -30,6 +30,7 @@ from werkzeug.utils import secure_filename
 import qrcode
 import lgsale_db as db
 import lgsale_auth as auth
+from lgsale_opening import bp as opening_blueprint
 from lgsale_config import required
 
 
@@ -38,6 +39,7 @@ UPLOAD_DIR = BASE_DIR / "uploads" / "task_photos"
 PORT = int(required("LGSALEOUT_PORT"))
 app = Flask(__name__)
 app.secret_key = os.getenv("LGSALEOUT_SESSION_SECRET") or secrets.token_hex(32)
+app.register_blueprint(opening_blueprint)
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",

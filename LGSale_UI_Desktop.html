@@ -33,6 +33,7 @@
       <button data-view="dealerMaster"><b>▦</b> <span>經銷商基本資料</span></button>
       <button data-view="passkeys"><b>⌘</b> <span>Passkey 帳號</span></button>
       <button data-view="reports"><b>▤</b> <span>實銷與陳列</span></button>
+      <button onclick="location.href='/opening-import'"><b>⇧</b> <span>期初匯入</span></button>
       <button onclick="location.href='/mobile'"><b>▤</b> <span>手機巡店介面</span></button>
       <button onclick="location.href='/photo'"><b>▧</b> <span>手機任務介面</span></button>
     </nav>
@@ -232,6 +233,8 @@
   function showPasskeyDevices(account){const rows=account.credentials.map(c=>'<div class="credential-row"><span><b>'+esc(c.deviceName)+'</b><br><small class="sub">建立：'+esc(c.createdAt.replace('T',' '))+'<br>最後使用：'+(c.lastUsedAt?esc(c.lastUsedAt.replace('T',' ')):'尚未使用')+'</small></span><span>'+(c.revokedAt?'<span class="status VOIDED">已撤銷</span>':'<span class="status ACTIVE">有效</span>')+'</span>'+(c.revokedAt?'<span></span>':'<button class="btn danger" data-revoke="'+c.id+'">撤銷</button>')+'</div>').join('');openPasskeyModal('Passkey 裝置',account.name+'｜'+account.ownerRef,rows||'<div class="empty">尚無 Passkey</div>');$$('[data-revoke]').forEach(b=>b.onclick=async()=>{if(!confirm('撤銷後這把 Passkey 將無法復原，確定繼續？'))return;try{await passkeyApi('/api/passkey-credentials/'+b.dataset.revoke+'/revoke',{method:'POST'});toast('Passkey 已撤銷');$('#passkeyModal').hidden=true;loadPasskeyAccounts()}catch(e){toast(e.message)}})}
   $$('#passkeyTypeTabs button').forEach(b=>b.onclick=()=>{$$('#passkeyTypeTabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.passkeyType=b.dataset.accountType;loadPasskeyAccounts()});$('#passkeySearch').oninput=renderPasskeyAccounts;$('#passkeyFilter').onchange=renderPasskeyAccounts;$('#refreshPasskeys').onclick=loadPasskeyAccounts;$('#closePasskeyModal').onclick=()=>$('#passkeyModal').hidden=true;$('#passkeyModal').onclick=e=>{if(e.target===$('#passkeyModal'))$('#passkeyModal').hidden=true};
   loadTasks();
+  const requestedView=new URLSearchParams(location.search).get('view');
+  if(['tasks','employees','dealerMaster','assignment','reports','passkeys'].includes(requestedView))show(requestedView);
 </script>
 </body>
 </html>
