@@ -437,6 +437,21 @@ def organizations():
         return jsonify(error="處所資料庫查詢失敗：" + str(exc)), 503
 
 
+@app.post("/api/organizations")
+def create_organization():
+    data = request.get_json(silent=True) or {}
+    if not str(data.get("code", "")).strip() or not str(data.get("name", "")).strip():
+        return jsonify(error="處所代碼與名稱必填"), 400
+    try:
+        payload={"code":str(data["code"]).strip().upper(),"name":str(data["name"]).strip(),"active":bool(data.get("active",True))}
+        org_id=db.create_organization(payload)
+        return jsonify(next(row for row in db.organizations() if row["id"]==org_id)),201
+    except ValueError as exc:
+        return jsonify(error=str(exc)),409
+    except Exception as exc:
+        return jsonify(error="處所新增失敗："+str(exc)),500
+
+
 @app.put("/api/organizations/<int:org_id>")
 def update_organization(org_id: int):
     data = request.get_json(silent=True) or {}
@@ -447,6 +462,8 @@ def update_organization(org_id: int):
         if not db.update_organization(org_id,payload):
             return jsonify(error="找不到處所"),404
         return jsonify(next(row for row in db.organizations() if row["id"]==org_id))
+    except ValueError as exc:
+        return jsonify(error=str(exc)),409
     except Exception as exc:
         return jsonify(error="處所資料更新失敗："+str(exc)),500
 

@@ -560,10 +560,28 @@ def organizations() -> list[dict[str,Any]]:
         cur=conn.cursor();cur.execute(sql);return [{"id":int(r[0]),"code":r[1],"name":r[2],"active":bool(r[3]),"employees":int(r[4]),"directors":int(r[5])} for r in cur.fetchall()]
 
 
+def create_organization(data:dict[str,Any]) -> int:
+    conn=connect()
+    try:
+        cur=conn.cursor()
+        if _one(cur,"SELECT 1 FROM dbo.OrganizationUnit WHERE OrgUnitCode=%s",(data["code"],)):
+            raise ValueError("處所代碼已存在")
+        row=_one(cur,"""INSERT dbo.OrganizationUnit(OrgUnitCode,OrgUnitName,IsActive)
+                         OUTPUT inserted.OrgUnitId VALUES(%s,%s,%s)""",
+                 (data["code"],data["name"],bool(data["active"])))
+        conn.commit()
+        return int(row[0])
+    except Exception:conn.rollback();raise
+    finally:conn.close()
+
+
 def update_organization(org_id:int,data:dict[str,Any]) -> bool:
     conn=connect()
     try:
-        cur=conn.cursor();cur.execute("UPDATE dbo.OrganizationUnit SET OrgUnitCode=%s,OrgUnitName=%s,IsActive=%s WHERE OrgUnitId=%s",(data["code"],data["name"],bool(data["active"]),org_id));changed=cur.rowcount>0;conn.commit();return changed
+        cur=conn.cursor()
+        if _one(cur,"SELECT 1 FROM dbo.OrganizationUnit WHERE OrgUnitCode=%s AND OrgUnitId<>%s",(data["code"],org_id)):
+            raise ValueError("處所代碼已存在")
+        cur.execute("UPDATE dbo.OrganizationUnit SET OrgUnitCode=%s,OrgUnitName=%s,IsActive=%s WHERE OrgUnitId=%s",(data["code"],data["name"],bool(data["active"]),org_id));changed=cur.rowcount>0;conn.commit();return changed
     except Exception:conn.rollback();raise
     finally:conn.close()
 

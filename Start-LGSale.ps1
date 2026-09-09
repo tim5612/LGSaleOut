@@ -1,7 +1,8 @@
 ﻿param(
     [switch]$Hidden,
     [switch]$Development,
-    [switch]$Restart
+    [switch]$Restart,
+    [switch]$Stop
 )
 
 $ErrorActionPreference = "Stop"
@@ -26,6 +27,31 @@ foreach ($rawLine in Get-Content -LiteralPath $configPath -Encoding UTF8) {
         $value = $value.Substring(1, $value.Length - 2)
     }
     [Environment]::SetEnvironmentVariable($key, $value, "Process")
+}
+
+if ($Stop) {
+    if ([string]::IsNullOrWhiteSpace($env:LGSALEOUT_PORT)) {
+        throw ".env.local 缺少必要設定：LGSALEOUT_PORT"
+    }
+    $port = [int]$env:LGSALEOUT_PORT
+    $listenerPids = @(netstat.exe -ano -p tcp | Select-String ":$port\s+.*LISTENING\s+(\d+)$" | ForEach-Object { [int]$_.Matches[0].Groups[1].Value } | Select-Object -Unique)
+    if ($listenerPids.Count -eq 0) {
+        Write-Output "連接埠 $port 沒有執行中的 LGSale，無需停止。"
+        exit 0
+    }
+    foreach ($processId in $listenerPids) {
+        Stop-Process -Id $processId -Force -ErrorAction Stop
+    }
+    for ($attempt = 0; $attempt -lt 20; $attempt++) {
+        $stillListening = netstat.exe -ano -p tcp | Select-String ":$port\s+.*LISTENING\s+\d+$"
+        if (-not $stillListening) { break }
+        Start-Sleep -Milliseconds 250
+    }
+    if ($stillListening) {
+        throw "已要求停止程序，但連接埠 $port 尚未釋放。"
+    }
+    Write-Output "LGSale 已停止，連接埠 $port 已釋放；不會重新啟動。"
+    exit 0
 }
 
 $requiredSettings = @(
@@ -61,10 +87,18 @@ $env:LGSALEOUT_SESSION_SECRET = (Get-Content -LiteralPath $sessionSecretPath -Ra
 $listenerPids = @(netstat.exe -ano -p tcp | Select-String ":$port\s+.*LISTENING\s+(\d+)$" | ForEach-Object { [int]$_.Matches[0].Groups[1].Value } | Select-Object -Unique)
 if ($listenerPids.Count -gt 0) {
     if (-not $Restart) {
-        throw "連接埠 $port 已被程序占用：$($listenerPids -join ', ')。若要重啟請使用 Restart-LGSale-Dev.ps1。"
+        throw "連接埠 $port 已被程序占用：$($listenerPids -join ', ')。若要重啟請執行 重新啟動-LGSale.cmd。"
     }
     foreach ($processId in $listenerPids) {
         Stop-Process -Id $processId -Force -ErrorAction Stop
+    }
+    for ($attempt = 0; $attempt -lt 20; $attempt++) {
+        $stillListening = netstat.exe -ano -p tcp | Select-String ":$port\s+.*LISTENING\s+\d+$"
+        if (-not $stillListening) { break }
+        Start-Sleep -Milliseconds 250
+    }
+    if ($stillListening) {
+        throw "已停止舊程序，但連接埠 $port 尚未釋放，請稍後再執行 重新啟動-LGSale.cmd。"
     }
 }
 
