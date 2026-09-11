@@ -501,7 +501,13 @@ def employees() -> list[dict[str, Any]]:
             position_history=[{"position":POSITION_TO_UI.get(x[0],x[0]),"start":x[1].isoformat(sep=" ",timespec="minutes"),"end":x[2].isoformat(sep=" ",timespec="minutes") if x[2] else None,"reason":x[3],"creator":x[4]} for x in cur.fetchall()]
             cur.execute("""SELECT o.OrgUnitName,h.StartDateTime,h.EndDateTime,h.ChangeReason,c.EmployeeName FROM dbo.EmployeeOrgAssignmentHistory h JOIN dbo.OrganizationUnit o ON o.OrgUnitId=h.OrgUnitId JOIN dbo.Employee c ON c.EmployeeId=h.CreatedByEmployeeId WHERE h.EmployeeId=%s ORDER BY h.StartDateTime DESC""",(employee_id,))
             org_history=[{"org":x[0],"start":x[1].isoformat(sep=" ",timespec="minutes"),"end":x[2].isoformat(sep=" ",timespec="minutes") if x[2] else None,"reason":x[3],"creator":x[4]} for x in cur.fetchall()]
-            result.append({"id":employee_id,"number":r[1],"name":r[2],"hireDate":r[3].isoformat(),"endDate":r[4].isoformat() if r[4] else None,"status":"INACTIVE" if r[4] else "ACTIVE","position":POSITION_TO_UI.get(r[5],r[5] or "—"),"positionSince":r[6].date().isoformat() if r[6] else "—","org":r[7] or "—","orgSince":r[8].date().isoformat() if r[8] else "—","positionHistory":position_history,"orgHistory":org_history})
+            cur.execute("""SELECT d.DealerId,d.DealerCode,d.DealerName,a.StartDateTime
+                              FROM dbo.DealerAssignmentHistory a JOIN dbo.Dealer d ON d.DealerId=a.DealerId
+                             WHERE a.EmployeeId=%s AND a.StartDateTime<=SYSDATETIME()
+                               AND (a.EndDateTime IS NULL OR a.EndDateTime>SYSDATETIME())
+                             ORDER BY d.DealerCode""",(employee_id,))
+            assigned_dealers=[{"id":int(x[0]),"code":x[1],"name":x[2],"start":x[3].isoformat(sep=" ",timespec="minutes")} for x in cur.fetchall()]
+            result.append({"id":employee_id,"number":r[1],"name":r[2],"hireDate":r[3].isoformat(),"endDate":r[4].isoformat() if r[4] else None,"status":"INACTIVE" if r[4] else "ACTIVE","position":POSITION_TO_UI.get(r[5],r[5] or "—"),"positionSince":r[6].date().isoformat() if r[6] else "—","org":r[7] or "—","orgSince":r[8].date().isoformat() if r[8] else "—","dealerCount":len(assigned_dealers),"assignedDealers":assigned_dealers,"positionHistory":position_history,"orgHistory":org_history})
         return result
 
 
@@ -715,19 +721,14 @@ def dealer_summary(dealer_id: int) -> dict[str, Any]:
 
 
 def reportable_products(dealer_id: int) -> list[dict[str, Any]]:
-    """Products in the latest effective Official opening-inventory batch."""
+    """Products in the current server month's Official opening inventory."""
     sql = """
-    WITH LatestMonth AS (
-        SELECT MAX(DataMonth) AS DataMonth
-          FROM dbo.ImportBatch
-         WHERE ImportType='OPENING_INVENTORY' AND ImportStatus='Official'
-    )
     SELECT DISTINCT p.ProductId,p.ProductCode,p.ProductName,COALESCE(p.CategoryLevel1,''),COALESCE(p.CategoryLevel2,'')
       FROM dbo.MonthlyOpeningInventoryDetail d
       JOIN dbo.ImportBatch b ON b.ImportBatchId=d.ImportBatchId AND b.ImportType='OPENING_INVENTORY' AND b.ImportStatus='Official'
-      JOIN LatestMonth latest ON latest.DataMonth=b.DataMonth
       JOIN dbo.Product p ON p.ProductId=d.ProductId AND p.IsActive=1
      WHERE d.DealerId=%s
+       AND b.DataMonth=CONVERT(char(6),SYSDATETIME(),112)
      ORDER BY p.ProductCode
     """
     with connect() as conn:

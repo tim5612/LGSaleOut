@@ -72,10 +72,26 @@ class ReviewTests(unittest.TestCase):
         self.assertEqual(r['corrections'][0]['oldQuantity'],5);self.assertEqual(r['corrections'][0]['newQuantity'],-1)
         self.assertEqual(r['duplicates'][0]['fileName'],'old.xlsx')
 
-    def test_assignment_conflict_requires_acknowledgement(self):
+    def test_assignment_conflict_requires_explicit_action(self):
         s=state();s['employees'].append([4,'E4','原業務',date(2020,1,1),None]);s['assignments']=[[1,1,4,datetime(2020,1,1),None]]
         r=o.build_review(source(),[],s,'2026-09');self.assertTrue(r['errors'])
-        r=o.build_review(source(),[],s,'2026-09',retained=['TW1']);self.assertFalse(r['errors']);self.assertEqual(r['assignments'],[])
+        action={'TW1':{'action':'retain','effectiveAt':'2026-09-01T00:00'}}
+        r=o.build_review(source(),[],s,'2026-09',assignment_actions=action);self.assertFalse(r['errors']);self.assertEqual(r['assignments'],[])
+
+    def test_assignment_transfer_closes_open_history(self):
+        s=state();s['employees'].append([4,'E4','原業務',date(2020,1,1),None]);s['assignments']=[[1,1,4,datetime(2020,1,1),None]]
+        action={'TW1':{'action':'transfer','effectiveAt':'2026-09-01T00:00'}}
+        r=o.build_review(source(),[],s,'2026-09',assignment_actions=action)
+        self.assertFalse(r['errors']);self.assertEqual(r['assignments'][0]['status'],'移轉')
+        self.assertIsNone(r['assignments'][0]['end'])
+
+    def test_assignment_bridge_preserves_later_transfer(self):
+        s=state();s['employees'].extend([[4,'E4','原業務',date(2020,1,1),None],[5,'E5','後續業務',date(2020,1,1),None]])
+        s['assignments']=[[1,1,4,datetime(2020,1,1),datetime(2026,9,11)],[2,1,5,datetime(2026,9,11),None]]
+        action={'TW1':{'action':'bridge','effectiveAt':'2026-09-01T00:00'}}
+        r=o.build_review(source(),[],s,'2026-09',assignment_actions=action)
+        self.assertFalse(r['errors']);item=r['assignments'][0]
+        self.assertEqual((item['status'],item['oldAssignmentId'],item['end']),('補登歷史',1,'2026-09-11 00:00:00'))
 
     def test_future_assignment_and_employee_dates_block(self):
         s=state();s['assignments']=[[1,1,2,datetime(2026,10,1),None]]

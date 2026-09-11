@@ -131,8 +131,8 @@ def snapshot(cur, month):
     return result
 
 
-def build_review(rows, parse_errors, state, month, edits=None, retained=None, decisions=None):
-    edits = edits or {}; retained=set(retained or [])
+def build_review(rows, parse_errors, state, month, edits=None, assignment_actions=None, decisions=None):
+    edits = edits or {}; assignment_actions=assignment_actions or {}
     effective=month_date(month); errors=list(parse_errors); notices=[]
     decisions=decisions or {}
     source_rows=rows
@@ -200,19 +200,48 @@ def build_review(rows, parse_errors, state, month, edits=None, retained=None, de
         name=first['employee'];eid=employee_ids.get(name)
         if not match:
             item=dict(code=code,name=first['dealer'],employee=name,status='新增',dealerCodes=[code]);dealers.append(item);new_dm[code]=item
-        histories=[h for h in state['assignments'] if match and h[1]==match[0]]
+        histories=sorted([h for h in state['assignments'] if match and h[1]==match[0]],key=lambda h:(h[3],h[0]))
         active=[h for h in histories if h[3]<=effective and (h[4] is None or h[4]>effective)]
         if len(active)>1:
             errors.append(f'{code} 期初日配對期間重疊');continue
         if active:
             old=employees_by_id.get(active[0][2]);oldname=old[2] if old else str(active[0][2])
-            if active[0][2]!=eid:
-                conflicts.append(dict(code=code,name=first['dealer'],employee=name,current=oldname,retained=code in retained))
-                if code not in retained:errors.append(f'{code} 檔案業務 {name} 與當期 {oldname} 不同，請確認保留原配對')
+            if oldname!=name:
+                raw_action=assignment_actions.get(code,{})
+                action=raw_action.get('action','') if isinstance(raw_action,dict) else ''
+                start_text=raw_action.get('effectiveAt',effective.strftime('%Y-%m-%dT%H:%M')) if isinstance(raw_action,dict) else effective.strftime('%Y-%m-%dT%H:%M')
+                try:
+                    transfer_at=datetime.fromisoformat(start_text)
+                    if transfer_at < effective or transfer_at >= (effective.replace(day=28)+timedelta(days=4)).replace(day=1):raise ValueError()
+                except (TypeError,ValueError):
+                    transfer_at=effective;errors.append(f'{code} 請填寫期初月份內的有效移轉時間')
+                covering=[h for h in histories if h[3]<=transfer_at and (h[4] is None or h[4]>transfer_at)]
+                next_history=next((h for h in histories if h[3]>transfer_at),None)
+                next_employee=employees_by_id.get(next_history[2]) if next_history else None
+                suggested='bridge' if next_history else 'transfer'
+                conflicts.append(dict(code=code,name=first['dealer'],employee=name,current=oldname,
+                    action=action,effectiveAt=start_text,suggested=suggested,
+                    nextAt=next_history[3].isoformat(sep=' ',timespec='minutes') if next_history else None,
+                    nextEmployee=next_employee[2] if next_employee else None,dealerCodes=[code]))
+                if action not in ('retain','transfer','bridge'):
+                    errors.append(f'{code} 檔案業務 {name} 與當期 {oldname} 不同，請選擇配對處理方式')
+                elif action!='retain':
+                    if len(covering)!=1:
+                        errors.append(f'{code} 指定移轉時間沒有唯一的原配對，請先處理歷史期間')
+                    elif action=='transfer' and next_history:
+                        errors.append(f'{code} 指定時間後已有 {next_employee[2] if next_employee else "其他業務"} 的配對，請改選補登歷史期間')
+                    elif action=='bridge' and not next_history:
+                        errors.append(f'{code} 指定時間後沒有其他移轉，請改選從指定日期起移轉')
+                    else:
+                        assignments.append(dict(code=code,name=first['dealer'],employee=name,current=(employees_by_id.get(covering[0][2]) or [None,None,str(covering[0][2])])[2],
+                            start=transfer_at.isoformat(sep=' ',timespec='seconds'),
+                            end=next_history[3].isoformat(sep=' ',timespec='seconds') if next_history else None,
+                            oldAssignmentId=covering[0][0],oldEnd=covering[0][4].isoformat(sep=' ',timespec='seconds') if covering[0][4] else None,
+                            action=action,status='補登歷史' if action=='bridge' else '移轉',dealerCodes=[code]))
             continue
         if any(h[3]>effective for h in histories):
             errors.append(f'{code} 已有期初日之後的配對，請先處理歷史期間');continue
-        assignments.append(dict(code=code,name=first['dealer'],employee=name,current='未指派',start=month+'-01 00:00:00',status='新增',dealerCodes=[code]))
+        assignments.append(dict(code=code,name=first['dealer'],employee=name,current='未指派',start=month+'-01 00:00:00',end=None,oldAssignmentId=None,oldEnd=None,action='create',status='新增',dealerCodes=[code]))
     source_products=defaultdict(list)
     for row in rows:source_products[row['product']].append(row)
     for code,items in source_products.items():
@@ -233,7 +262,7 @@ def build_review(rows, parse_errors, state, month, edits=None, retained=None, de
         exclusions.append(dict(code=code,scope='ALL',reason='PSIRemove',fromMonth=month.replace('-',''),toMonth=None,status='沿用' if existing else '新增'))
     if not state['schemaReady']:errors.append('資料庫尚未允許負庫存，請先由管理員完成限制調整')
     summary=dict(rows=len(source_rows),quantity=sum(r['quantity'] for r in source_rows),display=sum(r['display'] for r in source_rows),excluded=sum(r['excluded'] for r in source_rows))
-    proof=digest(dict(state=state,month=month,rows=source_rows,edits=edits,retained=sorted(retained),decisions=decisions))
+    proof=digest(dict(state=state,month=month,rows=source_rows,edits=edits,assignmentActions=assignment_actions,decisions=decisions))
     return dict(rows=source_rows,importRows=new_rows,corrections=corrections,duplicates=duplicates,
         changes=dict(inserted=len(new_rows),corrected=len(corrections),skipped=sum(x['decision']=='keep' for x in duplicates)),
         dealers=dealers,employees=employees,products=products,assignments=assignments,exclusions=exclusions,conflicts=conflicts,errors=errors,notices=notices,summary=summary,month=month,proof=proof,orgs=[dict(id=o[0],name=o[1]) for o in state['orgs']],dealerOptions=[dict(code=c,name=n) for c,n in sorted({(x['code'],x['dealer']) for x in source_rows})])
@@ -306,11 +335,12 @@ def upload():
 def get_review(payload,cur):
     meta,path=load_upload(payload.get('token'));month=payload.get('month');month_date(month)
     rows,errors=parse_workbook(path)
-    edits=payload.get('edits',{});retained=payload.get('retained',[])
-    if not isinstance(edits,dict) or any(not isinstance(v,dict) for v in edits.values()) or not isinstance(retained,list) or any(not isinstance(v,str) for v in retained):raise ValueError('預覽編輯格式無效')
+    edits=payload.get('edits',{});assignment_actions=payload.get('assignmentActions',{})
+    if not isinstance(edits,dict) or any(not isinstance(v,dict) for v in edits.values()):raise ValueError('預覽編輯格式無效')
+    if not isinstance(assignment_actions,dict) or any(not isinstance(k,str) or not isinstance(v,dict) or v.get('action','') not in ('','retain','transfer','bridge') or not isinstance(v.get('effectiveAt',''),str) for k,v in assignment_actions.items()):raise ValueError('配對處理選項格式無效')
     decisions=payload.get('decisions',{})
     if not isinstance(decisions,dict) or any(v not in ('','keep','replace') for v in decisions.values()):raise ValueError('重複資料處理選項無效')
-    review=build_review(rows,errors,snapshot(cur,month),month,edits,retained,decisions)
+    review=build_review(rows,errors,snapshot(cur,month),month,edits,assignment_actions,decisions)
     return review,meta,path
 
 
@@ -356,7 +386,13 @@ def commit():
         cur.execute('SELECT ProductCode,ProductId FROM dbo.Product');pm={r[0].casefold():r[1] for r in cur.fetchall()}
         cur.execute('SELECT EmployeeName,EmployeeId FROM dbo.Employee');em={r[0]:r[1] for r in cur.fetchall()}
         for item in review['assignments']:
-            cur.execute('INSERT dbo.DealerAssignmentHistory(DealerId,EmployeeId,StartDateTime,ChangeReason,CreatedByEmployeeId) VALUES(%s,%s,%s,%s,%s)',(dm[item['code'].casefold()],em[item['employee']],effective,reason,actor))
+            if item['oldAssignmentId'] is not None:
+                cur.execute("""UPDATE dbo.DealerAssignmentHistory SET EndDateTime=%s
+                                WHERE DealerAssignmentId=%s AND ((EndDateTime IS NULL AND %s IS NULL) OR EndDateTime=%s)""",
+                            (item['start'],item['oldAssignmentId'],item['oldEnd'],item['oldEnd']))
+                if cur.rowcount!=1:raise ValueError(f"{item['code']} 原配對已變動，請重新比對；本批未寫入")
+            cur.execute('INSERT dbo.DealerAssignmentHistory(DealerId,EmployeeId,StartDateTime,EndDateTime,ChangeReason,CreatedByEmployeeId) VALUES(%s,%s,%s,%s,%s,%s)',
+                        (dm[item['code'].casefold()],em[item['employee']],item['start'],item['end'],reason,actor))
         cur.execute("INSERT dbo.ImportBatch(ImportType,DataMonth,OriginalFileName,StoredFilePath,FileHash,FileSize,ImportStatus,TotalRowCount,SuccessRowCount,ImportedByEmployeeId) OUTPUT inserted.ImportBatchId VALUES('OPENING_INVENTORY',%s,%s,%s,%s,%s,'Official',%s,%s,%s)",(review['month'].replace('-',''),meta['name'],str(path),meta['hash'],meta['size'],len(review['rows']),len(review['importRows'])+len(review['corrections']),actor))
         batch=cur.fetchone()[0]
         if review['importRows']:

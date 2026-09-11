@@ -9,10 +9,10 @@ SET XACT_ABORT ON;
 
 -- 可修改：每台可以使用相同員工編號，但資料各自獨立。
 DECLARE @EmployeeNo nvarchar(30) = N'E0001';
-DECLARE @EmployeeName nvarchar(100) = N'初始管理員';
+DECLARE @EmployeeName nvarchar(100) = N'王正文';
 DECLARE @HireDate date = '2026-01-01';
 DECLARE @OrgUnitCode varchar(30) = 'TEST';
-DECLARE @OrgUnitName nvarchar(100) = N'測試處所';
+DECLARE @OrgUnitName nvarchar(100) = N'內湖';
 DECLARE @PositionLevel varchar(30) = 'MANAGER'; -- SALES／MANAGER／DIRECTOR
 
 BEGIN TRY

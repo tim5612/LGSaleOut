@@ -8,7 +8,8 @@ SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
 DECLARE @EmployeeNo nvarchar(30) = N'E0001'; -- 與初始帳戶 SQL 相同
-DECLARE @Origin varchar(500) = 'https://CHANGE_ME'; -- 本機 .env.local 的 LGSALEOUT_ORIGIN
+DECLARE @Origin varchar(500) = 'https://lgdeva.superb-supplies.com.tw'; -- 本機 民生東路
+--DECLARE @Origin varchar(500) = 'https://lgdevb.superb-supplies.com.tw'; -- 本機 內湖
 
 IF CHARINDEX('CHANGE_ME',@Origin)>0 OR @Origin NOT LIKE 'https://%' OR CHARINDEX(' ',@Origin)>0
     THROW 51000, N'請把 @Origin 改成本台電腦 .env.local 的 LGSALEOUT_ORIGIN（完整 HTTPS 網址）。', 1;
