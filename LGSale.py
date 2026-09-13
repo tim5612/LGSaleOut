@@ -32,6 +32,7 @@ import lgsale_db as db
 import lgsale_auth as auth
 from lgsale_opening import bp as opening_blueprint
 from lgsale_sellin import bp as sellin_blueprint
+from lgsale_psi import bp as psi_blueprint
 from lgsale_config import required
 
 
@@ -42,6 +43,7 @@ app = Flask(__name__)
 app.secret_key = os.getenv("LGSALEOUT_SESSION_SECRET") or secrets.token_hex(32)
 app.register_blueprint(opening_blueprint)
 app.register_blueprint(sellin_blueprint)
+app.register_blueprint(psi_blueprint)
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",

@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Codex" compressed="false">
   <diagram id="LGSaleERD0722" name="LGSale ERD 0722">
-    <mxGraphModel dx="6216" dy="3299" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="2300" math="0" shadow="0">
+    <mxGraphModel dx="4786" dy="2772" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="2300" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -639,7 +639,7 @@
         </UserObject>
         <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#d79b00;font-weight:bold&quot;&gt;PK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;SellInTransactionId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;識別碼&lt;/span&gt;&lt;/div&gt;" dbColumn="SellInTransactionId" dbType="bigint" dbKey="PK" dbDescription="識別碼" id="row_SellInTransaction_SellInTransactionId">
           <mxCell parent="table_SellInTransaction" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;spacingRight=4;overflow=hidden;whiteSpace=wrap;strokeColor=#d6b656;strokeWidth=0.5;fillColor=#ffffff;connectable=1;portConstraint=eastwest;" vertex="1">
-            <mxGeometry height="26" width="420" x="50" y="10" as="geometry" />
+            <mxGeometry height="26" width="420" y="38" as="geometry" />
           </mxCell>
         </UserObject>
         <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#b85450;font-weight:bold&quot;&gt;FK&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;ImportBatchId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;bigint&lt;/span&gt;&lt;span&gt;批次&lt;/span&gt;&lt;/div&gt;" dbColumn="ImportBatchId" dbType="bigint" dbKey="FK" dbDescription="批次" id="row_SellInTransaction_ImportBatchId">

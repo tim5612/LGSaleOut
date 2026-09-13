@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>LGSale｜PSI 月報</title>
+  <style>
+    :root{--ink:#17324d;--line:#cbd6df;--bg:#f4f7fa;--blue:#1769aa}*{box-sizing:border-box}
+    body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Microsoft JhengHei","Segoe UI",sans-serif}
+    button,input,select{font:inherit}button,a,select{cursor:pointer}button:disabled{opacity:.45;cursor:wait}
+    .app{display:grid;grid-template-columns:176px minmax(0,1fr);min-height:100vh}.side{height:100vh;position:sticky;top:0;background:#17324d;padding:24px 12px;color:white}
+    .brand{font-size:22px;font-weight:700;padding:0 10px 24px}.brand small{display:block;font-size:12px;font-weight:400;color:#b9cad7}
+    nav{display:grid;gap:4px}nav a{color:#c8d6e3;text-decoration:none;padding:12px 10px;border-radius:6px}nav a:hover,nav a.active{color:white;background:#27577d}
+    main{padding:20px 24px;min-width:0}.crumb{font-size:12px;color:#60758a}h1{font-size:24px;margin:12px 0 0}.meta{margin:4px 0 16px;color:#60758a;font-size:12px}
+    .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}button,input,select{border:1px solid #bdcbd8;background:white;border-radius:5px;padding:7px 10px;color:var(--ink);height:36px}
+    input[type=search]{width:200px}.export{margin-left:auto;background:#e7eff5;font-weight:700}.notice{font-size:12px;padding:8px 12px;background:#edf4f9;border:1px solid #cbddea;margin:8px 0}.notice.warn{background:#fff8e8;border-color:#ead6a6;color:#805400}.error{background:#fff0ed;color:#9c2f20;border:1px solid #eac3ba;padding:10px;margin:8px 0}
+    .scroll{overflow:auto;height:calc(100vh - 306px);min-height:330px;border:1px solid #aec1d0;background:white;position:relative;overscroll-behavior:contain}
+    table{border-collapse:separate;border-spacing:0;table-layout:fixed;font-size:12px;font-variant-numeric:tabular-nums}
+    th,td{padding:0 4px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);height:32px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:white}
+    thead th{position:sticky;text-align:center;z-index:5;font-weight:600}thead tr:nth-child(1) th{top:0;height:28px;background:#cbddea}thead tr:nth-child(2) th{top:28px;height:28px;background:#dde9f2}thead tr:nth-child(3) th{top:56px;height:44px;background:#edf4f9;white-space:normal;line-height:17px}thead tr:nth-child(4) th{top:100px;height:40px;background:#eaf0f5}
+    .fixed{position:sticky;z-index:3}.f0{left:0}.f1{left:84px}.f2{left:168px}.f3{left:308px;border-right:2px solid #9fb5c5}thead .fixed{z-index:8}thead .basic{left:0;border-right:2px solid #9fb5c5}
+    thead th.band{text-align:left;overflow:visible}thead th.band span{position:sticky;left:412px;display:block;width:max-content;max-width:360px;padding:0 8px}
+    tbody tr.alt td{background:#f8fafc}td.num{text-align:right}td.saleable{font-weight:700}td.group-end,th.group-end{border-right:2px solid #aebfcd}
+    td.ttl,thead th.ttl{background:#fff3e4!important}thead tr:nth-child(1) th.ttl{background:#f4d9bc!important}tbody tr.subtotal td{background:#e5eedb;font-weight:600}tbody tr.subtotal td.ttl{background:#efd2ad!important}
+    tfoot td{position:sticky;bottom:0;z-index:4;background:#d4e6c4;font-weight:700;border-top:2px solid #829d72}tfoot td.fixed{z-index:7}tfoot td.ttl{background:#efd2ad!important}
+    tbody tr:hover td{box-shadow:inset 0 0 0 999px #1769aa09}td.unknown{cursor:help}td.negative{color:#b42318}tr.spacer td{padding:0;border:0;background:white}
+    .empty{padding:50px;color:#60758a;text-align:center}.foot{font-size:12px;color:#60758a;margin-top:10px;display:flex;justify-content:space-between;gap:16px}details{margin-top:8px;font-size:12px;color:#60758a}details li{margin:4px 0}[hidden]{display:none!important}
+    @media(max-width:1100px){.app{grid-template-columns:148px minmax(0,1fr)}main{padding:16px}.side{padding:20px 8px}.scroll{height:calc(100vh - 350px)}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="side"><div class="brand">LGSale<small>通路任務管理</small></div><nav>
+    <a href="/">‹ 返回管理後台</a><a href="/opening-import">⇧ 期初匯入</a><a href="/sellin-import">⇩ SaleIn 匯入</a><a class="active" href="/psi" aria-current="page">▥ PSI 月報</a><a href="/mobile">手機巡店介面</a>
+  </nav></aside>
+  <main>
+    <div class="crumb">管理後台 / PSI 月報</div>
+    <h1 id="title">PSI 月報</h1><p class="meta" id="meta">讀取資料庫中…</p>
+    <div class="tools">
+      <button id="prev" aria-label="上個月">◀ 上月</button><input type="month" id="month" aria-label="報表月份"><button id="next" aria-label="下個月">下月 ▶</button>
+      <select id="org" aria-label="區域"><option value="">區域：全部</option></select>
+      <select id="employee" aria-label="業務"><option value="">業務：全部</option></select>
+      <select id="category" aria-label="大分類"><option value="">大分類：全部</option></select>
+      <select id="level" aria-label="顯示層級"><option value="dealer">客戶明細</option><option value="employee">業務彙總</option><option value="org">區域彙總</option><option value="company">範圍總覽</option></select>
+      <input id="search" type="search" aria-label="搜尋型號或客戶" placeholder="搜尋型號 / 客戶">
+      <button id="refresh">重新整理</button><button class="export" id="export" disabled>匯出 Excel</button>
+    </div>
+    <div class="notice" id="quality">商品往下、客戶往右；左側商品欄與表頭固定。單位：台。</div>
+    <div id="error" class="error" role="alert" hidden></div>
+    <div class="scroll" id="scroll" tabindex="0" aria-label="PSI 表格，可上下及左右捲動" aria-busy="true"><div class="empty">正在取得真實資料…</div></div>
+    <div class="foot"><span>陳列含在庫存內、不可銷售。零值留白；資料未齊也留白，滑鼠停留可查看原因。</span><span id="count"></span></div>
+    <details><summary>計算方式與資料來源</summary><ul id="notes"></ul><p>頁面每 60 秒更新，返回此頁會重新查詢；也可按「重新整理」。合計若包含未齊資料會留白，不以部分已知數量冒充完整庫存。</p></details>
+  </main>
+</div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const widths=[44,52,58,48,58,52,64], fixed=[84,84,140,96], rowHeight=32, headerHeight=140;
+let data=null, controller=null, sequence=0, renderedStart=-1, renderedEnd=-1, pendingFrame=0, searchTimer=0;
+const fmt=new Intl.NumberFormat('zh-TW',{maximumFractionDigits:3});
+function params(){const p=new URLSearchParams();for(const id of ['month','org','employee','category','level'])if($(id).value)p.set(id,$(id).value);if($('search').value.trim())p.set('q',$('search').value.trim());return p;}
+function options(id,items,label){const old=$(id).value,oldLabel=$(id).selectedOptions[0]?.textContent||old;$(id).innerHTML=`<option value="">${label}：全部</option>`+items.map(i=>`<option value="${esc(i.id)}">${esc(i.name)}</option>`).join('');if(old&&!items.some(i=>String(i.id)===old))$(id).insertAdjacentHTML('beforeend',`<option value="${esc(old)}">${esc(oldLabel)}</option>`);$(id).value=old;}
+function headers(){
+  const cols=data.columns;
+  function band(field){let out='';for(let i=0;i<cols.length;){let j=i+1;while(j<cols.length&&cols[j][field]===cols[i][field]&&(field!=='employee'||cols[j].org===cols[i].org))j++;out+=`<th class="band" colspan="${(j-i)*7}" title="${esc(cols[i][field])}"><span>${field==='org'?'區域：':'業務：'}${esc(cols[i][field])}</span></th>`;i=j;}return out;}
+  return `<colgroup>${[...fixed,...cols.flatMap(()=>widths)].map(w=>`<col style="width:${w}px">`).join('')}</colgroup><thead>
+    <tr><th colspan="4" rowspan="3" class="fixed basic">商品基本資料（固定欄）</th>${band('org')}</tr>
+    <tr>${band('employee')}</tr>
+    <tr>${cols.map(c=>`<th colspan="7" class="group-end ${c.total?'ttl':''}" title="${esc(c.title)}">${esc(c.title).replace(/\n/g,'<br>')}</th>`).join('')}</tr>
+    <tr>${['大分類','品類','型號','建議售價'].map((s,i)=>`<th class="fixed f${i}" title="${i===3?'欄位保留，待 Product 加入售價':s}">${s}</th>`).join('')}${cols.map(c=>data.metrics.map((m,i)=>`<th class="${c.total?'ttl ':''}${i===6?'group-end':''}">${m==='Sell Out'?'Sell<br>Out':esc(m)}</th>`).join('')).join('')}</tr></thead>`;
+}
+function renderRow(r,index){
+  const total=r.kind!=='product';
+  let html=`<tr class="${total?r.kind:(index%2?'alt':'')}" aria-rowindex="${index+5}">`;
+  [r.category,r.subcategory,r.code,''].forEach((v,i)=>{html+=`<td class="fixed f${i}" title="${esc(i===3?'建議售價待新增':v+(i===2&&r.name?' · '+r.name:''))}">${esc(v)}</td>`;});
+  r.values.forEach((vs,g)=>vs.forEach((v,i)=>{
+    const reason=v===null?(i===0?'尚無陳列快照，或合計包含尚未回報的商品':i===1?'缺少當月期初基準，或合計包含缺少基準的商品':i===5?'缺少當月期初基準，無法推算完整期末':'期初或陳列資料未齊，無法推算完整可銷售數量'):(v===0?'0 台':`${fmt.format(v)} 台`);
+    html+=`<td class="num ${data.columns[g].total?'ttl ':''}${i===6?'saleable group-end ':''}${v===null?'unknown ':''}${v<0?'negative':''}" title="${esc(reason)}">${v===null||v===0?'':fmt.format(v)}</td>`;
+  }));return html+'</tr>';
+}
+function renderWindow(force=false){
+  if(!data||!$('bodyRows'))return;
+  const rows=data.rows.filter(r=>r.kind!=='total'), visible=Math.ceil($('scroll').clientHeight/rowHeight)+8;
+  const start=Math.max(0,Math.min(rows.length,Math.floor(Math.max(0,$('scroll').scrollTop-headerHeight)/rowHeight)-4)),end=Math.min(rows.length,start+visible);
+  if(!force&&start===renderedStart&&end===renderedEnd)return;
+  renderedStart=start;renderedEnd=end;
+  const spacer=h=>h>0?`<tr class="spacer" aria-hidden="true"><td colspan="${4+data.columns.length*7}" style="height:${h}px"></td></tr>`:'';
+  $('bodyRows').innerHTML=spacer(start*rowHeight)+rows.slice(start,end).map((r,i)=>renderRow(r,start+i)).join('')+spacer((rows.length-end)*rowHeight);
+}
+function render(preserve){
+  const scroll=$('scroll'),top=preserve?scroll.scrollTop:0,left=preserve?scroll.scrollLeft:0;
+  if(!data.rows.length){scroll.innerHTML='<div class="empty">這個月份或篩選範圍沒有可顯示的 PSI 資料。</div>';return;}
+  const total=data.rows.find(r=>r.kind==='total');
+  scroll.innerHTML=`<table aria-label="PSI 月報" aria-rowcount="${data.rows.length+4}" style="width:${404+data.columns.length*376}px">${headers()}<tbody id="bodyRows"></tbody><tfoot>${total?renderRow(total,data.rows.length-1):''}</tfoot></table>`;
+  renderedStart=-1;renderWindow(true);scroll.scrollTop=top;scroll.scrollLeft=left;renderWindow(true);
+}
+async function load(preserve=false){
+  const seq=++sequence;if(controller)controller.abort();controller=new AbortController();
+  $('export').disabled=true;$('refresh').disabled=true;$('scroll').setAttribute('aria-busy','true');$('error').hidden=true;
+  try{
+    const res=await fetch('/api/psi?'+params(),{signal:controller.signal,cache:'no-store'});const body=await res.json();
+    if(!res.ok)throw new Error(body.error||'讀取失敗');if(seq!==sequence)return;data=body;
+    $('month').value=data.month;$('month').max=data.currentMonth;$('next').disabled=data.month>=data.currentMonth;
+    options('org',data.options.orgs,'區域');options('employee',data.options.employees.filter(e=>!$('org').value||String(e.orgId)===$('org').value),'業務');
+    options('category',data.options.categories.map(c=>({id:c,name:c})),'大分類');
+    $('title').textContent='PSI 月報 | '+data.month.replace('-',' 年 ')+' 月';
+    $('meta').textContent=`截至 ${data.asOf.replace('T',' ')} · 查詢時間 ${data.fetchedAt.replace('T',' ')} · 單位：台 · 真實資料`;
+    const q=data.quality, warnings=[];
+    if(q.missingOpening)warnings.push(`${q.missingOpening} 組客戶／商品缺少當月期初`);
+    if(q.missingDisplay)warnings.push(`${q.missingDisplay} 組尚無陳列回報`);
+    $('quality').textContent=(warnings.length?warnings.join('；')+'，相關推算與合計留白。':'資料基準與陳列齊全。')+` 本月有 ${q.sellOutReportedPairs} 組實銷回報；已套用 PSI 排除規則。`;
+    $('quality').classList.toggle('warn',!!q.missingOpening);
+    $('count').textContent=`${data.productCount} 個型號 · ${data.dealerCount} 家客戶`;
+    $('notes').innerHTML=data.notes.map(n=>`<li>${esc(n)}</li>`).join('');render(preserve);$('export').disabled=!data.rows.length;
+  }catch(e){if(e.name==='AbortError'||seq!==sequence)return;$('error').textContent=e.message+(data?'（下方仍為前次查詢結果，尚未更新）':'');$('error').hidden=false;if(!data)$('scroll').innerHTML='<div class="empty">尚未取得資料，請按重新整理重試。</div>';}
+  finally{if(seq===sequence){$('refresh').disabled=false;$('scroll').setAttribute('aria-busy','false');}}
+}
+$('scroll').addEventListener('scroll',()=>{if(!pendingFrame)pendingFrame=requestAnimationFrame(()=>{pendingFrame=0;renderWindow();});},{passive:true});
+window.addEventListener('resize',()=>renderWindow(true));
+for(const id of ['month','org','employee','category','level'])$(id).addEventListener('change',()=>{if(id==='org')$('employee').value='';load();});
+$('search').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>load(),300);});
+function moveMonth(delta){if(!$('month').value)return;let [y,m]=$('month').value.split('-').map(Number);m+=delta;if(m===0){m=12;y--;}if(m===13){m=1;y++;}$('month').value=`${y}-${String(m).padStart(2,'0')}`;load();}
+$('prev').onclick=()=>moveMonth(-1);$('next').onclick=()=>moveMonth(1);$('refresh').onclick=()=>load(true);
+$('export').onclick=async()=>{
+  $('export').disabled=true;
+  try{const res=await fetch('/api/psi/export?'+params(),{cache:'no-store'});if(!res.ok){const err=await res.json();throw new Error(err.error||'匯出失敗');}
+    const url=URL.createObjectURL(await res.blob()),a=document.createElement('a');a.href=url;a.download=`PSI-${data.month}.xlsx`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }catch(e){$('error').textContent=e.message;$('error').hidden=false;}finally{$('export').disabled=false;}
+};
+setInterval(()=>{if(!document.hidden&&!$('refresh').disabled)load(true);},60000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)load(true);});
+load();
+</script>
+</body>
+</html>
