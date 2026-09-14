@@ -108,6 +108,7 @@ class CalculationTests(unittest.TestCase):
 
 class RouteTests(unittest.TestCase):
     def setUp(self):
+        psi._SOURCE_CACHE.clear()
         self.app = Flask(__name__)
         self.app.secret_key = "unit-test-only"
         self.app.register_blueprint(psi.bp)
@@ -139,7 +140,7 @@ class RouteTests(unittest.TestCase):
         self.login()
         s = source(); load.return_value = s
         def closing():
-            return self.client.get("/api/psi?level=company").json["rows"][-1]["values"][-1][5]
+            return self.client.get("/api/psi?level=company&fresh=1").json["rows"][-1]["values"][-1][5]
         self.assertEqual(closing(), 15)
         s["outgoing"] = [(1, 1, 7)]
         self.assertEqual(closing(), 12)

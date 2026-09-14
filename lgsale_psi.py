@@ -6,6 +6,9 @@ Absent display snapshots and absent opening baselines are not invented as zero.
 from __future__ import annotations
 
 import re
+import math
+import threading
+import time
 from collections import defaultdict
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -20,6 +23,9 @@ import lgsale_db as db
 bp = Blueprint("psi", __name__)
 BASE = Path(__file__).resolve().parent
 METRICS = ["陳列", "期初", "Sell In", "退貨", "Sell Out", "期末", "可銷售"]
+_SOURCE_CACHE = {}
+_SOURCE_CACHE_LOCK = threading.RLock()
+_SOURCE_CACHE_SECONDS = 8
 
 
 def period(month, now):
@@ -102,6 +108,24 @@ def load_source(month=None):
                 opening=opening, incoming=incoming, outgoing=outgoing, displays=displays, exclusions=exclusions)
 
 
+def cached_source(month=None, fresh=False):
+    """Briefly reuse raw facts while a user changes filters; explicit refresh bypasses it."""
+    key = month or "CURRENT"
+    now = time.monotonic()
+    with _SOURCE_CACHE_LOCK:
+        cached = _SOURCE_CACHE.get(key)
+        if not fresh and cached and now - cached[0] < _SOURCE_CACHE_SECONDS:
+            return cached[1]
+    result = load_source(month)
+    with _SOURCE_CACHE_LOCK:
+        _SOURCE_CACHE[key] = (time.monotonic(), result)
+        # Only current/recent filter activity is useful; avoid unbounded month keys.
+        if len(_SOURCE_CACHE) > 6:
+            oldest = min(_SOURCE_CACHE, key=lambda item: _SOURCE_CACHE[item][0])
+            _SOURCE_CACHE.pop(oldest, None)
+    return result
+
+
 def number(value):
     value = Decimal(value)
     return int(value) if value == value.to_integral_value() else float(value)
@@ -118,8 +142,15 @@ def metrics(fact):
 
 def sum_values(values):
     values = list(values)
-    return [None if any(v[i] is None for v in values) else number(sum((Decimal(str(v[i])) for v in values), Decimal(0)))
-            for i in range(7)]
+    result = []
+    for i in range(7):
+        column = [v[i] for v in values]
+        if not column or any(v is None for v in column):
+            result.append(None)
+            continue
+        total = math.fsum(column)
+        result.append(int(total) if total.is_integer() else round(total, 3))
+    return result
 
 
 def matrix(report, level="dealer"):
@@ -164,7 +195,10 @@ def matrix(report, level="dealer"):
             subtotal(last_category, category_rows)
             category_rows = []
             last_category = row["category"]
-        values = [sum_values(row["cells"][str(d)]["values"] for d in c["dealerIds"] if str(d) in row["cells"]) for c in columns]
+        values = []
+        for c in columns:
+            present = [row["cells"][str(d)]["values"] for d in c["dealerIds"] if str(d) in row["cells"]]
+            values.append(present[0] if len(present) == 1 else sum_values(present))
         item = dict(kind="product", category=row["category"], subcategory=row["subcategory"], code=row["code"],
                     name=row["name"], price=None, values=values)
         rows.append(item)
@@ -191,12 +225,14 @@ def build_report(source, filters):
     global_ex = {int(p) for p, d in source["exclusions"] if d is None}
     pair_ex = {(int(d), int(p)) for p, d in source["exclusions"] if d is not None}
     excluded = sum(p in global_ex or (d, p) in pair_ex for d, p in facts)
+    excluded_products = sum(p["id"] in global_ex for p in source["products"])
     facts = {k: v for k, v in facts.items() if k[1] not in global_ex and k not in pair_ex}
     active_dealers = {d for d, _ in facts}
     dealers = [d for d in source["dealers"] if d["id"] in active_dealers]
+    fact_products = {pid for _, pid in facts}
     options = dict(orgs=list({d["orgId"]: {"id": d["orgId"], "name": d["org"]} for d in dealers}.values()),
                    employees=list({d["employeeId"]: {"id": d["employeeId"], "name": d["employee"], "orgId": d["orgId"]} for d in dealers}.values()),
-                   categories=sorted({p["category"] for p in source["products"] if p["id"] in {pid for _, pid in facts}}))
+                   categories=sorted({p["category"] for p in source["products"] if p["id"] in fact_products}))
     for field, key in (("org", "orgId"), ("employee", "employeeId")):
         if filters.get(field, "") != "":
             try:
@@ -216,10 +252,13 @@ def build_report(source, filters):
     ds, ps = {d["id"] for d in dealers}, {p["id"] for p in products}
     facts = {k: v for k, v in facts.items() if k[0] in ds and k[1] in ps}
     dealers = [d for d in dealers if any(k[0] == d["id"] for k in facts)]
+    cells_by_product = defaultdict(dict)
+    for (dealer_id, product_id), fact in facts.items():
+        cells_by_product[product_id][str(dealer_id)] = {
+            "values": metrics(fact), "displayAt": fact.get("displayAt"), "sellOutReported": "outgoing" in fact}
     rows = []
     for p in products:
-        values = {str(d): {"values": metrics(f), "displayAt": f.get("displayAt"),
-                           "sellOutReported": "outgoing" in f} for (d, pid), f in facts.items() if pid == p["id"]}
+        values = cells_by_product.get(p["id"], {})
         if values:
             rows.append({**p, "cells": values})
     return {k: source[k] for k in ("month", "asOf", "fetchedAt", "currentMonth")} | dict(
@@ -227,7 +266,7 @@ def build_report(source, filters):
         quality=dict(missingOpening=sum("opening" not in f for f in facts.values()),
                      missingDisplay=sum("display" not in f for f in facts.values()),
                      sellOutReportedPairs=sum("outgoing" in f for f in facts.values()),
-                     excludedPairs=excluded),
+                     excludedPairs=excluded, excludedProducts=excluded_products),
         notes=["期末 = 期初 + Sell In + 退貨（負數）− Sell Out；可銷售 = 期末 − 陳列。",
                "實銷按 SellOutDate 加總有效回報（含事後補登與修改）；未回報不代表實際無銷售。期末為依已登錄資料推算。",
                "陳列取截至日最新有效快照（可沿用前月），不是巡店累加；尚無陳列回報時可銷售留白。",
@@ -265,7 +304,8 @@ def page():
 
 @bp.get("/api/psi")
 def report():
-    return jsonify(matrix(build_report(load_source(request.args.get("month")), request.args), request.args.get("level", "dealer")))
+    source = cached_source(request.args.get("month"), request.args.get("fresh") == "1")
+    return jsonify(matrix(build_report(source, request.args), request.args.get("level", "dealer")))
 
 
 @bp.get("/api/psi/export")
@@ -274,7 +314,7 @@ def export():
     from openpyxl.styles import Alignment, Font, PatternFill
     from openpyxl.utils import get_column_letter
 
-    result = matrix(build_report(load_source(request.args.get("month")), request.args), request.args.get("level", "dealer"))
+    result = matrix(build_report(cached_source(request.args.get("month")), request.args), request.args.get("level", "dealer"))
     book = openpyxl.Workbook()
     sheet = book.active
     sheet.title = "PSI"
