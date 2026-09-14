@@ -299,7 +299,10 @@ def error(exc):
 
 @bp.get("/psi")
 def page():
-    return send_from_directory(BASE, "LGSale_PSI.html")
+    response = send_from_directory(BASE, "LGSale_PSI.html", max_age=0)
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    return response
 
 
 @bp.get("/api/psi")
