@@ -105,9 +105,16 @@ def load_source(month=None):
         cur.execute("""SELECT ProductId,DealerId FROM dbo.OpeningInventoryProductExclusion
             WHERE EffectiveFromMonth<=%s AND (EffectiveToMonth IS NULL OR EffectiveToMonth>=%s)""", (key, key))
         exclusions = list(cur.fetchall())
+        cur.execute("""SELECT p.DealerId,p.ProductId,p.DisplayPhotoId,p.CapturedAt,
+                   COALESCE(e.EmployeeName,d.DealerName,'—')
+            FROM dbo.DealerProductDisplayPhoto p JOIN dbo.UserAccount a ON a.UserAccountId=p.UploadedByUserAccountId
+            LEFT JOIN dbo.Employee e ON e.EmployeeId=a.EmployeeId LEFT JOIN dbo.Dealer d ON d.DealerId=a.DealerId
+            WHERE p.DataMonth=%s AND p.RecordStatus='ACTIVE'""",(key,))
+        display_photos=list(cur.fetchall())
     return dict(month=month, asOf=as_of.isoformat(timespec="seconds"), fetchedAt=now.isoformat(timespec="seconds"),
                 currentMonth=now.strftime("%Y-%m"), dealers=dealers, products=products,
-                opening=opening, incoming=incoming, outgoing=outgoing, displays=displays, exclusions=exclusions)
+                opening=opening, incoming=incoming, outgoing=outgoing, displays=displays,
+                exclusions=exclusions, displayPhotos=display_photos)
 
 
 def cached_source(month=None, fresh=False):
@@ -201,8 +208,12 @@ def matrix(report, level="dealer"):
         for c in columns:
             present = [row["cells"][str(d)]["values"] for d in c["dealerIds"] if str(d) in row["cells"]]
             values.append(present[0] if len(present) == 1 else sum_values(present))
+        photos=[]
+        for c in columns:
+            present=[row["cells"][str(d)].get("displayPhoto") for d in c["dealerIds"] if str(d) in row["cells"]]
+            photos.append(present[0] if len(present)==1 else None)
         item = dict(kind="product", category=row["category"], subcategory=row["subcategory"], code=row["code"],
-                    name=row["name"], price=None, values=values)
+                    name=row["name"], price=None, values=values, photos=photos)
         rows.append(item)
         category_rows.append(item)
         product_rows.append(item)
@@ -237,6 +248,10 @@ def build_report(source, filters):
         key = (int(d), int(p))
         if key in active_pairs:
             facts[key].update(display=Decimal(n), displayAt=stamp.isoformat(timespec="seconds"))
+    for d,p,photo_id,captured_at,uploader in source.get("displayPhotos",[]):
+        key=(int(d),int(p))
+        if key in active_pairs:
+            facts[key]["displayPhoto"]={"id":int(photo_id),"capturedAt":captured_at.isoformat(timespec="seconds"),"uploader":uploader}
     global_ex = {int(p) for p, d in source["exclusions"] if d is None}
     pair_ex = {(int(d), int(p)) for p, d in source["exclusions"] if d is not None}
     excluded = sum(p in global_ex or (d, p) in pair_ex for d, p in facts)
@@ -270,7 +285,8 @@ def build_report(source, filters):
     cells_by_product = defaultdict(dict)
     for (dealer_id, product_id), fact in facts.items():
         cells_by_product[product_id][str(dealer_id)] = {
-            "values": metrics(fact), "displayAt": fact.get("displayAt"), "sellOutReported": "outgoing" in fact}
+            "values": metrics(fact), "displayAt": fact.get("displayAt"), "displayPhoto":fact.get("displayPhoto"),
+            "sellOutReported": "outgoing" in fact}
     rows = []
     for p in products:
         values = cells_by_product.get(p["id"], {})

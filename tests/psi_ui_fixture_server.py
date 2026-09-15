@@ -25,7 +25,7 @@ def fixture():
     return dict(month=month, asOf=cutoff.isoformat(), fetchedAt="2026-09-14T12:00:00", currentMonth="2026-09",
                 dealers=dealers, products=products, opening=[(d,p,10) for d,p in pairs],
                 incoming=[(d,p,3,-1) for d,p in pairs], outgoing=[(d,p,2) for d,p in pairs],
-                displays=[(d,p,2,datetime(2026, 7, 1)) for d,p in pairs if p%5], exclusions=[])
+                displays=[(d,p,2,datetime(2026, 7, 1)) for d,p in pairs if p%5], exclusions=[],displayPhotos=[])
 
 
 @app.get("/psi")

@@ -667,6 +667,11 @@ def create_visit(data:dict[str,Any]) -> tuple[int,datetime]:
         for item in data["details"]:
             sell=_optional_quantity(item,"sellOutQuantity","實銷");display=_optional_quantity(item,"displayQuantity","陳列")
             cur.execute("INSERT dbo.StoreVisitProductDetail(StoreVisitId,ProductId,SellOutQuantity,SellOutDate,DisplayQuantity) VALUES(%s,%s,%s,%s,%s)",(visit_id,int(item["productId"]),sell,item.get("sellOutDate") if sell else None,display))
+            if item.get("displayPhotoId"):
+                cur.execute("""UPDATE dbo.DealerProductDisplayPhoto SET SourceStoreVisitId=COALESCE(SourceStoreVisitId,%s)
+                               WHERE DisplayPhotoId=%s AND DealerId=%s AND ProductId=%s
+                                 AND DataMonth=CONVERT(char(6),SYSDATETIME(),112) AND RecordStatus='ACTIVE'""",
+                            (visit_id,int(item["displayPhotoId"]),dealer_id,int(item["productId"])))
         conn.commit();return visit_id,row[1]
     except Exception:conn.rollback();raise
     finally:conn.close()
@@ -694,11 +699,28 @@ def mobile_dashboard(employee_id: int | None = None, dealer_id: int | None = Non
             dealer_rows = [{"id":int(r[0]),"code":r[1],"name":r[2],"level":r[3],"employee":r[4],
                             "lastVisit":r[5].isoformat(timespec="minutes") if r[5] else None}
                            for r in cur.fetchall()]
+        cur.execute("""WITH latest AS (
+            SELECT v.DealerId,p.ProductId,p.DisplayQuantity,
+                   ROW_NUMBER() OVER(PARTITION BY v.DealerId,p.ProductId ORDER BY v.ReportDateTime DESC,v.StoreVisitId DESC) rn
+              FROM dbo.StoreVisit v JOIN dbo.StoreVisitProductDetail p ON p.StoreVisitId=v.StoreVisitId
+              LEFT JOIN dbo.DealerAssignmentHistory a ON a.DealerId=v.DealerId AND a.EndDateTime IS NULL
+             WHERE v.RecordStatus='ACTIVE' AND v.ReportDateTime>=DATEFROMPARTS(YEAR(SYSDATETIME()),MONTH(SYSDATETIME()),1)
+               AND (%s IS NULL OR v.DealerId=%s) AND (%s IS NULL OR a.EmployeeId=%s)
+        )
+        SELECT l.DealerId,d.DealerCode,d.DealerName,l.ProductId,p.ProductCode,l.DisplayQuantity
+          FROM latest l JOIN dbo.Dealer d ON d.DealerId=l.DealerId JOIN dbo.Product p ON p.ProductId=l.ProductId
+          LEFT JOIN dbo.DealerProductDisplayPhoto photo ON photo.DataMonth=CONVERT(char(6),SYSDATETIME(),112)
+            AND photo.DealerId=l.DealerId AND photo.ProductId=l.ProductId AND photo.RecordStatus='ACTIVE'
+         WHERE l.rn=1 AND l.DisplayQuantity>0 AND photo.DisplayPhotoId IS NULL
+         ORDER BY d.DealerName,p.ProductCode""",(dealer_id,dealer_id,employee_id,employee_id))
+        pending_photos=[{"dealerId":int(r[0]),"dealerCode":r[1],"dealer":r[2],"productId":int(r[3]),
+                         "productCode":r[4],"displayQuantity":int(r[5])} for r in cur.fetchall()]
         visit_rows = visits(employee_id=employee_id, dealer_id=dealer_id, limit=200)
         editable = sum(1 for item in visit_rows if item["canEdit"] and item["entrySourceType"] == "EMPLOYEE")
         dealer_reports = sum(1 for item in visit_rows if item["entrySourceType"] == "DEALER")
         locked = sum(1 for item in visit_rows if not item["canEdit"])
-        return {"dealers": dealer_rows, "counts": {"editable": editable, "dealer": dealer_reports, "locked": locked}}
+        return {"dealers": dealer_rows, "counts": {"editable": editable, "dealer": dealer_reports, "locked": locked,
+                "pendingDisplayPhotos":len(pending_photos)},"pendingDisplayPhotos":pending_photos[:20]}
 
 
 def dealer_summary(dealer_id: int) -> dict[str, Any]:
@@ -748,15 +770,62 @@ def reportable_products(dealer_id: int, exclude_visit_id: int | None = None) -> 
          GROUP BY d.ProductId
     )
     SELECT p.ProductId,p.ProductCode,p.ProductName,COALESCE(p.CategoryLevel1,''),COALESCE(p.CategoryLevel2,''),
-           o.Quantity+COALESCE(i.Quantity,0)-COALESCE(s.Quantity,0)
+           o.Quantity+COALESCE(i.Quantity,0)-COALESCE(s.Quantity,0),display.DisplayQuantity,photo.DisplayPhotoId
       FROM opening o JOIN dbo.Product p ON p.ProductId=o.ProductId AND p.IsActive=1
       LEFT JOIN incoming i ON i.ProductId=o.ProductId LEFT JOIN outgoing s ON s.ProductId=o.ProductId
+      OUTER APPLY (SELECT TOP 1 pd.DisplayQuantity
+          FROM dbo.StoreVisitProductDetail pd JOIN dbo.StoreVisit v ON v.StoreVisitId=pd.StoreVisitId
+          WHERE v.DealerId=%s AND pd.ProductId=o.ProductId AND v.RecordStatus='ACTIVE'
+            AND v.ReportDateTime>=DATEFROMPARTS(YEAR(SYSDATETIME()),MONTH(SYSDATETIME()),1)
+            AND v.ReportDateTime<=SYSDATETIME() AND pd.DisplayQuantity IS NOT NULL
+          ORDER BY v.ReportDateTime DESC,v.StoreVisitId DESC) display
+      OUTER APPLY (SELECT TOP 1 dp.DisplayPhotoId FROM dbo.DealerProductDisplayPhoto dp
+          WHERE dp.DataMonth=CONVERT(char(6),SYSDATETIME(),112) AND dp.DealerId=%s
+            AND dp.ProductId=o.ProductId AND dp.RecordStatus='ACTIVE') photo
      ORDER BY p.ProductCode
     """
     with connect() as conn:
-        cur=conn.cursor();cur.execute(sql,(dealer_id,dealer_id,dealer_id,exclude_visit_id,exclude_visit_id));rows=cur.fetchall()
+        cur=conn.cursor();cur.execute(sql,(dealer_id,dealer_id,dealer_id,exclude_visit_id,exclude_visit_id,dealer_id,dealer_id));rows=cur.fetchall()
     return [{"id":int(r[0]),"code":r[1],"name":r[2],"category":r[3] or r[4],
-             "availableQuantity":int(r[5])} for r in rows]
+             "availableQuantity":int(r[5]),"displayQuantity":int(r[6]) if r[6] is not None else None,
+             "displayPhotoId":int(r[7]) if r[7] is not None else None} for r in rows]
+
+
+def save_display_photo(*, dealer_id:int, product_id:int, account_id:int, original_name:str,
+                       original_path:str, thumbnail_path:str, original_size:int,
+                       thumbnail_size:int, file_hash:str, captured_at:datetime) -> dict[str,Any]:
+    """Activate one monthly dealer/product photo and retain any replaced photo as history."""
+    conn=connect()
+    try:
+        cur=conn.cursor();month=_one(cur,"SELECT CONVERT(char(6),SYSDATETIME(),112)")[0]
+        if _one(cur,"SELECT 1 FROM dbo.Product WHERE ProductId=%s AND IsActive=1",(product_id,)) is None:
+            raise LookupError("找不到可用的商品")
+        previous=_one(cur,"""SELECT DisplayPhotoId FROM dbo.DealerProductDisplayPhoto WITH (UPDLOCK,HOLDLOCK)
+                               WHERE DataMonth=%s AND DealerId=%s AND ProductId=%s AND RecordStatus='ACTIVE'""",
+                      (month,dealer_id,product_id))
+        if previous:
+            cur.execute("UPDATE dbo.DealerProductDisplayPhoto SET RecordStatus='SUPERSEDED' WHERE DisplayPhotoId=%s",(previous[0],))
+        row=_one(cur,"""INSERT dbo.DealerProductDisplayPhoto
+            (DataMonth,DealerId,ProductId,OriginalFileName,OriginalFilePath,ThumbnailFilePath,
+             OriginalFileSize,ThumbnailFileSize,FileHash,CapturedAt,UploadedByUserAccountId,ReplacedPhotoId)
+            OUTPUT inserted.DisplayPhotoId,inserted.DataMonth,inserted.UploadedAt
+            VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+            (month,dealer_id,product_id,original_name,original_path,thumbnail_path,original_size,
+             thumbnail_size,file_hash,captured_at,account_id,previous[0] if previous else None))
+        conn.commit();return {"id":int(row[0]),"month":row[1],"uploadedAt":row[2].isoformat(timespec="seconds")}
+    except Exception:conn.rollback();raise
+    finally:conn.close()
+
+
+def display_photo_file(photo_id:int, variant:str, *, dealer_id:int|None=None) -> dict[str,Any]|None:
+    column="OriginalFilePath" if variant=="original" else "ThumbnailFilePath"
+    with connect() as conn:
+        row=_one(conn.cursor(),f"""SELECT {column},DealerId,ProductId,DataMonth,CapturedAt,OriginalDeletedAt
+                                     FROM dbo.DealerProductDisplayPhoto WHERE DisplayPhotoId=%s""",(photo_id,))
+    if row is None or (dealer_id is not None and int(row[1])!=dealer_id):return None
+    if variant=="original" and row[5] is not None:return None
+    return {"path":row[0],"dealerId":int(row[1]),"productId":int(row[2]),"month":row[3],
+            "capturedAt":row[4].isoformat(timespec="seconds")}
 
 
 def _validate_sell_out_inventory(cur, dealer_id: int, details: list[dict[str, Any]],
@@ -879,6 +948,11 @@ def update_visit(visit_id: int, details: list[dict[str, Any]], *, account_id: in
             if sell is None and display is None:continue
             cur.execute("""INSERT dbo.StoreVisitProductDetail(StoreVisitId,ProductId,SellOutQuantity,SellOutDate,DisplayQuantity)
                            VALUES(%s,%s,%s,%s,%s)""",(visit_id,int(item['productId']),sell,item.get('sellOutDate') if sell else None,display))
+            if item.get('displayPhotoId'):
+                cur.execute("""UPDATE dbo.DealerProductDisplayPhoto SET SourceStoreVisitId=COALESCE(SourceStoreVisitId,%s)
+                               WHERE DisplayPhotoId=%s AND DealerId=%s AND ProductId=%s
+                                 AND DataMonth=CONVERT(char(6),SYSDATETIME(),112) AND RecordStatus='ACTIVE'""",
+                            (visit_id,int(item['displayPhotoId']),dealer_id,int(item['productId'])))
         cur.execute("UPDATE dbo.StoreVisit SET UpdatedAt=SYSDATETIME(),UpdatedByUserAccountId=%s WHERE StoreVisitId=%s",(account_id,visit_id))
         conn.commit()
     except Exception:conn.rollback();raise

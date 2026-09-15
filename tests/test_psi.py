@@ -16,7 +16,8 @@ def source():
                 products=[dict(id=1, code="P1", name="Product 1", category="HA", subcategory="Fridge", price=None),
                           dict(id=2, code="P2", name="Product 2", category="TV", subcategory="OLED", price=None)],
                 opening=[(1, 1, 10), (2, 1, 5), (1, 2, 2)], incoming=[(1, 1, Decimal("3"), Decimal("-1"))],
-                outgoing=[(1, 1, 4)], displays=[(1, 1, 2, datetime(2026, 8, 30)), (2, 1, 1, datetime(2026, 9, 1)), (1, 2, 1, datetime(2026, 9, 1))], exclusions=[])
+                outgoing=[(1, 1, 4)], displays=[(1, 1, 2, datetime(2026, 8, 30)), (2, 1, 1, datetime(2026, 9, 1)), (1, 2, 1, datetime(2026, 9, 1))], exclusions=[],
+                displayPhotos=[(1,1,91,datetime(2026,9,2,10),"E1")])
 
 
 class CalculationTests(unittest.TestCase):
@@ -26,7 +27,7 @@ class CalculationTests(unittest.TestCase):
         connect.return_value.__enter__.return_value.cursor.return_value = cur
         now = datetime(2026, 9, 14, 12)
         cur.fetchone.return_value = (now,)
-        cur.fetchall.side_effect = [[], [], [], [], [], [], []]
+        cur.fetchall.side_effect = [[], [], [], [], [], [], [], []]
         psi.load_source("2026-08")
         calls = cur.execute.call_args_list
         incoming = next(c for c in calls if "FROM dbo.SellInTransaction" in c.args[0])
@@ -47,6 +48,7 @@ class CalculationTests(unittest.TestCase):
         r = psi.build_report(source(), {})
         self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, 3, -1, 4, 8, 6])
         self.assertTrue(r["rows"][0]["cells"]["1"]["displayAt"].startswith("2026-08"))
+        self.assertEqual(r["rows"][0]["cells"]["1"]["displayPhoto"]["id"],91)
 
     def test_no_snapshot_is_unknown_not_zero(self):
         s = source(); s["displays"] = []

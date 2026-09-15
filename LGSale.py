@@ -20,6 +20,7 @@ import socket
 import argparse
 import os
 import secrets
+import hashlib
 from io import BytesIO
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -38,6 +39,7 @@ from lgsale_config import required
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / "uploads" / "task_photos"
+DISPLAY_UPLOAD_DIR = BASE_DIR / "uploads" / "display_photos"
 PORT = int(required("LGSALEOUT_PORT"))
 app = Flask(__name__)
 app.secret_key = os.getenv("LGSALEOUT_SESSION_SECRET") or secrets.token_hex(32)
@@ -74,7 +76,7 @@ def require_login():
             return jsonify(error="此帳號已停用，請聯絡管理人員"), 401
         entry = "dealer" if user.get("type") == "DEALER" else "employee"
         return redirect(f"/login/{entry}")
-    dealer_allowed = request.path == "/dealer" or request.path in {"/api/auth/me", "/api/auth/logout", "/api/dealers", "/api/products", "/api/mobile-dashboard"} or request.path.startswith("/api/visits")
+    dealer_allowed = request.path == "/dealer" or request.path in {"/api/auth/me", "/api/auth/logout", "/api/dealers", "/api/products", "/api/mobile-dashboard"} or request.path.startswith("/api/visits") or request.path.startswith("/api/display-photos")
     if user["type"] == "DEALER" and not dealer_allowed:
         if request.path.startswith("/api/"):
             return jsonify(error="經銷商帳號無權存取此功能"), 403
@@ -481,6 +483,52 @@ def products():
         return jsonify(db.reportable_products(dealer_id,visit_id) if dealer_id is not None else db.products())
     except Exception as exc:
         return jsonify(error="商品資料庫查詢失敗：" + str(exc)), 503
+
+
+@app.post("/api/display-photos")
+def upload_display_photo():
+    user=session["user"]
+    try:
+        dealer_id=int(request.form.get("dealerId", ""));product_id=int(request.form.get("productId", ""))
+    except ValueError:
+        return jsonify(error="經銷商與型號必填"),400
+    if user["type"]=="DEALER" and dealer_id!=int(user["dealerId"]):
+        return jsonify(error="無權上傳其他經銷商的照片"),403
+    original=request.files.get("original");thumbnail=request.files.get("thumbnail")
+    if not original or not thumbnail:return jsonify(error="原圖與縮圖都必須上傳"),400
+    original_bytes=original.read();thumbnail_bytes=thumbnail.read()
+    if not (original_bytes.startswith(b"\xff\xd8\xff") and thumbnail_bytes.startswith(b"\xff\xd8\xff")):
+        return jsonify(error="陳列照片必須是 JPEG"),400
+    if not 0<len(original_bytes)<=300*1024 or not 0<len(thumbnail_bytes)<=80*1024:
+        return jsonify(error="照片檔案過大，請重新拍攝"),400
+    now=datetime.now();folder=DISPLAY_UPLOAD_DIR/f"{now:%Y}"/f"{now:%m}"/str(dealer_id);folder.mkdir(parents=True,exist_ok=True)
+    token=secrets.token_hex(16);original_path=folder/f"{token}.jpg";thumbnail_path=folder/f"{token}_thumb.jpg"
+    original_path.write_bytes(original_bytes);thumbnail_path.write_bytes(thumbnail_bytes)
+    try:
+        saved=db.save_display_photo(dealer_id=dealer_id,product_id=product_id,account_id=int(user["id"]),
+            original_name=secure_filename(original.filename or "display.jpg"),
+            original_path=original_path.relative_to(BASE_DIR).as_posix(),thumbnail_path=thumbnail_path.relative_to(BASE_DIR).as_posix(),
+            original_size=len(original_bytes),thumbnail_size=len(thumbnail_bytes),
+            file_hash=hashlib.sha256(original_bytes).hexdigest(),captured_at=now)
+        return jsonify(displayPhotoId=saved["id"],month=saved["month"],uploadedAt=saved["uploadedAt"],
+                       thumbnailUrl=f'/api/display-photos/{saved["id"]}/thumbnail')
+    except LookupError as exc:
+        original_path.unlink(missing_ok=True);thumbnail_path.unlink(missing_ok=True);return jsonify(error=str(exc)),404
+    except Exception as exc:
+        original_path.unlink(missing_ok=True);thumbnail_path.unlink(missing_ok=True)
+        return jsonify(error="陳列照片上傳失敗："+str(exc)),500
+
+
+@app.get("/api/display-photos/<int:photo_id>/<variant>")
+def display_photo(photo_id:int,variant:str):
+    if variant not in {"thumbnail","original"}:return jsonify(error="照片版本不正確"),404
+    user=session["user"]
+    item=db.display_photo_file(photo_id,variant,dealer_id=user.get("dealerId") if user["type"]=="DEALER" else None)
+    if item is None:return jsonify(error="找不到照片或沒有存取權限"),404
+    target=(BASE_DIR/item["path"]).resolve();root=DISPLAY_UPLOAD_DIR.resolve()
+    if root not in target.parents or not target.is_file():return jsonify(error="照片檔案不存在"),404
+    response=send_file(target,mimetype="image/jpeg",max_age=86400 if variant=="thumbnail" else 3600)
+    response.headers["X-Content-Type-Options"]="nosniff";return response
 
 
 @app.post("/api/assignments")

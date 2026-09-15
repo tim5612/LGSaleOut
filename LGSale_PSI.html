@@ -25,7 +25,7 @@
     td.ttl,thead th.ttl{background:#fff3e4!important}thead tr:nth-child(1) th.ttl{background:#f4d9bc!important}tbody tr.subtotal td{background:#e5eedb;font-weight:600}tbody tr.subtotal td.ttl{background:#efd2ad!important}
     td.merged{vertical-align:top;text-align:center;background:#f3f7fa!important;border-bottom:1px solid #aebfcd}td.merged span{position:relative;display:block;padding:8px 0}tfoot td{position:sticky;bottom:0;z-index:12;background:#d4e6c4;font-weight:700;border-top:2px solid #829d72}tfoot td.fixed{z-index:14}tfoot td.ttl{background:#efd2ad!important}
     tbody tr:hover td{box-shadow:inset 0 0 0 999px #1769aa09}tbody tr.row-selected td{background:#fff2cc!important;box-shadow:inset 0 2px #d79b00,inset 0 -2px #d79b00}tbody tr.row-selected td:first-child{border-left:3px solid #d79b00}td.unknown{cursor:help}td.negative{color:#b42318}tr.spacer td{padding:0;border:0;background:white}
-    .empty{padding:50px;color:#60758a;text-align:center}.foot{font-size:12px;color:#60758a;margin-top:10px;display:flex;justify-content:space-between;gap:16px}details{margin-top:8px;font-size:12px;color:#60758a}details li{margin:4px 0}[hidden]{display:none!important}
+    .empty{padding:50px;color:#60758a;text-align:center}.foot{font-size:12px;color:#60758a;margin-top:10px;display:flex;justify-content:space-between;gap:16px}details{margin-top:8px;font-size:12px;color:#60758a}details li{margin:4px 0}[hidden]{display:none!important}.photo-cell{cursor:pointer;color:#1769aa;font-weight:700}.photo-popover{position:fixed;z-index:40;width:220px;background:#fff;border:1px solid #8ba5ba;border-radius:8px;padding:8px;box-shadow:0 8px 28px #17324d40;pointer-events:none}.photo-popover img{display:block;width:202px;height:202px;object-fit:cover;background:#edf4f9}.photo-popover small{display:block;margin-top:5px;color:#60758a;white-space:normal}.photo-modal{position:fixed;inset:0;z-index:50;background:#000b;display:grid;place-items:center;padding:20px}.photo-modal[hidden]{display:none}.photo-modal figure{margin:0;max-width:min(92vw,900px);max-height:92vh;background:#fff;padding:12px;border-radius:10px}.photo-modal img{display:block;max-width:100%;max-height:80vh;margin:auto}.photo-modal figcaption{margin-top:8px}.photo-modal button{float:right}
     @media(max-width:1100px){:root{--navw:138px;--pad:8px}.side{padding:16px 6px}.brand{font-size:19px;padding-left:8px}main{padding-top:8px}}
   </style>
 </head>
@@ -54,7 +54,7 @@
     <div class="foot"><span>陳列含在庫存內、不可銷售。零值留白；資料未齊也留白，滑鼠停留可查看原因。</span><span id="count"></span></div>
     <details><summary>計算方式與資料來源</summary><ul id="notes"></ul><p>頁面每 60 秒更新，返回此頁會重新查詢；也可按「重新整理」。合計若包含未齊資料會留白，不以部分已知數量冒充完整庫存。</p></details>
   </main>
-</div>
+</div><div id="photoPopover" class="photo-popover" hidden></div><div id="photoModal" class="photo-modal" hidden><figure><button id="closePhoto" aria-label="關閉照片">×</button><img id="photoOriginal" alt="陳列照片"><figcaption id="photoCaption"></figcaption></figure></div>
 <script>
 'use strict';
 const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -89,7 +89,8 @@ function renderRow(r,index,rows=null,end=0,windowStart=0,columnStart=0,columnEnd
   if(columnStart)html+=`<td class="virtual-spacer" style="width:${columnStart*376}px;min-width:${columnStart*376}px"></td>`;
   r.values.slice(columnStart,columnEnd).forEach((vs,visibleGroup)=>{const g=columnStart+visibleGroup;vs.forEach((v,i)=>{
     const reason=v===null?(i===0?'尚無陳列快照，或合計包含尚未回報的商品':i===1?'缺少當月期初基準，或合計包含缺少基準的商品':i===5?'缺少當月期初基準，無法推算完整期末':'期初或陳列資料未齊，無法推算完整可銷售數量'):(v===0?'0 台':`${fmt.format(v)} 台`);
-    html+=`<td class="num ${data.columns[g].total?'ttl ':''}${i===6?'saleable group-end ':''}${v===null?'unknown ':''}${v<0?'negative':''}" title="${esc(reason)}">${v===null||v===0?'':fmt.format(v)}</td>`;
+    const photo=!total&&i===0?r.photos?.[g]:null,photoAttrs=photo?` data-photo-id="${photo.id}" data-photo-code="${esc(r.code)}" data-photo-captured="${esc(photo.capturedAt)}" data-photo-uploader="${esc(photo.uploader)}"`:'';
+    html+=`<td class="num ${data.columns[g].total?'ttl ':''}${i===6?'saleable group-end ':''}${v===null?'unknown ':''}${v<0?'negative ':''}${photo?'photo-cell':''}" title="${esc(photo?'點選查看陳列照片':reason)}"${photoAttrs}>${v===null||v===0?'':fmt.format(v)}${photo?' 📷':''}</td>`;
   })});
   if(columnEnd<data.columns.length)html+=`<td class="virtual-spacer" style="width:${(data.columns.length-columnEnd)*376}px;min-width:${(data.columns.length-columnEnd)*376}px"></td>`;
   return html+'</tr>';
@@ -165,8 +166,17 @@ function endDrag(event,cancelled=false){
 }
 $('scroll').addEventListener('pointerup',event=>endDrag(event));$('scroll').addEventListener('pointercancel',event=>endDrag(event,true));
 $('scroll').addEventListener('click',event=>{
-  if(drag.moved){drag.moved=false;event.preventDefault();event.stopPropagation();}
+  if(drag.moved){drag.moved=false;event.preventDefault();event.stopPropagation();return;}
+  const cell=event.target.closest('[data-photo-id]');if(cell)openPhoto(cell);
 });
+let photoHoverTimer=0;
+function photoMeta(cell){return `${cell.dataset.photoCode}｜${cell.dataset.photoCaptured.replace('T',' ')}｜${cell.dataset.photoUploader}`}
+function showPhotoPopover(cell){const box=$('photoPopover'),rect=cell.getBoundingClientRect();box.innerHTML=`<img src="/api/display-photos/${cell.dataset.photoId}/thumbnail" alt="${esc(cell.dataset.photoCode)} 陳列縮圖"><small>${esc(photoMeta(cell))}</small>`;box.hidden=false;const left=Math.min(innerWidth-230,Math.max(8,rect.left)),top=rect.bottom+226<innerHeight?rect.bottom+6:Math.max(8,rect.top-226);box.style.left=left+'px';box.style.top=top+'px'}
+function hidePhotoPopover(){clearTimeout(photoHoverTimer);$('photoPopover').hidden=true}
+function openPhoto(cell){hidePhotoPopover();$('photoOriginal').src=`/api/display-photos/${cell.dataset.photoId}/original`;$('photoOriginal').alt=cell.dataset.photoCode+' 陳列照片';$('photoCaption').textContent=photoMeta(cell);$('photoModal').hidden=false}
+$('scroll').addEventListener('pointerover',event=>{const cell=event.target.closest('[data-photo-id]');if(cell){clearTimeout(photoHoverTimer);photoHoverTimer=setTimeout(()=>showPhotoPopover(cell),220)}});
+$('scroll').addEventListener('pointerout',event=>{if(event.target.closest('[data-photo-id]'))hidePhotoPopover()});
+$('closePhoto').onclick=()=>{$('photoModal').hidden=true;$('photoOriginal').removeAttribute('src')};$('photoModal').onclick=e=>{if(e.target===$('photoModal'))$('closePhoto').click()};
 for(const id of ['month','org','employee','category','level'])$(id).addEventListener('change',()=>{if(id==='org')$('employee').value='';load();});
 $('search').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>load(),300);});
 function moveMonth(delta){if(!$('month').value)return;let [y,m]=$('month').value.split('-').map(Number);m+=delta;if(m===0){m=12;y--;}if(m===13){m=1;y++;}$('month').value=`${y}-${String(m).padStart(2,'0')}`;load();}
