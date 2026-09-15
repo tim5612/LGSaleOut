@@ -92,13 +92,15 @@ def load_source(month=None):
               AND p.SellOutQuantity IS NOT NULL
             GROUP BY v.DealerId,p.ProductId""", (now, start.date(), end.date(), as_of.date()))
         outgoing = list(cur.fetchall())
-        cur.execute("""WITH snapshots AS (
-            SELECT v.DealerId,p.ProductId,p.DisplayQuantity,v.ReportDateTime,
-                ROW_NUMBER() OVER (PARTITION BY v.DealerId,p.ProductId
-                    ORDER BY v.ReportDateTime DESC,v.StoreVisitId DESC,p.StoreVisitProductDetailId DESC) AS rn
-            FROM dbo.StoreVisit v JOIN dbo.StoreVisitProductDetail p ON p.StoreVisitId=v.StoreVisitId
-            WHERE v.RecordStatus='ACTIVE' AND v.ReportDateTime<=%s AND p.DisplayQuantity IS NOT NULL)
-            SELECT DealerId,ProductId,DisplayQuantity,ReportDateTime FROM snapshots WHERE rn=1""", (as_of,))
+        cur.execute("""WITH latest_visits AS (
+            SELECT v.StoreVisitId,v.DealerId,v.ReportDateTime,
+                ROW_NUMBER() OVER (PARTITION BY v.DealerId
+                    ORDER BY v.ReportDateTime DESC,v.StoreVisitId DESC) AS rn
+            FROM dbo.StoreVisit v
+            WHERE v.RecordStatus='ACTIVE' AND v.ReportDateTime<=%s)
+            SELECT v.DealerId,p.ProductId,p.DisplayQuantity,v.ReportDateTime
+            FROM latest_visits v JOIN dbo.StoreVisitProductDetail p ON p.StoreVisitId=v.StoreVisitId
+            WHERE v.rn=1 AND p.DisplayQuantity IS NOT NULL""", (as_of,))
         displays = list(cur.fetchall())
         cur.execute("""SELECT ProductId,DealerId FROM dbo.OpeningInventoryProductExclusion
             WHERE EffectiveFromMonth<=%s AND (EffectiveToMonth IS NULL OR EffectiveToMonth>=%s)""", (key, key))
@@ -215,13 +217,26 @@ def matrix(report, level="dealer"):
 def build_report(source, filters):
     facts = defaultdict(dict)
     for d, p, n in source["opening"]:
-        facts[int(d), int(p)]["opening"] = Decimal(n)
+        quantity = Decimal(n)
+        if quantity != 0:
+            facts[int(d), int(p)]["opening"] = quantity
+    # PSI membership starts with a non-zero official opening balance, or with
+    # valid in-month Sale In/return activity for a product launched mid-month.
     for d, p, pos, neg in source["incoming"]:
-        facts[int(d), int(p)].update(incoming=Decimal(pos), returned=Decimal(neg))
+        key = (int(d), int(p))
+        incoming, returned = Decimal(pos), Decimal(neg)
+        if incoming != 0 or returned != 0:
+            facts[key].setdefault("opening", Decimal(0))
+            facts[key].update(incoming=Decimal(pos), returned=Decimal(neg))
+    active_pairs = set(facts)
     for d, p, n in source["outgoing"]:
-        facts[int(d), int(p)]["outgoing"] = Decimal(n)
+        key = (int(d), int(p))
+        if key in active_pairs:
+            facts[key]["outgoing"] = Decimal(n)
     for d, p, n, stamp in source["displays"]:
-        facts[int(d), int(p)].update(display=Decimal(n), displayAt=stamp.isoformat(timespec="seconds"))
+        key = (int(d), int(p))
+        if key in active_pairs:
+            facts[key].update(display=Decimal(n), displayAt=stamp.isoformat(timespec="seconds"))
     global_ex = {int(p) for p, d in source["exclusions"] if d is None}
     pair_ex = {(int(d), int(p)) for p, d in source["exclusions"] if d is not None}
     excluded = sum(p in global_ex or (d, p) in pair_ex for d, p in facts)
@@ -269,8 +284,8 @@ def build_report(source, filters):
                      excludedPairs=excluded, excludedProducts=excluded_products),
         notes=["期末 = 期初 + Sell In + 退貨（負數）− Sell Out；可銷售 = 期末 − 陳列。",
                "實銷按 SellOutDate 加總有效回報（含事後補登與修改）；未回報不代表實際無銷售。期末為依已登錄資料推算。",
-               "陳列取截至日最新有效快照（可沿用前月），不是巡店累加；尚無陳列回報時可銷售留白。",
-               "沒有當月期初基準的客戶／商品，期末及可銷售留白；不自行沿用前月期初。",
+               "陳列取該經銷商截至日最後一次有效巡店的商品明細（可沿用前月），不是巡店累加；該次未填陳列時可銷售留白。",
+               "PSI 納入當月正式非零期初，或當月有有效 Sell In／退貨的客戶／商品；僅有 Sell Out 或陳列不能單獨建立商品列。",
                "依截至日的區域與業務歸屬分組，套用有效 PSI 排除規則；售價待新增，零值留白。"])
 
 

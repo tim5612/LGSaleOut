@@ -1,4 +1,5 @@
 https://lgdeva.superb-supplies.com.tw/login/employee
+https://lgdeva.superb-supplies.com.tw/login/mobile
 
 
 期初庫存匯入

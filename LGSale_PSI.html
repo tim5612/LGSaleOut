@@ -11,7 +11,7 @@
     .app{display:block;min-height:100vh}.side{width:var(--navw);height:100vh;position:fixed;z-index:20;left:0;top:0;background:#17324d;padding:20px 8px;color:white}
     .brand{font-size:22px;font-weight:700;padding:0 10px 24px}.brand small{display:block;font-size:12px;font-weight:400;color:#b9cad7}
     nav{display:grid;gap:4px}nav a{color:#c8d6e3;text-decoration:none;padding:12px 10px;border-radius:6px}nav a:hover,nav a.active{color:white;background:#27577d}
-    main{width:calc(100vw - var(--navw));margin-left:var(--navw);padding:12px var(--pad) 24px;min-width:0}.crumb{font-size:12px;color:#60758a}h1{font-size:24px;margin:8px 0 0}.meta{margin:2px 0 10px;color:#60758a;font-size:12px}
+    main{width:max-content;min-width:calc(100vw - var(--navw));margin-left:var(--navw);padding:12px var(--pad) 24px}.report-head{position:sticky;left:calc(var(--navw) + var(--pad));z-index:19;width:calc(100vw - var(--navw) - var(--pad)*2)}.crumb{font-size:12px;color:#60758a}h1{font-size:24px;margin:8px 0 0}.meta{margin:2px 0 10px;color:#60758a;font-size:12px}
     .tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}button,input,select{border:1px solid #bdcbd8;background:white;border-radius:5px;padding:7px 10px;color:var(--ink);height:36px}
     input[type=search]{width:200px}.export{margin-left:auto;background:#e7eff5;font-weight:700}.notice{font-size:12px;padding:8px 12px;background:#edf4f9;border:1px solid #cbddea;margin:8px 0}.notice.warn{background:#fff8e8;border-color:#ead6a6;color:#805400}.error{background:#fff0ed;color:#9c2f20;border:1px solid #eac3ba;padding:10px;margin:8px 0}
     .scroll{overflow:visible;border:1px solid #aec1d0;background:white;position:relative;cursor:grab;touch-action:none}
@@ -35,19 +35,21 @@
     <a href="/">‹ 返回管理後台</a><a href="/opening-import">⇧ 期初匯入</a><a href="/sellin-import">⇩ SaleIn 匯入</a><a class="active" href="/psi" aria-current="page">▥ PSI 月報</a><a href="/mobile">手機巡店介面</a>
   </nav></aside>
   <main>
-    <div class="crumb">管理後台 / PSI 月報</div>
-    <h1 id="title">PSI 月報</h1><p class="meta" id="meta">讀取資料庫中…</p>
-    <div class="tools">
-      <button id="prev" aria-label="上個月">◀ 上月</button><input type="month" id="month" aria-label="報表月份"><button id="next" aria-label="下個月">下月 ▶</button>
-      <select id="org" aria-label="區域"><option value="">區域：全部</option></select>
-      <select id="employee" aria-label="業務"><option value="">業務：全部</option></select>
-      <select id="category" aria-label="大分類"><option value="">大分類：全部</option></select>
-      <select id="level" aria-label="顯示層級"><option value="dealer">客戶明細</option><option value="employee">業務彙總</option><option value="org">區域彙總</option><option value="company">範圍總覽</option></select>
-      <input id="search" type="search" aria-label="搜尋型號或客戶" placeholder="搜尋型號 / 客戶">
-      <button id="refresh">重新整理</button><button class="export" id="export" disabled>匯出 Excel</button>
+    <div class="report-head">
+      <div class="crumb">管理後台 / PSI 月報</div>
+      <h1 id="title">PSI 月報</h1><p class="meta" id="meta">讀取資料庫中…</p>
+      <div class="tools">
+        <button id="prev" aria-label="上個月">◀ 上月</button><input type="month" id="month" aria-label="報表月份"><button id="next" aria-label="下個月">下月 ▶</button>
+        <select id="org" aria-label="區域"><option value="">區域：全部</option></select>
+        <select id="employee" aria-label="業務"><option value="">業務：全部</option></select>
+        <select id="category" aria-label="大分類"><option value="">大分類：全部</option></select>
+        <select id="level" aria-label="顯示層級"><option value="dealer">客戶明細</option><option value="employee">業務彙總</option><option value="org">區域彙總</option><option value="company">範圍總覽</option></select>
+        <input id="search" type="search" aria-label="搜尋型號或客戶" placeholder="搜尋型號 / 客戶">
+        <button id="refresh">重新整理</button><button class="export" id="export" disabled>匯出 Excel</button>
+      </div>
+      <div class="notice" id="quality">商品往下、客戶往右；左側商品欄與表頭固定。單位：台。</div>
+      <div id="error" class="error" role="alert" hidden></div>
     </div>
-    <div class="notice" id="quality">商品往下、客戶往右；左側商品欄與表頭固定。單位：台。</div>
-    <div id="error" class="error" role="alert" hidden></div>
     <div class="scroll" id="scroll" aria-label="PSI 表格，使用頁面捲軸上下及左右捲動" aria-busy="true"><div class="empty">正在取得真實資料…</div></div>
     <div class="foot"><span>陳列含在庫存內、不可銷售。零值留白；資料未齊也留白，滑鼠停留可查看原因。</span><span id="count"></span></div>
     <details><summary>計算方式與資料來源</summary><ul id="notes"></ul><p>頁面每 60 秒更新，返回此頁會重新查詢；也可按「重新整理」。合計若包含未齊資料會留白，不以部分已知數量冒充完整庫存。</p></details>

@@ -38,9 +38,9 @@ class CalculationTests(unittest.TestCase):
         self.assertEqual(outgoing.args[1][0], now)  # late-entered August sales still count
         self.assertEqual(outgoing.args[1][1].isoformat(), "2026-08-01")
         self.assertEqual(outgoing.args[1][2].isoformat(), "2026-09-01")
-        snapshot = next(c for c in calls if "WITH snapshots" in c.args[0])
-        self.assertIn("p.DisplayQuantity IS NOT NULL", snapshot.args[0])
-        self.assertIn("WHERE rn=1", snapshot.args[0])
+        snapshot = next(c for c in calls if "WITH latest_visits" in c.args[0])
+        self.assertIn("PARTITION BY v.DealerId", snapshot.args[0])
+        self.assertIn("WHERE v.rn=1", snapshot.args[0])
         self.assertEqual(snapshot.args[1][0].date().isoformat(), "2026-08-31")
 
     def test_balance_returns_and_display(self):
@@ -54,10 +54,20 @@ class CalculationTests(unittest.TestCase):
         self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [None, 10, 3, -1, 4, 8, None])
         self.assertEqual(r["quality"]["missingDisplay"], 3)
 
-    def test_no_opening_is_not_invented(self):
+    def test_salein_without_opening_creates_psi_with_zero_baseline(self):
         s = source(); s["opening"] = []
         r = psi.build_report(s, {})
-        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, None, 3, -1, 4, None, None])
+        self.assertEqual(len(r["rows"]), 1)
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 0, 3, -1, 4, -2, -4])
+        self.assertEqual([d["id"] for d in r["dealers"]], [1])
+
+    def test_zero_opening_without_salein_does_not_create_psi_rows(self):
+        s = source()
+        s["opening"] = [(1, 1, 0)]
+        s["incoming"] = []
+        r = psi.build_report(s, {})
+        self.assertEqual(r["rows"], [])
+        self.assertEqual(r["dealers"], [])
 
     def test_explicit_zero_and_negative_stock(self):
         self.assertEqual(psi.metrics(dict(opening=0, display=0, outgoing=2)), [0, 0, 0, 0, 2, -2, -2])

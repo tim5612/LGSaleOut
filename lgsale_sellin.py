@@ -96,6 +96,10 @@ def parse_workbook(path):
         if "Data" not in book.sheetnames:
             raise ValueError("找不到「Data」工作表")
         sheet = book["Data"]
+        if sheet.max_row is None or sheet.max_column is None:
+            # The worksheet dimension record is optional in valid XLSX files.
+            # Recalculate it so read-only parsing also accepts generated files.
+            sheet.calculate_dimension(force=True)
         if sheet.max_row > 50000 or sheet.max_column > 150:
             raise ValueError("工作表範圍過大；最多支援 50,000 列、150 欄")
         header_cells = next(sheet.iter_rows(min_row=1, max_row=1), ())
