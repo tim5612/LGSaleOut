@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Codex" compressed="false">
   <diagram id="LGSaleERD0722" name="LGSale ERD 0722">
-    <mxGraphModel dx="6216" dy="3299" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="2300" math="0" shadow="0">
+    <mxGraphModel dx="6064" dy="4151" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="2300" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -192,9 +192,21 @@
             <mxGeometry height="26" width="420" y="116" as="geometry" />
           </mxCell>
         </UserObject>
-        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerCondition&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;經銷狀態&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerCondition" dbType="varchar" dbKey="NULL" dbDescription="經銷狀態" id="row_Dealer_DealerCondition"><mxCell parent="table_Dealer" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;" vertex="1"><mxGeometry height="26" width="420" y="142" as="geometry" /></mxCell></UserObject>
-        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;TaxId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;統一編號&lt;/span&gt;&lt;/div&gt;" dbColumn="TaxId" dbType="varchar" dbKey="NULL" dbDescription="統一編號" id="row_Dealer_TaxId"><mxCell parent="table_Dealer" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;" vertex="1"><mxGeometry height="26" width="420" y="168" as="geometry" /></mxCell></UserObject>
-        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;建立&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="建立" id="row_Dealer_CreatedAt"><mxCell parent="table_Dealer" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;" vertex="1"><mxGeometry height="26" width="420" y="194" as="geometry" /></mxCell></UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;DealerCondition&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;經銷狀態&lt;/span&gt;&lt;/div&gt;" dbColumn="DealerCondition" dbType="varchar" dbKey="NULL" dbDescription="經銷狀態" id="row_Dealer_DealerCondition">
+          <mxCell parent="table_Dealer" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;" vertex="1">
+            <mxGeometry height="26" width="420" y="142" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;NULL&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;TaxId&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;varchar&lt;/span&gt;&lt;span&gt;統一編號&lt;/span&gt;&lt;/div&gt;" dbColumn="TaxId" dbType="varchar" dbKey="NULL" dbDescription="統一編號" id="row_Dealer_TaxId">
+          <mxCell parent="table_Dealer" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;" vertex="1">
+            <mxGeometry height="26" width="420" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div style=&quot;display:flex;white-space:nowrap&quot;&gt;&lt;span style=&quot;display:inline-block;width:66px;color:#777;font-weight:bold&quot;&gt;&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:174px;font-family:monospace&quot;&gt;CreatedAt&lt;/span&gt;&lt;span style=&quot;display:inline-block;width:100px;color:#666&quot;&gt;datetime2&lt;/span&gt;&lt;span&gt;建立&lt;/span&gt;&lt;/div&gt;" dbColumn="CreatedAt" dbType="datetime2" dbKey="" dbDescription="建立" id="row_Dealer_CreatedAt">
+          <mxCell parent="table_Dealer" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=8;overflow=hidden;whiteSpace=wrap;strokeWidth=0.5;" vertex="1">
+            <mxGeometry height="26" width="420" y="194" as="geometry" />
+          </mxCell>
+        </UserObject>
         <UserObject label="DealerLevelHistory｜經銷商等級歷程" dbTable="DealerLevelHistory" id="table_DealerLevelHistory">
           <mxCell parent="1" style="swimlane;html=1;startSize=38;horizontal=1;rounded=1;collapsible=1;fontStyle=1;fontSize=14;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;swimlaneFillColor=#ffffff;" vertex="1">
             <mxGeometry height="220" width="420" x="140" y="-1400" as="geometry" />
@@ -1209,52 +1221,153 @@
             </mxGeometry>
           </mxCell>
         </UserObject>
-        <UserObject label="DealerTransferReview｜經銷商移轉檢查" dbTable="DealerTransferReview" id="table_DealerTransferReview"><mxCell parent="1" style="swimlane;html=1;startSize=38;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1"><mxGeometry height="402" width="420" x="-2390" y="2100" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="DealerTransferReviewId" dbType="bigint" dbKey="PK" id="row_DealerTransferReview_DealerTransferReviewId"><mxCell parent="table_DealerTransferReview" value="PK　DealerTransferReviewId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="38" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="DealerId" dbType="bigint" dbKey="FK" id="row_DealerTransferReview_DealerId"><mxCell parent="table_DealerTransferReview" value="FK　DealerId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="64" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="SourceDealerAssignmentId" dbType="bigint" dbKey="FK NULL" id="row_DealerTransferReview_SourceDealerAssignmentId"><mxCell parent="table_DealerTransferReview" value="FK NULL　SourceDealerAssignmentId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="90" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="SourceEmployeeId" dbType="bigint" dbKey="FK NULL" id="row_DealerTransferReview_SourceEmployeeId"><mxCell parent="table_DealerTransferReview" value="FK NULL　SourceEmployeeId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="116" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="TriggerType" dbType="varchar" dbKey="" id="row_DealerTransferReview_TriggerType"><mxCell parent="table_DealerTransferReview" value="TriggerType　varchar" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="142" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="FromOrgUnitId" dbType="bigint" dbKey="FK NULL" id="row_DealerTransferReview_FromOrgUnitId"><mxCell parent="table_DealerTransferReview" value="FK NULL　FromOrgUnitId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="168" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="ToOrgUnitId" dbType="bigint" dbKey="FK NULL" id="row_DealerTransferReview_ToOrgUnitId"><mxCell parent="table_DealerTransferReview" value="FK NULL　ToOrgUnitId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="194" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="TriggeredAt" dbType="datetime2" dbKey="" id="row_DealerTransferReview_TriggeredAt"><mxCell parent="table_DealerTransferReview" value="TriggeredAt　datetime2" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="220" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="ReviewStatus" dbType="varchar" dbKey="" id="row_DealerTransferReview_ReviewStatus"><mxCell parent="table_DealerTransferReview" value="ReviewStatus　varchar" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="246" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="ResolvedEmployeeId" dbType="bigint" dbKey="FK NULL" id="row_DealerTransferReview_ResolvedEmployeeId"><mxCell parent="table_DealerTransferReview" value="FK NULL　ResolvedEmployeeId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="272" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="ResolvedAt" dbType="datetime2" dbKey="NULL" id="row_DealerTransferReview_ResolvedAt"><mxCell parent="table_DealerTransferReview" value="NULL　ResolvedAt　datetime2" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="298" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="ResolvedByEmployeeId" dbType="bigint" dbKey="FK NULL" id="row_DealerTransferReview_ResolvedByEmployeeId"><mxCell parent="table_DealerTransferReview" value="FK NULL　ResolvedByEmployeeId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="324" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="ResolutionNote" dbType="nvarchar" dbKey="NULL" id="row_DealerTransferReview_ResolutionNote"><mxCell parent="table_DealerTransferReview" value="NULL　ResolutionNote　nvarchar" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="350" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="CreatedAt" dbType="datetime2" dbKey="" id="row_DealerTransferReview_CreatedAt"><mxCell parent="table_DealerTransferReview" value="CreatedAt　datetime2" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="376" width="420" height="26" as="geometry" /></mxCell></UserObject>
-
-        <UserObject label="OpeningInventoryCorrection｜期初庫存更正" dbTable="OpeningInventoryCorrection" id="table_OpeningInventoryCorrection"><mxCell parent="1" style="swimlane;html=1;startSize=38;rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1"><mxGeometry height="220" width="420" x="-1900" y="2100" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="CorrectionId" dbType="bigint" dbKey="PK" id="row_OpeningInventoryCorrection_CorrectionId"><mxCell parent="table_OpeningInventoryCorrection" value="PK　CorrectionId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="38" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="ImportBatchId" dbType="bigint" dbKey="FK UQ1" id="row_OpeningInventoryCorrection_ImportBatchId"><mxCell parent="table_OpeningInventoryCorrection" value="FK UQ1　ImportBatchId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="64" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="OpeningInventoryDetailId" dbType="bigint" dbKey="FK UQ1" id="row_OpeningInventoryCorrection_OpeningInventoryDetailId"><mxCell parent="table_OpeningInventoryCorrection" value="FK UQ1　OpeningInventoryDetailId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="90" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="SourceRowNumber" dbType="int" dbKey="" id="row_OpeningInventoryCorrection_SourceRowNumber"><mxCell parent="table_OpeningInventoryCorrection" value="SourceRowNumber　int" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="116" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="PreviousQuantity" dbType="int" dbKey="" id="row_OpeningInventoryCorrection_PreviousQuantity"><mxCell parent="table_OpeningInventoryCorrection" value="PreviousQuantity　int" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="142" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="NewQuantity" dbType="int" dbKey="" id="row_OpeningInventoryCorrection_NewQuantity"><mxCell parent="table_OpeningInventoryCorrection" value="NewQuantity　int" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="168" width="420" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="CreatedAt" dbType="datetime2" dbKey="" id="row_OpeningInventoryCorrection_CreatedAt"><mxCell parent="table_OpeningInventoryCorrection" value="CreatedAt　datetime2" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="194" width="420" height="26" as="geometry" /></mxCell></UserObject>
-
-        <UserObject label="DealerProductDisplayPhoto｜月度型號陳列照片【新】" dbTable="DealerProductDisplayPhoto" id="table_DealerProductDisplayPhoto"><mxCell parent="1" style="swimlane;html=1;startSize=38;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1"><mxGeometry height="480" width="440" x="2530" y="2100" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="DisplayPhotoId" dbType="bigint" dbKey="PK" id="row_DealerProductDisplayPhoto_DisplayPhotoId"><mxCell parent="table_DealerProductDisplayPhoto" value="PK　DisplayPhotoId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="38" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="DataMonth" dbType="char" dbKey="UQ1" id="row_DealerProductDisplayPhoto_DataMonth"><mxCell parent="table_DealerProductDisplayPhoto" value="UQ1　DataMonth　char(6)" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="64" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="DealerId" dbType="bigint" dbKey="FK UQ1" id="row_DealerProductDisplayPhoto_DealerId"><mxCell parent="table_DealerProductDisplayPhoto" value="FK UQ1　DealerId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="90" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="ProductId" dbType="bigint" dbKey="FK UQ1" id="row_DealerProductDisplayPhoto_ProductId"><mxCell parent="table_DealerProductDisplayPhoto" value="FK UQ1　ProductId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="116" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="SourceStoreVisitId" dbType="bigint" dbKey="FK NULL" id="row_DealerProductDisplayPhoto_SourceStoreVisitId"><mxCell parent="table_DealerProductDisplayPhoto" value="FK NULL　SourceStoreVisitId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="142" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="OriginalFileName" dbType="nvarchar" dbKey="" id="row_DealerProductDisplayPhoto_OriginalFileName"><mxCell parent="table_DealerProductDisplayPhoto" value="OriginalFileName　nvarchar" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="168" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="OriginalFilePath" dbType="nvarchar" dbKey="" id="row_DealerProductDisplayPhoto_OriginalFilePath"><mxCell parent="table_DealerProductDisplayPhoto" value="OriginalFilePath　nvarchar（僅路徑，不存圖片）" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="194" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="ThumbnailFilePath" dbType="nvarchar" dbKey="" id="row_DealerProductDisplayPhoto_ThumbnailFilePath"><mxCell parent="table_DealerProductDisplayPhoto" value="ThumbnailFilePath　nvarchar（僅路徑）" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="220" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="OriginalFileSize" dbType="int" dbKey="" id="row_DealerProductDisplayPhoto_OriginalFileSize"><mxCell parent="table_DealerProductDisplayPhoto" value="OriginalFileSize　int" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="246" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="ThumbnailFileSize" dbType="int" dbKey="" id="row_DealerProductDisplayPhoto_ThumbnailFileSize"><mxCell parent="table_DealerProductDisplayPhoto" value="ThumbnailFileSize　int" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="272" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="FileHash" dbType="char" dbKey="" id="row_DealerProductDisplayPhoto_FileHash"><mxCell parent="table_DealerProductDisplayPhoto" value="FileHash　char(64)" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="298" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="CapturedAt" dbType="datetime2" dbKey="" id="row_DealerProductDisplayPhoto_CapturedAt"><mxCell parent="table_DealerProductDisplayPhoto" value="CapturedAt　datetime2" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="324" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="UploadedAt" dbType="datetime2" dbKey="" id="row_DealerProductDisplayPhoto_UploadedAt"><mxCell parent="table_DealerProductDisplayPhoto" value="UploadedAt　datetime2" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="350" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="UploadedByUserAccountId" dbType="bigint" dbKey="FK" id="row_DealerProductDisplayPhoto_UploadedByUserAccountId"><mxCell parent="table_DealerProductDisplayPhoto" value="FK　UploadedByUserAccountId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="376" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="RecordStatus" dbType="varchar" dbKey="" id="row_DealerProductDisplayPhoto_RecordStatus"><mxCell parent="table_DealerProductDisplayPhoto" value="RecordStatus　ACTIVE／SUPERSEDED" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="402" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="ReplacedPhotoId" dbType="bigint" dbKey="FK NULL" id="row_DealerProductDisplayPhoto_ReplacedPhotoId"><mxCell parent="table_DealerProductDisplayPhoto" value="FK NULL　ReplacedPhotoId　bigint" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="428" width="440" height="26" as="geometry" /></mxCell></UserObject>
-        <UserObject dbColumn="OriginalDeletedAt" dbType="datetime2" dbKey="NULL" id="row_DealerProductDisplayPhoto_OriginalDeletedAt"><mxCell parent="table_DealerProductDisplayPhoto" value="NULL　OriginalDeletedAt　datetime2" style="text;html=1;align=left;spacingLeft=8;" vertex="1"><mxGeometry y="454" width="440" height="26" as="geometry" /></mxCell></UserObject>
-
-        <mxCell id="note_display_photo_rules" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;align=left;verticalAlign=top;spacing=10;" value="&lt;b&gt;月度陳列照片規則&lt;/b&gt;&lt;br&gt;• 唯一有效鍵：DataMonth＋DealerId＋ProductId。&lt;br&gt;• 圖片二進位不進 SQL Server；資料庫只保存正式機相對路徑、中繼資料與 SHA-256。&lt;br&gt;• 同月重拍保留舊紀錄並標記 SUPERSEDED。&lt;br&gt;• 原圖保存三年；縮圖可長期保存。" vertex="1"><mxGeometry height="190" width="520" x="3040" y="2100" as="geometry" /></mxCell>
-
+        <UserObject label="DealerTransferReview｜經銷商移轉檢查" dbTable="DealerTransferReview" id="table_DealerTransferReview">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1">
+            <mxGeometry height="402" width="420" x="-2390" y="2100" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="row_DealerTransferReview_DealerTransferReviewId" parent="table_DealerTransferReview" style="text;html=1;align=left;spacingLeft=8;" value="PK　DealerTransferReviewId　bigint" vertex="1">
+          <mxGeometry height="26" width="420" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerTransferReview_DealerId" parent="table_DealerTransferReview" style="text;html=1;align=left;spacingLeft=8;" value="FK　DealerId　bigint" vertex="1">
+          <mxGeometry height="26" width="420" y="64" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerTransferReview_SourceDealerAssignmentId" parent="table_DealerTransferReview" style="text;html=1;align=left;spacingLeft=8;" value="FK NULL　SourceDealerAssignmentId　bigint" vertex="1">
+          <mxGeometry height="26" width="420" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerTransferReview_SourceEmployeeId" parent="table_DealerTransferReview" style="text;html=1;align=left;spacingLeft=8;" value="FK NULL　SourceEmployeeId　bigint" vertex="1">
+          <mxGeometry height="26" width="420" y="116" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerTransferReview_TriggerType" parent="table_DealerTransferReview" style="text;html=1;align=left;spacingLeft=8;" value="TriggerType　varchar" vertex="1">
+          <mxGeometry height="26" width="420" y="142" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerTransferReview_FromOrgUnitId" parent="table_DealerTransferReview" style="text;html=1;align=left;spacingLeft=8;" value="FK NULL　FromOrgUnitId　bigint" vertex="1">
+          <mxGeometry height="26" width="420" y="168" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerTransferReview_ToOrgUnitId" parent="table_DealerTransferReview" style="text;html=1;align=left;spacingLeft=8;" value="FK NULL　ToOrgUnitId　bigint" vertex="1">
+          <mxGeometry height="26" width="420" y="194" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerTransferReview_TriggeredAt" parent="table_DealerTransferReview" style="text;html=1;align=left;spacingLeft=8;" value="TriggeredAt　datetime2" vertex="1">
+          <mxGeometry height="26" width="420" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerTransferReview_ReviewStatus" parent="table_DealerTransferReview" style="text;html=1;align=left;spacingLeft=8;" value="ReviewStatus　varchar" vertex="1">
+          <mxGeometry height="26" width="420" y="246" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerTransferReview_ResolvedEmployeeId" parent="table_DealerTransferReview" style="text;html=1;align=left;spacingLeft=8;" value="FK NULL　ResolvedEmployeeId　bigint" vertex="1">
+          <mxGeometry height="26" width="420" y="272" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerTransferReview_ResolvedAt" parent="table_DealerTransferReview" style="text;html=1;align=left;spacingLeft=8;" value="NULL　ResolvedAt　datetime2" vertex="1">
+          <mxGeometry height="26" width="420" y="298" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerTransferReview_ResolvedByEmployeeId" parent="table_DealerTransferReview" style="text;html=1;align=left;spacingLeft=8;" value="FK NULL　ResolvedByEmployeeId　bigint" vertex="1">
+          <mxGeometry height="26" width="420" y="324" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerTransferReview_ResolutionNote" parent="table_DealerTransferReview" style="text;html=1;align=left;spacingLeft=8;" value="NULL　ResolutionNote　nvarchar" vertex="1">
+          <mxGeometry height="26" width="420" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerTransferReview_CreatedAt" parent="table_DealerTransferReview" style="text;html=1;align=left;spacingLeft=8;" value="CreatedAt　datetime2" vertex="1">
+          <mxGeometry height="26" width="420" y="376" as="geometry" />
+        </mxCell>
+        <UserObject label="OpeningInventoryCorrection｜期初庫存更正" dbTable="OpeningInventoryCorrection" id="table_OpeningInventoryCorrection">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1">
+            <mxGeometry height="220" width="420" x="-1900" y="2100" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="row_OpeningInventoryCorrection_CorrectionId" parent="table_OpeningInventoryCorrection" style="text;html=1;align=left;spacingLeft=8;" value="PK　CorrectionId　bigint" vertex="1">
+          <mxGeometry height="26" width="420" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="row_OpeningInventoryCorrection_ImportBatchId" parent="table_OpeningInventoryCorrection" style="text;html=1;align=left;spacingLeft=8;" value="FK UQ1　ImportBatchId　bigint" vertex="1">
+          <mxGeometry height="26" width="420" y="64" as="geometry" />
+        </mxCell>
+        <mxCell id="row_OpeningInventoryCorrection_OpeningInventoryDetailId" parent="table_OpeningInventoryCorrection" style="text;html=1;align=left;spacingLeft=8;" value="FK UQ1　OpeningInventoryDetailId　bigint" vertex="1">
+          <mxGeometry height="26" width="420" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="row_OpeningInventoryCorrection_SourceRowNumber" parent="table_OpeningInventoryCorrection" style="text;html=1;align=left;spacingLeft=8;" value="SourceRowNumber　int" vertex="1">
+          <mxGeometry height="26" width="420" y="116" as="geometry" />
+        </mxCell>
+        <mxCell id="row_OpeningInventoryCorrection_PreviousQuantity" parent="table_OpeningInventoryCorrection" style="text;html=1;align=left;spacingLeft=8;" value="PreviousQuantity　int" vertex="1">
+          <mxGeometry height="26" width="420" y="142" as="geometry" />
+        </mxCell>
+        <mxCell id="row_OpeningInventoryCorrection_NewQuantity" parent="table_OpeningInventoryCorrection" style="text;html=1;align=left;spacingLeft=8;" value="NewQuantity　int" vertex="1">
+          <mxGeometry height="26" width="420" y="168" as="geometry" />
+        </mxCell>
+        <mxCell id="row_OpeningInventoryCorrection_CreatedAt" parent="table_OpeningInventoryCorrection" style="text;html=1;align=left;spacingLeft=8;" value="CreatedAt　datetime2" vertex="1">
+          <mxGeometry height="26" width="420" y="194" as="geometry" />
+        </mxCell>
+        <UserObject label="DealerProductDisplayPhoto｜月度型號陳列照片【新】" dbTable="DealerProductDisplayPhoto" id="table_DealerProductDisplayPhoto">
+          <mxCell parent="1" style="swimlane;html=1;startSize=38;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1">
+            <mxGeometry height="480" width="440" x="2550" y="2220" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="row_DealerProductDisplayPhoto_DisplayPhotoId" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="PK　DisplayPhotoId　bigint" vertex="1">
+          <mxGeometry height="26" width="440" y="38" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_DataMonth" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="UQ1　DataMonth　char(6)" vertex="1">
+          <mxGeometry height="26" width="440" y="64" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_DealerId" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="FK UQ1　DealerId　bigint" vertex="1">
+          <mxGeometry height="26" width="440" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_ProductId" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="FK UQ1　ProductId　bigint" vertex="1">
+          <mxGeometry height="26" width="440" y="116" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_SourceStoreVisitId" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="FK NULL　SourceStoreVisitId　bigint" vertex="1">
+          <mxGeometry height="26" width="440" y="142" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_OriginalFileName" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="OriginalFileName　nvarchar" vertex="1">
+          <mxGeometry height="26" width="440" y="168" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_OriginalFilePath" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="OriginalFilePath　nvarchar（僅路徑，不存圖片）" vertex="1">
+          <mxGeometry height="26" width="440" y="194" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_ThumbnailFilePath" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="ThumbnailFilePath　nvarchar（僅路徑）" vertex="1">
+          <mxGeometry height="26" width="440" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_OriginalFileSize" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="OriginalFileSize　int" vertex="1">
+          <mxGeometry height="26" width="440" y="246" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_ThumbnailFileSize" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="ThumbnailFileSize　int" vertex="1">
+          <mxGeometry height="26" width="440" y="272" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_FileHash" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="FileHash　char(64)" vertex="1">
+          <mxGeometry height="26" width="440" y="298" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_CapturedAt" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="CapturedAt　datetime2" vertex="1">
+          <mxGeometry height="26" width="440" y="324" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_UploadedAt" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="UploadedAt　datetime2" vertex="1">
+          <mxGeometry height="26" width="440" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_UploadedByUserAccountId" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="FK　UploadedByUserAccountId　bigint" vertex="1">
+          <mxGeometry height="26" width="440" y="376" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_RecordStatus" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="RecordStatus　ACTIVE／SUPERSEDED" vertex="1">
+          <mxGeometry height="26" width="440" y="402" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_ReplacedPhotoId" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="FK NULL　ReplacedPhotoId　bigint" vertex="1">
+          <mxGeometry height="26" width="440" y="428" as="geometry" />
+        </mxCell>
+        <mxCell id="row_DealerProductDisplayPhoto_OriginalDeletedAt" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="NULL　OriginalDeletedAt　datetime2" vertex="1">
+          <mxGeometry height="26" width="440" y="454" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_display_photo_dealer" edge="1" parent="1" source="row_Dealer_DealerId" target="row_DealerProductDisplayPhoto_DealerId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_display_photo_product" edge="1" parent="1" source="row_Product_ProductId" target="row_DealerProductDisplayPhoto_ProductId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_display_photo_store_visit" edge="1" parent="1" source="row_StoreVisit_StoreVisitId" target="row_DealerProductDisplayPhoto_SourceStoreVisitId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_display_photo_uploaded_by" edge="1" parent="1" source="row_UserAccount_UserAccountId" target="row_DealerProductDisplayPhoto_UploadedByUserAccountId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_display_photo_replaced" edge="1" parent="1" source="row_DealerProductDisplayPhoto_DisplayPhotoId" target="row_DealerProductDisplayPhoto_ReplacedPhotoId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="note_display_photo_rules" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;align=left;verticalAlign=top;spacing=10;" value="&lt;b&gt;月度陳列照片規則&lt;/b&gt;&lt;br&gt;• 唯一有效鍵：DataMonth＋DealerId＋ProductId。&lt;br&gt;• 圖片二進位不進 SQL Server；資料庫只保存正式機相對路徑、中繼資料與 SHA-256。&lt;br&gt;• 同月重拍保留舊紀錄並標記 SUPERSEDED。&lt;br&gt;• 原圖保存三年；縮圖可長期保存。" vertex="1">
+          <mxGeometry height="190" width="520" x="3040" y="2100" as="geometry" />
+        </mxCell>
         <mxCell id="note_task_rules" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=14;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;align=left;verticalAlign=top;spacing=10;" value="&lt;b&gt;VisitTask／樣本任務規則&lt;/b&gt;&lt;br&gt;&lt;b&gt;★ 樣本搜尋邏輯：VisitTask.SampleTaskExecutionId ＝ VisitTaskExecution.TaskExecutionId；被指到的那一筆就是唯一樣本，不保存 IsSampleExecution。&lt;/b&gt;&lt;br&gt;• 為防止指到其他任務，外鍵同時驗證 VisitTaskId＋SampleTaskExecutionId 對應同一筆 VisitTaskExecution。&lt;br&gt;• SampleTaskExecutionId＝NULL：尚未指定樣本；SampleApprovedAt＝NULL：尚未核准；核准時間有值：可供其他業務執行。&lt;br&gt;• 電腦版指定樣本，以及建立樣本前修改候選 VisitTaskPhoto.PhotoDescription，均與 VisitTaskExecution.SubmittedAt 無關。&lt;br&gt;• 修改候選 PhotoDescription 不保存修改時間或修改人，VisitTaskPhoto 不新增相關稽核欄位。&lt;br&gt;• 任務發布時，系統依 DealerAssignmentHistory 為每家經銷商建立一筆 VisitTaskExecution；VisitTaskId＋DealerId 唯一。&lt;br&gt;• ExecutionNote 合併執行及未執行說明；SubmittedAt 為 NULL 表示尚未正式回報。&lt;br&gt;• 樣本的每張 VisitTaskPhoto 必須填 PhotoDescription 與 SortOrder；一般照片以 SampleTaskPhotoId 逐張對應，說明與順序不可修改。&lt;br&gt;• 樣本有幾個照片項目，其他已執行回報就必須完成幾個對應照片；不使用 MinPhotoCount。&lt;br&gt;• 任務執行與 StoreVisit 分開，不保存 StoreVisitId。" vertex="1">
           <mxGeometry height="330" width="500" x="1980" y="2510" as="geometry" />
         </mxCell>
