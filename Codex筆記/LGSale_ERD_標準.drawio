@@ -1,6 +1,6 @@
 <mxfile host="Electron" agent="Codex" compressed="false">
   <diagram id="LGSaleERD0722" name="LGSale ERD 0722">
-    <mxGraphModel dx="6064" dy="4151" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="2300" math="0" shadow="0">
+    <mxGraphModel dx="11915" dy="6465" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="2300" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -1296,7 +1296,7 @@
         </mxCell>
         <UserObject label="DealerProductDisplayPhoto｜月度型號陳列照片【新】" dbTable="DealerProductDisplayPhoto" id="table_DealerProductDisplayPhoto">
           <mxCell parent="1" style="swimlane;html=1;startSize=38;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1">
-            <mxGeometry height="480" width="440" x="2550" y="2220" as="geometry" />
+            <mxGeometry height="480" width="440" x="2625" y="2330" as="geometry" />
           </mxCell>
         </UserObject>
         <mxCell id="row_DealerProductDisplayPhoto_DisplayPhotoId" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="PK　DisplayPhotoId　bigint" vertex="1">
@@ -1350,19 +1350,19 @@
         <mxCell id="row_DealerProductDisplayPhoto_OriginalDeletedAt" parent="table_DealerProductDisplayPhoto" style="text;html=1;align=left;spacingLeft=8;" value="NULL　OriginalDeletedAt　datetime2" vertex="1">
           <mxGeometry height="26" width="440" y="454" as="geometry" />
         </mxCell>
-        <mxCell id="rel_display_photo_dealer" edge="1" parent="1" source="row_Dealer_DealerId" target="row_DealerProductDisplayPhoto_DealerId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;">
+        <mxCell id="rel_display_photo_dealer" edge="1" parent="1" source="row_Dealer_DealerId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_DealerProductDisplayPhoto_DealerId">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="rel_display_photo_product" edge="1" parent="1" source="row_Product_ProductId" target="row_DealerProductDisplayPhoto_ProductId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;">
+        <mxCell id="rel_display_photo_product" edge="1" parent="1" source="row_Product_ProductId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_DealerProductDisplayPhoto_ProductId">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="rel_display_photo_store_visit" edge="1" parent="1" source="row_StoreVisit_StoreVisitId" target="row_DealerProductDisplayPhoto_SourceStoreVisitId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;">
+        <mxCell id="rel_display_photo_store_visit" edge="1" parent="1" source="row_StoreVisit_StoreVisitId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_DealerProductDisplayPhoto_SourceStoreVisitId">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="rel_display_photo_uploaded_by" edge="1" parent="1" source="row_UserAccount_UserAccountId" target="row_DealerProductDisplayPhoto_UploadedByUserAccountId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;">
+        <mxCell id="rel_display_photo_uploaded_by" edge="1" parent="1" source="row_UserAccount_UserAccountId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERone;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_DealerProductDisplayPhoto_UploadedByUserAccountId">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="rel_display_photo_replaced" edge="1" parent="1" source="row_DealerProductDisplayPhoto_DisplayPhotoId" target="row_DealerProductDisplayPhoto_ReplacedPhotoId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;">
+        <mxCell id="rel_display_photo_replaced" edge="1" parent="1" source="row_DealerProductDisplayPhoto_DisplayPhotoId" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=18;html=1;endArrow=ERmany;endFill=0;startArrow=ERzeroToOne;strokeWidth=5;strokeColor=light-dark(#FF3333,#8F98A4);fontSize=24;labelBackgroundColor=#ffffff;" target="row_DealerProductDisplayPhoto_ReplacedPhotoId">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="note_display_photo_rules" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;align=left;verticalAlign=top;spacing=10;" value="&lt;b&gt;月度陳列照片規則&lt;/b&gt;&lt;br&gt;• 唯一有效鍵：DataMonth＋DealerId＋ProductId。&lt;br&gt;• 圖片二進位不進 SQL Server；資料庫只保存正式機相對路徑、中繼資料與 SHA-256。&lt;br&gt;• 同月重拍保留舊紀錄並標記 SUPERSEDED。&lt;br&gt;• 原圖保存三年；縮圖可長期保存。" vertex="1">
