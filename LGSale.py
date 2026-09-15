@@ -476,7 +476,9 @@ def update_organization(org_id: int):
 def products():
     try:
         dealer_id=request.args.get("dealerId",type=int)
-        return jsonify(db.reportable_products(dealer_id) if dealer_id is not None else db.products())
+        if session["user"]["type"] == "DEALER":dealer_id=session["user"]["dealerId"]
+        visit_id=request.args.get("visitId",type=int)
+        return jsonify(db.reportable_products(dealer_id,visit_id) if dealer_id is not None else db.products())
     except Exception as exc:
         return jsonify(error="商品資料庫查詢失敗：" + str(exc)), 503
 
@@ -536,6 +538,8 @@ def create_visit():
     try:
         visit_id, report_time = db.create_visit(data)
         return jsonify(storeVisitId=visit_id, reportDateTime=report_time.isoformat(timespec="seconds")), 201
+    except ValueError as exc:
+        return jsonify(error=str(exc)), 400
     except Exception as exc:
         return jsonify(error="巡店資料建立失敗：" + str(exc)), 500
 
@@ -580,6 +584,7 @@ def update_visit(visit_id:int):
         return jsonify(db.visit_detail(visit_id))
     except LookupError as exc:return jsonify(error=str(exc)),404
     except PermissionError as exc:return jsonify(error=str(exc)),403
+    except ValueError as exc:return jsonify(error=str(exc)),400
     except Exception as exc:return jsonify(error="巡店資料修改失敗："+str(exc)),500
 
 

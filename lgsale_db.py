@@ -662,6 +662,7 @@ def create_visit(data:dict[str,Any]) -> tuple[int,datetime]:
     try:
         cur=conn.cursor();dealer_id=int(data["dealerId"]);assignment=_one(cur,"SELECT DealerAssignmentId FROM dbo.DealerAssignmentHistory WHERE DealerId=%s AND EndDateTime IS NULL",(dealer_id,));account=(data.get("userAccountId"),) if data.get("userAccountId") else _one(cur,"SELECT TOP 1 UserAccountId FROM dbo.UserAccount WHERE AccountType='EMPLOYEE' AND IsLoginEnabled=1 ORDER BY UserAccountId")
         if account is None:raise ValueError("找不到可用的員工帳號")
+        _validate_sell_out_inventory(cur,dealer_id,data["details"])
         row=_one(cur,"""INSERT dbo.StoreVisit(DealerId,DealerAssignmentId,EntrySourceType,CreatedByUserAccountId) OUTPUT inserted.StoreVisitId,inserted.ReportDateTime VALUES(%s,%s,%s,%s)""",(dealer_id,assignment[0] if assignment else None,data.get("entrySourceType","EMPLOYEE"),account[0]));visit_id=int(row[0])
         for item in data["details"]:
             sell=_optional_quantity(item,"sellOutQuantity","實銷");display=_optional_quantity(item,"displayQuantity","陳列")
@@ -720,20 +721,71 @@ def dealer_summary(dealer_id: int) -> dict[str, Any]:
                 "sellOutTotal":int(row[4]), "displayTotal":int(row[5])}
 
 
-def reportable_products(dealer_id: int) -> list[dict[str, Any]]:
+def reportable_products(dealer_id: int, exclude_visit_id: int | None = None) -> list[dict[str, Any]]:
     """Products in the current server month's Official opening inventory."""
     sql = """
-    SELECT DISTINCT p.ProductId,p.ProductCode,p.ProductName,COALESCE(p.CategoryLevel1,''),COALESCE(p.CategoryLevel2,'')
-      FROM dbo.MonthlyOpeningInventoryDetail d
-      JOIN dbo.ImportBatch b ON b.ImportBatchId=d.ImportBatchId AND b.ImportType='OPENING_INVENTORY' AND b.ImportStatus='Official'
-      JOIN dbo.Product p ON p.ProductId=d.ProductId AND p.IsActive=1
-     WHERE d.DealerId=%s
-       AND b.DataMonth=CONVERT(char(6),SYSDATETIME(),112)
+    WITH opening AS (
+        SELECT d.ProductId,SUM(CAST(d.OpeningQuantity AS bigint)) Quantity
+          FROM dbo.MonthlyOpeningInventoryDetail d
+          JOIN dbo.ImportBatch b ON b.ImportBatchId=d.ImportBatchId
+         WHERE d.DealerId=%s AND b.ImportType='OPENING_INVENTORY'
+           AND b.ImportStatus='Official' AND b.DataMonth=CONVERT(char(6),SYSDATETIME(),112)
+         GROUP BY d.ProductId
+    ), incoming AS (
+        SELECT t.ProductId,SUM(t.Quantity) Quantity
+          FROM dbo.SellInTransaction t JOIN dbo.ImportBatch b ON b.ImportBatchId=t.ImportBatchId
+         WHERE t.DealerId=%s AND b.ImportType='SELL_IN' AND b.ImportStatus='Official'
+           AND t.TransactionStatus='VALID' AND t.ReviewStatus='APPROVED'
+           AND t.InventoryEffectiveDate>=DATEFROMPARTS(YEAR(SYSDATETIME()),MONTH(SYSDATETIME()),1)
+           AND t.InventoryEffectiveDate<=CAST(SYSDATETIME() AS date)
+         GROUP BY t.ProductId
+    ), outgoing AS (
+        SELECT d.ProductId,SUM(CAST(d.SellOutQuantity AS bigint)) Quantity
+          FROM dbo.StoreVisitProductDetail d JOIN dbo.StoreVisit v ON v.StoreVisitId=d.StoreVisitId
+         WHERE v.DealerId=%s AND v.RecordStatus='ACTIVE' AND (%s IS NULL OR v.StoreVisitId<>%s)
+           AND d.SellOutDate>=DATEFROMPARTS(YEAR(SYSDATETIME()),MONTH(SYSDATETIME()),1)
+           AND d.SellOutDate<=CAST(SYSDATETIME() AS date) AND d.SellOutQuantity IS NOT NULL
+         GROUP BY d.ProductId
+    )
+    SELECT p.ProductId,p.ProductCode,p.ProductName,COALESCE(p.CategoryLevel1,''),COALESCE(p.CategoryLevel2,''),
+           o.Quantity+COALESCE(i.Quantity,0)-COALESCE(s.Quantity,0)
+      FROM opening o JOIN dbo.Product p ON p.ProductId=o.ProductId AND p.IsActive=1
+      LEFT JOIN incoming i ON i.ProductId=o.ProductId LEFT JOIN outgoing s ON s.ProductId=o.ProductId
      ORDER BY p.ProductCode
     """
     with connect() as conn:
-        cur=conn.cursor();cur.execute(sql,(dealer_id,));rows=cur.fetchall()
-    return [{"id":int(r[0]),"code":r[1],"name":r[2],"category":r[3] or r[4]} for r in rows]
+        cur=conn.cursor();cur.execute(sql,(dealer_id,dealer_id,dealer_id,exclude_visit_id,exclude_visit_id));rows=cur.fetchall()
+    return [{"id":int(r[0]),"code":r[1],"name":r[2],"category":r[3] or r[4],
+             "availableQuantity":int(r[5])} for r in rows]
+
+
+def _validate_sell_out_inventory(cur, dealer_id: int, details: list[dict[str, Any]],
+                                 exclude_visit_id: int | None = None) -> None:
+    """Reject a visit when its sell-out exceeds the current month's available stock."""
+    requested = {int(item["productId"]): _optional_quantity(item,"sellOutQuantity","實銷")
+                 for item in details if item.get("sellOutQuantity") not in (None, "")}
+    if not requested:
+        return
+    stock = {item["id"]:item for item in reportable_products_for_cursor(cur,dealer_id,exclude_visit_id)}
+    for product_id, sell in requested.items():
+        product = stock.get(product_id)
+        available = product["availableQuantity"] if product else 0
+        if sell is not None and sell > available:
+            code = product["code"] if product else str(product_id)
+            raise ValueError(f"{code}：實銷 {sell} 超過目前總庫存 {available}，請修正後再送出")
+
+
+def reportable_products_for_cursor(cur, dealer_id: int, exclude_visit_id: int | None = None) -> list[dict[str, Any]]:
+    """Inventory snapshot used inside a visit write transaction."""
+    # Keep this query aligned with reportable_products while using the caller's transaction.
+    sql = """
+    WITH opening AS (SELECT d.ProductId,SUM(CAST(d.OpeningQuantity AS bigint)) Quantity FROM dbo.MonthlyOpeningInventoryDetail d JOIN dbo.ImportBatch b ON b.ImportBatchId=d.ImportBatchId WHERE d.DealerId=%s AND b.ImportType='OPENING_INVENTORY' AND b.ImportStatus='Official' AND b.DataMonth=CONVERT(char(6),SYSDATETIME(),112) GROUP BY d.ProductId),
+    incoming AS (SELECT t.ProductId,SUM(t.Quantity) Quantity FROM dbo.SellInTransaction t JOIN dbo.ImportBatch b ON b.ImportBatchId=t.ImportBatchId WHERE t.DealerId=%s AND b.ImportType='SELL_IN' AND b.ImportStatus='Official' AND t.TransactionStatus='VALID' AND t.ReviewStatus='APPROVED' AND t.InventoryEffectiveDate>=DATEFROMPARTS(YEAR(SYSDATETIME()),MONTH(SYSDATETIME()),1) AND t.InventoryEffectiveDate<=CAST(SYSDATETIME() AS date) GROUP BY t.ProductId),
+    outgoing AS (SELECT d.ProductId,SUM(CAST(d.SellOutQuantity AS bigint)) Quantity FROM dbo.StoreVisitProductDetail d JOIN dbo.StoreVisit v ON v.StoreVisitId=d.StoreVisitId WHERE v.DealerId=%s AND v.RecordStatus='ACTIVE' AND (%s IS NULL OR v.StoreVisitId<>%s) AND d.SellOutDate>=DATEFROMPARTS(YEAR(SYSDATETIME()),MONTH(SYSDATETIME()),1) AND d.SellOutDate<=CAST(SYSDATETIME() AS date) AND d.SellOutQuantity IS NOT NULL GROUP BY d.ProductId)
+    SELECT p.ProductId,p.ProductCode,o.Quantity+COALESCE(i.Quantity,0)-COALESCE(s.Quantity,0) FROM opening o JOIN dbo.Product p ON p.ProductId=o.ProductId LEFT JOIN incoming i ON i.ProductId=o.ProductId LEFT JOIN outgoing s ON s.ProductId=o.ProductId
+    """
+    cur.execute(sql,(dealer_id,dealer_id,dealer_id,exclude_visit_id,exclude_visit_id))
+    return [{"id":int(r[0]),"code":r[1],"availableQuantity":int(r[2])} for r in cur.fetchall()]
 
 
 def visits(*, employee_id: int | None = None, dealer_id: int | None = None,
@@ -818,6 +870,8 @@ def update_visit(visit_id: int, details: list[dict[str, Any]], *, account_id: in
             raise PermissionError("此筆回報已超過 72 小時修改期限或已作廢")
         if account_type=='EMPLOYEE' and row[0] != 'EMPLOYEE':raise PermissionError("業務帳號不可修改經銷商自行回報")
         if account_type=='DEALER' and int(row[1]) != account_id:raise PermissionError("只能修改由自己的帳號建立的回報")
+        dealer_id=int(_one(cur,"SELECT DealerId FROM dbo.StoreVisit WHERE StoreVisitId=%s",(visit_id,))[0])
+        _validate_sell_out_inventory(cur,dealer_id,details,visit_id)
         cur.execute("DELETE dbo.StoreVisitProductDetail WHERE StoreVisitId=%s",(visit_id,))
         for item in details:
             sell=_optional_quantity(item,'sellOutQuantity','實銷')
