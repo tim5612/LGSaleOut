@@ -1,11 +1,14 @@
 import unittest
+import tempfile
 from datetime import datetime
 from decimal import Decimal
 from io import BytesIO
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import openpyxl
 from flask import Flask
+from PIL import Image
 
 import lgsale_psi as psi
 
@@ -172,6 +175,31 @@ class RouteTests(unittest.TestCase):
         self.assertEqual(sheet["C5"].data_type, "s")
         self.assertEqual([sheet.cell(sheet.max_row, c).value for c in range(5, 12)], [4, 17, 3, -1, 4, 15, 11])
         self.assertIn("計算說明", book.sheetnames)
+
+    @patch.object(psi, "load_source")
+    def test_export_can_embed_thumbnail_without_changing_default(self, load):
+        load.return_value = source()
+        self.login()
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            relative = Path("uploads/display_photos/2026/09/1/photo_thumb.jpg")
+            target = root / relative
+            target.parent.mkdir(parents=True)
+            Image.new("RGB", (32, 32), "navy").save(target, "JPEG")
+            with patch.object(psi, "BASE", root), patch.object(
+                psi.db, "display_photo_file", return_value={"path": relative.as_posix()}
+            ):
+                result = self.client.get("/api/psi/export?level=dealer&photos=thumbnail")
+        self.assertEqual(result.status_code, 200)
+        book = openpyxl.load_workbook(BytesIO(result.data))
+        self.assertEqual(len(book["PSI"]._images), 1)
+        self.assertIn("已在客戶明細", book["計算說明"]["A7"].value)
+
+    @patch.object(psi, "load_source", side_effect=source)
+    def test_export_rejects_unknown_photo_mode(self, load):
+        self.login()
+        result = self.client.get("/api/psi/export?photos=original")
+        self.assertEqual(result.status_code, 400)
 
 
 if __name__ == "__main__":

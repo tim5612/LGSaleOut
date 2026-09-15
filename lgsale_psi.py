@@ -211,7 +211,7 @@ def matrix(report, level="dealer"):
         photos=[]
         for c in columns:
             present=[row["cells"][str(d)].get("displayPhoto") for d in c["dealerIds"] if str(d) in row["cells"]]
-            photos.append(present[0] if len(present)==1 else None)
+            photos.append(present[0] if not c["total"] and len(present)==1 else None)
         item = dict(kind="product", category=row["category"], subcategory=row["subcategory"], code=row["code"],
                     name=row["name"], price=None, values=values, photos=photos)
         rows.append(item)
@@ -345,9 +345,13 @@ def report():
 @bp.get("/api/psi/export")
 def export():
     import openpyxl
+    from openpyxl.drawing.image import Image as ExcelImage
     from openpyxl.styles import Alignment, Font, PatternFill
     from openpyxl.utils import get_column_letter
 
+    photo_mode = request.args.get("photos", "")
+    if photo_mode not in {"", "thumbnail"}:
+        raise ValueError("Excel 照片選項無效")
     result = matrix(build_report(cached_source(request.args.get("month")), request.args), request.args.get("level", "dealer"))
     book = openpyxl.Workbook()
     sheet = book.active
@@ -362,6 +366,7 @@ def export():
             sheet.merge_cells(start_row=r, start_column=5 + i*7, end_row=r, end_column=11 + i*7)
     for row in result["rows"]:
         sheet.append([row["category"], row["subcategory"], row["code"], None] + [v for group in row["values"] for v in group])
+        excel_row = sheet.max_row
         for cell in sheet[sheet.max_row]:
             cell.number_format = '#,##0.###;-#,##0.###;;@'
             if row["kind"] != "product":
@@ -372,6 +377,19 @@ def export():
             # Database labels must remain literal text, not executable spreadsheet formulas.
             if isinstance(cell.value, str):
                 cell.data_type = "s"
+        if photo_mode == "thumbnail" and row["kind"] == "product":
+            for group_index, photo in enumerate(row.get("photos", [])):
+                if not photo:
+                    continue
+                item = db.display_photo_file(int(photo["id"]), "thumbnail")
+                target = (BASE / item["path"]).resolve() if item else None
+                photo_root = (BASE / "uploads" / "display_photos").resolve()
+                if target is None or photo_root not in target.parents or not target.is_file():
+                    continue
+                picture = ExcelImage(str(target))
+                picture.width = picture.height = 48
+                sheet.add_image(picture, f"{get_column_letter(5 + group_index * 7)}{excel_row}")
+                sheet.row_dimensions[excel_row].height = max(sheet.row_dimensions[excel_row].height or 15, 42)
     for row in sheet.iter_rows(min_row=1, max_row=4):
         for cell in row:
             cell.fill = PatternFill("solid", fgColor="DDE9F2")
@@ -387,6 +405,7 @@ def export():
     for line in result["notes"]:
         note.append([line])
     note.append(["空白可能為零值或資料未齊；缺少期初或陳列時，相關合計也留白，不以部分資料冒充完整庫存。"])
+    note.append(["照片匯出：" + ("已在客戶明細的陳列欄插入固定尺寸縮圖；原圖請回到 PSI 點擊相機圖示查看。" if photo_mode else "本檔未插入照片，以維持較小檔案。")])
     note.column_dimensions["A"].width = 120
     output = BytesIO()
     book.save(output)

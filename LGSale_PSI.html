@@ -25,7 +25,7 @@
     td.ttl,thead th.ttl{background:#fff3e4!important}thead tr:nth-child(1) th.ttl{background:#f4d9bc!important}tbody tr.subtotal td{background:#e5eedb;font-weight:600}tbody tr.subtotal td.ttl{background:#efd2ad!important}
     td.merged{vertical-align:top;text-align:center;background:#f3f7fa!important;border-bottom:1px solid #aebfcd}td.merged span{position:relative;display:block;padding:8px 0}tfoot td{position:sticky;bottom:0;z-index:12;background:#d4e6c4;font-weight:700;border-top:2px solid #829d72}tfoot td.fixed{z-index:14}tfoot td.ttl{background:#efd2ad!important}
     tbody tr:hover td{box-shadow:inset 0 0 0 999px #1769aa09}tbody tr.row-selected td{background:#fff2cc!important;box-shadow:inset 0 2px #d79b00,inset 0 -2px #d79b00}tbody tr.row-selected td:first-child{border-left:3px solid #d79b00}td.unknown{cursor:help}td.negative{color:#b42318}tr.spacer td{padding:0;border:0;background:white}
-    .empty{padding:50px;color:#60758a;text-align:center}.foot{font-size:12px;color:#60758a;margin-top:10px;display:flex;justify-content:space-between;gap:16px}details{margin-top:8px;font-size:12px;color:#60758a}details li{margin:4px 0}[hidden]{display:none!important}.photo-cell{cursor:pointer;color:#1769aa;font-weight:700}.photo-popover{position:fixed;z-index:40;width:220px;background:#fff;border:1px solid #8ba5ba;border-radius:8px;padding:8px;box-shadow:0 8px 28px #17324d40;pointer-events:none}.photo-popover img{display:block;width:202px;height:202px;object-fit:cover;background:#edf4f9}.photo-popover small{display:block;margin-top:5px;color:#60758a;white-space:normal}.photo-modal{position:fixed;inset:0;z-index:50;background:#000b;display:grid;place-items:center;padding:20px}.photo-modal[hidden]{display:none}.photo-modal figure{margin:0;max-width:min(92vw,900px);max-height:92vh;background:#fff;padding:12px;border-radius:10px}.photo-modal img{display:block;max-width:100%;max-height:80vh;margin:auto}.photo-modal figcaption{margin-top:8px}.photo-modal button{float:right}
+    .empty{padding:50px;color:#60758a;text-align:center}.foot{font-size:12px;color:#60758a;margin-top:10px;display:flex;justify-content:space-between;gap:16px}details{margin-top:8px;font-size:12px;color:#60758a}details li{margin:4px 0}[hidden]{display:none!important}.photo-cell{cursor:pointer;color:#1769aa;font-weight:700}.photo-popover{position:fixed;z-index:40;width:220px;background:#fff;border:1px solid #8ba5ba;border-radius:8px;padding:8px;box-shadow:0 8px 28px #17324d40;pointer-events:none}.photo-popover img{display:block;width:202px;height:202px;object-fit:contain;background:#111}.photo-popover small{display:block;margin-top:5px;color:#60758a;white-space:normal}.photo-modal{position:fixed;inset:0;z-index:50;background:#000b;display:grid;place-items:center;padding:20px}.photo-modal[hidden]{display:none}.photo-modal figure{margin:0;max-width:min(92vw,1100px);max-height:92vh;background:#fff;padding:12px;border-radius:10px}.photo-modal img{display:block;max-width:100%;max-height:80vh;margin:auto;object-fit:contain}.photo-modal figcaption{margin-top:8px}.photo-modal button{float:right}
     @media(max-width:1100px){:root{--navw:138px;--pad:8px}.side{padding:16px 6px}.brand{font-size:19px;padding-left:8px}main{padding-top:8px}}
   </style>
 </head>
@@ -45,7 +45,7 @@
         <select id="category" aria-label="大分類"><option value="">大分類：全部</option></select>
         <select id="level" aria-label="顯示層級"><option value="dealer">客戶明細</option><option value="employee">業務彙總</option><option value="org">區域彙總</option><option value="company">範圍總覽</option></select>
         <input id="search" type="search" aria-label="搜尋型號或客戶" placeholder="搜尋型號 / 客戶">
-        <button id="refresh">重新整理</button><button class="export" id="export" disabled>匯出 Excel</button>
+        <button id="refresh">重新整理</button><select id="exportPhotos" aria-label="Excel 照片選項"><option value="">不含照片（檔案小）</option><option value="thumbnail">含縮圖（檔案較大）</option></select><button class="export" id="export" disabled>匯出 Excel</button>
       </div>
       <div class="notice" id="quality">商品往下、客戶往右；左側商品欄與表頭固定。單位：台。</div>
       <div id="error" class="error" role="alert" hidden></div>
@@ -173,7 +173,7 @@ let photoHoverTimer=0;
 function photoMeta(cell){return `${cell.dataset.photoCode}｜${cell.dataset.photoCaptured.replace('T',' ')}｜${cell.dataset.photoUploader}`}
 function showPhotoPopover(cell){const box=$('photoPopover'),rect=cell.getBoundingClientRect();box.innerHTML=`<img src="/api/display-photos/${cell.dataset.photoId}/thumbnail" alt="${esc(cell.dataset.photoCode)} 陳列縮圖"><small>${esc(photoMeta(cell))}</small>`;box.hidden=false;const left=Math.min(innerWidth-230,Math.max(8,rect.left)),top=rect.bottom+226<innerHeight?rect.bottom+6:Math.max(8,rect.top-226);box.style.left=left+'px';box.style.top=top+'px'}
 function hidePhotoPopover(){clearTimeout(photoHoverTimer);$('photoPopover').hidden=true}
-function openPhoto(cell){hidePhotoPopover();$('photoOriginal').src=`/api/display-photos/${cell.dataset.photoId}/original`;$('photoOriginal').alt=cell.dataset.photoCode+' 陳列照片';$('photoCaption').textContent=photoMeta(cell);$('photoModal').hidden=false}
+function openPhoto(cell){hidePhotoPopover();$('photoOriginal').src=`/api/display-photos/${cell.dataset.photoId}/original`;$('photoOriginal').alt=cell.dataset.photoCode+' 陳列照片';$('photoCaption').textContent=photoMeta(cell)+'｜原圖';$('photoModal').hidden=false}
 $('scroll').addEventListener('pointerover',event=>{const cell=event.target.closest('[data-photo-id]');if(cell){clearTimeout(photoHoverTimer);photoHoverTimer=setTimeout(()=>showPhotoPopover(cell),220)}});
 $('scroll').addEventListener('pointerout',event=>{if(event.target.closest('[data-photo-id]'))hidePhotoPopover()});
 $('closePhoto').onclick=()=>{$('photoModal').hidden=true;$('photoOriginal').removeAttribute('src')};$('photoModal').onclick=e=>{if(e.target===$('photoModal'))$('closePhoto').click()};
@@ -183,7 +183,7 @@ function moveMonth(delta){if(!$('month').value)return;let [y,m]=$('month').value
 $('prev').onclick=()=>moveMonth(-1);$('next').onclick=()=>moveMonth(1);$('refresh').onclick=()=>load(true,true);
 $('export').onclick=async()=>{
   $('export').disabled=true;
-  try{const res=await fetch('/api/psi/export?'+params(),{cache:'no-store'});if(!res.ok){const err=await res.json();throw new Error(err.error||'匯出失敗');}
+  try{const exportParams=params();if($('exportPhotos').value)exportParams.set('photos',$('exportPhotos').value);const res=await fetch('/api/psi/export?'+exportParams,{cache:'no-store'});if(!res.ok){const err=await res.json();throw new Error(err.error||'匯出失敗');}
     const url=URL.createObjectURL(await res.blob()),a=document.createElement('a');a.href=url;a.download=`PSI-${data.month}.xlsx`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
   }catch(e){$('error').textContent=e.message;$('error').hidden=false;}finally{$('export').disabled=false;}
 };
