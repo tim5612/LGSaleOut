@@ -13,7 +13,7 @@ DECLARE @EmployeeName nvarchar(100) = N'王正文';
 DECLARE @HireDate date = '2026-01-01';
 DECLARE @OrgUnitCode varchar(30) = 'TEST';
 DECLARE @OrgUnitName nvarchar(100) = N'內湖';
-DECLARE @PositionLevel varchar(30) = 'MANAGER'; -- SALES／MANAGER／DIRECTOR
+DECLARE @PositionLevel varchar(30) = 'MANAGER'; -- SALES／DIRECTOR／MANAGER／ADMIN（管理）
 
 BEGIN TRY
     BEGIN TRANSACTION;

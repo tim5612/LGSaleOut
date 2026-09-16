@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>LGSale｜PSI 月報</title>
   <style>
-    :root{--ink:#17324d;--line:#cbd6df;--bg:#f4f7fa;--blue:#1769aa;--navw:156px;--pad:12px}*{box-sizing:border-box}
+    :root{--ink:#17324d;--line:#cbd6df;--bg:#f4f7fa;--blue:#1769aa;--navw:232px;--pad:12px}*{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Microsoft JhengHei","Segoe UI",sans-serif}
     button,input,select{font:inherit}button,a,select{cursor:pointer}button:disabled{opacity:.45;cursor:wait}
     .app{display:block;min-height:100vh}.side{width:var(--navw);height:100vh;position:fixed;z-index:20;left:0;top:0;background:#17324d;padding:20px 8px;color:white}
@@ -26,7 +26,7 @@
     td.merged{vertical-align:top;text-align:center;background:#f3f7fa!important;border-bottom:1px solid #aebfcd}td.merged span{position:relative;display:block;padding:8px 0}tfoot td{position:sticky;bottom:0;z-index:12;background:#d4e6c4;font-weight:700;border-top:2px solid #829d72}tfoot td.fixed{z-index:14}tfoot td.ttl{background:#efd2ad!important}
     tbody tr:hover td{box-shadow:inset 0 0 0 999px #1769aa09}tbody tr.row-selected td{background:#fff2cc!important;box-shadow:inset 0 2px #d79b00,inset 0 -2px #d79b00}tbody tr.row-selected td:first-child{border-left:3px solid #d79b00}td.unknown{cursor:help}td.negative{color:#b42318}tr.spacer td{padding:0;border:0;background:white}
     .empty{padding:50px;color:#60758a;text-align:center}.foot{font-size:12px;color:#60758a;margin-top:10px;display:flex;justify-content:space-between;gap:16px}details{margin-top:8px;font-size:12px;color:#60758a}details li{margin:4px 0}[hidden]{display:none!important}.photo-cell{cursor:pointer;color:#1769aa;font-weight:700}.photo-popover{position:fixed;z-index:40;width:220px;background:#fff;border:1px solid #8ba5ba;border-radius:8px;padding:8px;box-shadow:0 8px 28px #17324d40;pointer-events:none}.photo-popover img{display:block;width:202px;height:202px;object-fit:cover;background:#edf4f9}.photo-popover small{display:block;margin-top:5px;color:#60758a;white-space:normal}.photo-modal{position:fixed;inset:0;z-index:50;background:#000b;display:grid;place-items:center;padding:20px}.photo-modal[hidden]{display:none}.photo-modal figure{margin:0;max-width:min(92vw,900px);max-height:92vh;background:#fff;padding:12px;border-radius:10px}.photo-modal img{display:block;max-width:100%;max-height:80vh;margin:auto}.photo-modal figcaption{margin-top:8px}.photo-modal button{float:right}
-    @media(max-width:1100px){:root{--navw:138px;--pad:8px}.side{padding:16px 6px}.brand{font-size:19px;padding-left:8px}main{padding-top:8px}}
+    @media(max-width:1100px){:root{--pad:8px}main{padding-top:8px}}
   </style>
 </head>
 <body>
@@ -55,6 +55,7 @@
     <details><summary>計算方式與資料來源</summary><ul id="notes"></ul><p>頁面每 60 秒更新，返回此頁會重新查詢；也可按「重新整理」。合計若包含未齊資料會留白，不以部分已知數量冒充完整庫存。</p></details>
   </main>
 </div><div id="photoPopover" class="photo-popover" hidden></div><div id="photoModal" class="photo-modal" hidden><figure><button id="closePhoto" aria-label="關閉照片">×</button><img id="photoOriginal" alt="陳列照片"><figcaption id="photoCaption"></figcaption></figure></div>
+<script src="/assets/menu.js"></script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

@@ -251,6 +251,8 @@ def finish_authentication(credential: dict[str, Any]) -> dict[str, Any]:
         require_user_verification=True,
     )
     db.record_passkey_login(record["passkeyCredentialId"], record["userAccountId"], verified.new_sign_count)
+    if record["accountType"] == "EMPLOYEE":
+        db.claim_first_designer(record["userAccountId"])
     session.clear()
     session.permanent = True
     session["user"] = {

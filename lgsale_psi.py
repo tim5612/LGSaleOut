@@ -15,7 +15,7 @@ from decimal import Decimal
 from io import BytesIO
 from pathlib import Path
 
-from flask import Blueprint, current_app, jsonify, request, send_file, send_from_directory, session
+from flask import Blueprint, current_app, g, jsonify, request, send_file, send_from_directory
 from werkzeug.exceptions import HTTPException
 
 import lgsale_db as db
@@ -225,7 +225,7 @@ def matrix(report, level="dealer"):
         columns=columns, rows=rows, productCount=len(product_rows), dealerCount=len(report["dealers"]), level=level)
 
 
-def build_report(source, filters):
+def build_report(source, filters, allowed_dealer_ids=None):
     facts = defaultdict(dict)
     for d, p, n in source["opening"]:
         quantity = Decimal(n)
@@ -258,7 +258,8 @@ def build_report(source, filters):
     excluded_products = sum(p["id"] in global_ex for p in source["products"])
     facts = {k: v for k, v in facts.items() if k[1] not in global_ex and k not in pair_ex}
     active_dealers = {d for d, _ in facts}
-    dealers = [d for d in source["dealers"] if d["id"] in active_dealers]
+    dealers = [d for d in source["dealers"] if d["id"] in active_dealers and
+               (allowed_dealer_ids is None or d["id"] in allowed_dealer_ids)]
     fact_products = {pid for _, pid in facts}
     options = dict(orgs=list({d["orgId"]: {"id": d["orgId"], "name": d["org"]} for d in dealers}.values()),
                    employees=list({d["employeeId"]: {"id": d["employeeId"], "name": d["employee"], "orgId": d["orgId"]} for d in dealers}.values()),
@@ -307,9 +308,8 @@ def build_report(source, filters):
 
 @bp.before_request
 def protect():
-    user = session.get("user", {})
-    if user.get("type") != "EMPLOYEE" or not user.get("employeeId"):
-        return jsonify(error="僅員工帳號可使用 PSI 月報"), 403
+    # The app-wide permission check supplies g.access for employees and dealers.
+    return None
 
 
 @bp.after_request
@@ -339,7 +339,8 @@ def page():
 @bp.get("/api/psi")
 def report():
     source = cached_source(request.args.get("month"), request.args.get("fresh") == "1")
-    return jsonify(matrix(build_report(source, request.args), request.args.get("level", "dealer")))
+    return jsonify(matrix(build_report(source, request.args, g.access.dealer_ids),
+                          request.args.get("level", "dealer")))
 
 
 @bp.get("/api/psi/export")
@@ -352,7 +353,8 @@ def export():
     photo_mode = request.args.get("photos", "")
     if photo_mode not in {"", "thumbnail"}:
         raise ValueError("Excel 照片選項無效")
-    result = matrix(build_report(cached_source(request.args.get("month")), request.args), request.args.get("level", "dealer"))
+    result = matrix(build_report(cached_source(request.args.get("month")), request.args,
+                                 g.access.dealer_ids), request.args.get("level", "dealer"))
     book = openpyxl.Workbook()
     sheet = book.active
     sheet.title = "PSI"

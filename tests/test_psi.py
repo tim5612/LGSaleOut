@@ -7,7 +7,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import openpyxl
-from flask import Flask
+from flask import Flask, g, jsonify, session
+from types import SimpleNamespace
 from PIL import Image
 
 import lgsale_psi as psi
@@ -127,17 +128,26 @@ class RouteTests(unittest.TestCase):
         self.app = Flask(__name__)
         self.app.secret_key = "unit-test-only"
         self.app.register_blueprint(psi.bp)
+        @self.app.before_request
+        def permission_fixture():
+            user = session.get("user")
+            if not user:
+                return jsonify(error="請先登入"), 403
+            g.access = SimpleNamespace(dealer_ids={1} if user["type"] == "DEALER" else {1, 2})
         self.client = self.app.test_client()
 
     def login(self, kind="EMPLOYEE"):
         with self.client.session_transaction() as s:
             s["user"] = {"type": kind, "employeeId": 1}
 
-    def test_unauthenticated_and_dealer_denied(self):
+    @patch.object(psi, "load_source", side_effect=lambda month: source())
+    def test_unauthenticated_and_dealer_limited_to_own_store(self, load):
         for path in ("/psi", "/api/psi", "/api/psi/export"):
             self.assertEqual(self.client.get(path).status_code, 403)
         self.login("DEALER")
-        self.assertEqual(self.client.get("/api/psi").status_code, 403)
+        result = self.client.get("/api/psi")
+        self.assertEqual(result.status_code, 200)
+        self.assertEqual(result.json["dealerCount"], 1)
 
     @patch.object(psi, "load_source", side_effect=source)
     def test_employee_api(self, load):

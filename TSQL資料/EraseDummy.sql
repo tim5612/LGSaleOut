@@ -36,6 +36,14 @@ BEGIN TRY
 
     DELETE FROM dbo.PasskeyRegistrationInvitation;
     DELETE FROM dbo.PasskeyCredential;
+    IF OBJECT_ID(N'dbo.PermissionAudit',N'U') IS NOT NULL
+        EXEC(N'DELETE FROM dbo.PermissionAudit;');
+    IF OBJECT_ID(N'dbo.PermissionAccountOverride',N'U') IS NOT NULL
+        EXEC(N'DELETE FROM dbo.PermissionAccountOverride;');
+    IF OBJECT_ID(N'dbo.PermissionRoleOverride',N'U') IS NOT NULL
+        EXEC(N'DELETE FROM dbo.PermissionRoleOverride;');
+    IF OBJECT_ID(N'dbo.PermissionDesigner',N'U') IS NOT NULL
+        EXEC(N'DELETE FROM dbo.PermissionDesigner;');
     DELETE FROM dbo.UserAccount;
 
     DELETE FROM dbo.ImportBatch;

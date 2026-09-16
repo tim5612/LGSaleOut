@@ -25,6 +25,7 @@
 <section class="panel source history"><h2>最近匯入批次</h2><div id="history"><div class="empty">載入中…</div></div></section>
 </main></div>
 <footer class="footer"><label><input id="confirmed" type="checkbox" disabled> 我已確認可匯入筆數、退貨負數及問題清單</label><div class="actions"><button class="btn" id="cancel" disabled>取消匯入</button><button class="btn primary" id="commit" disabled>正式匯入</button></div></footer>
+<script src="/assets/menu.js"></script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id),esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

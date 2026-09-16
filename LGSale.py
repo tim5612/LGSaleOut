@@ -26,10 +26,11 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import quote
 
-from flask import Flask, jsonify, redirect, request, send_file, send_from_directory, session
+from flask import Flask, g, jsonify, redirect, request, send_file, send_from_directory, session
 from werkzeug.utils import secure_filename
 import qrcode
 import lgsale_db as db
+import lgsale_permissions as permissions
 import lgsale_auth as auth
 from lgsale_opening import bp as opening_blueprint
 from lgsale_sellin import bp as sellin_blueprint
@@ -54,6 +55,58 @@ app.config.update(
 )
 
 
+ENDPOINT_CAPABILITIES = {
+    "desktop_page": ("tasks.view", "permissions.manage"),
+    "mobile_page": ("mobile.reports.view", "mobile.tasks.view"), "dealer_page": ("mobile.reports.view",),
+    "photo_page": ("mobile.tasks.view",),
+    "mobile_locked_page": (),
+    "tasks": ("tasks.view",), "create_task": ("tasks.create",),
+    "toggle_task": ("tasks.toggle",), "task_detail": ("tasks.view",),
+    "update_task_photos": ("tasks.photos.manage",),
+    "dealers": ("dealers.view", "mobile.reports.view", "mobile.tasks.view"),
+    "create_dealer": ("dealers.manage",), "update_dealer": ("dealers.manage",),
+    "mobile_dashboard": ("mobile.reports.view", "mobile.tasks.view"),
+    "dealer_summary": ("mobile.reports.view", "mobile.tasks.view"),
+    "employees": ("employees.view",), "create_employee": ("employees.manage",),
+    "update_employee": ("employees.manage",), "organizations": ("employees.view",),
+    "change_employee_position": ("employees.manage",),
+    "create_organization": ("employees.manage",), "update_organization": ("employees.manage",),
+    "products": ("mobile.reports.view",), "upload_display_photo": ("reports.create",),
+    "display_photo": ("mobile.reports.view", "psi.view", "reports.view"),
+    "create_assignment": ("assignments.manage",), "create_change": ("assignments.manage",),
+    "dealer_transfer_candidates": ("assignments.view",),
+    "transfer_dealers": ("assignments.manage",), "retain_dealers": ("assignments.manage",),
+    "create_visit": ("reports.create",),
+    "visit_list": ("mobile.reports.view", "reports.view"),
+    "report_details": ("reports.view",),
+    "visit_detail": ("mobile.reports.view", "reports.view"),
+    "update_visit": ("reports.edit",),
+    "photo_tasks": ("mobile.tasks.view",),
+    "upload_photo": ("mobile.tasks.execute",),
+    "task_photo_file": ("tasks.view", "mobile.tasks.view"),
+    "complete_execution": ("mobile.tasks.execute",),
+    "passkey_accounts": ("passkeys.manage",),
+    "update_passkey_account": ("passkeys.manage",),
+    "create_passkey_invitation": ("passkeys.manage",),
+    "passkey_invitation_qr": ("passkeys.manage",),
+    "passkey_login_qr": ("passkeys.manage",),
+    "revoke_passkey_credential": ("passkeys.manage",),
+    "psi.page": ("psi.view",), "psi.report": ("psi.view",),
+    "psi.export": ("psi.export",),
+    "opening.page": ("opening.manage",), "opening.context": ("opening.manage",),
+    "opening.upload": ("opening.manage",), "opening.preview": ("opening.manage",),
+    "opening.commit": ("opening.manage",), "opening.cancel": ("opening.manage",),
+    "sellin.page": ("sellin.manage",), "sellin.context": ("sellin.manage",),
+    "sellin.upload": ("sellin.manage",), "sellin.preview": ("sellin.manage",),
+    "sellin.commit": ("sellin.manage",), "sellin.cancel": ("sellin.manage",),
+    "permissions_page": ("permissions.manage",),
+    "permission_config": ("permissions.manage",),
+    "permission_update": ("permissions.manage",),
+    "menu_script": (),
+    "desktop_approval_approve": (),
+}
+
+
 @app.before_request
 def require_login():
     public = request.endpoint in {
@@ -76,13 +129,22 @@ def require_login():
             return jsonify(error="此帳號已停用，請聯絡管理人員"), 401
         entry = "dealer" if user.get("type") == "DEALER" else "employee"
         return redirect(f"/login/{entry}")
-    dealer_allowed = request.path == "/dealer" or request.path in {"/api/auth/me", "/api/auth/logout", "/api/dealers", "/api/products", "/api/mobile-dashboard"} or request.path.startswith("/api/visits") or request.path.startswith("/api/display-photos")
-    if user["type"] == "DEALER" and not dealer_allowed:
+    try:
+        g.access = permissions.resolve(user)
+    except (PermissionError, ValueError) as exc:
+        return jsonify(error=str(exc)), 403
+    except Exception:
+        app.logger.exception("Permission lookup failed")
+        return jsonify(error="權限資料無法讀取，請聯絡管理人員"), 503
+    if user["type"] == "EMPLOYEE" and request.endpoint == "dealer_page":
+        return redirect("/mobile") if g.access.can("mobile.reports.view") else redirect("/")
+    required = ENDPOINT_CAPABILITIES.get(request.endpoint)
+    if required is None and request.endpoint not in {"auth_me", "auth_logout"}:
+        return jsonify(error="此功能尚未設定權限"), 403
+    if required and not any(g.access.can(capability) for capability in required):
         if request.path.startswith("/api/"):
-            return jsonify(error="經銷商帳號無權存取此功能"), 403
-        return redirect("/dealer")
-    if user["type"] == "EMPLOYEE" and request.path == "/dealer":
-        return redirect("/mobile")
+            return jsonify(error="沒有此功能的權限"), 403
+        return "沒有此功能的權限", 403
     return None
 
 
@@ -91,7 +153,8 @@ def login_page(account_type: str):
     if account_type not in {"employee", "dealer"}:
         return "Not found", 404
     if session.get("user"):
-        return redirect("/dealer" if session["user"]["type"] == "DEALER" else "/")
+        mobile = any(x in request.headers.get("User-Agent", "") for x in ("iPhone", "iPad", "Android"))
+        return redirect(("/dealer" if mobile else "/psi") if session["user"]["type"] == "DEALER" else "/")
     return send_from_directory(BASE_DIR, "LGSale_Auth.html")
 
 
@@ -187,7 +250,60 @@ def desktop_approval_qr(token: str):
 
 @app.get("/api/auth/me")
 def auth_me():
-    return jsonify(session["user"])
+    return jsonify({**session["user"], **g.access.as_public()})
+
+
+@app.get("/permissions")
+def permissions_page():
+    return send_from_directory(BASE_DIR, "LGSale_Permissions.html")
+
+
+@app.get("/assets/menu.js")
+def menu_script():
+    return send_from_directory(BASE_DIR, "lgsale_menu.js")
+
+
+@app.get("/api/permissions")
+def permission_config():
+    try:
+        roles = {role: {"name": name, "defaults": sorted(permissions.ROLE_DEFAULTS[role]),
+                        "overrides": db.permission_rules(role, -1)[0]}
+                 for role, name in permissions.ROLE_NAMES.items()}
+        accounts = db.permission_accounts()
+        for account in accounts:
+            account["overrides"] = db.permission_rules(account["role"], account["id"])[1]
+        return jsonify(capabilities=permissions.CAPABILITIES, roles=roles,
+                       accounts=accounts, audit=db.permission_audit())
+    except Exception:
+        app.logger.exception("Permission configuration read failed")
+        return jsonify(error="權限設定讀取失敗"),503
+
+
+@app.put("/api/permissions")
+def permission_update():
+    data = request.get_json(silent=True) or {}
+    subject_type = data.get("subjectType")
+    subject = str(data.get("subject", ""))
+    capability = data.get("capability")
+    value = data.get("value")
+    if capability not in permissions.CAPABILITIES or (value is not None and type(value) is not bool):
+        return jsonify(error="權限項目或設定值不正確"),400
+    if subject_type == "ROLE":
+        if subject not in permissions.ROLE_DEFAULTS:
+            return jsonify(error="職級不正確"),400
+    elif subject_type == "ACCOUNT":
+        if not subject.isdecimal() or int(subject) not in {a["id"] for a in db.permission_accounts()}:
+            return jsonify(error="帳號不正確"),400
+    else:
+        return jsonify(error="設定對象不正確"),400
+    try:
+        db.set_permission_override(subject_type=subject_type, subject=subject,
+                                   capability=capability, value=value,
+                                   actor_id=g.access.account_id)
+        return jsonify(saved=True)
+    except Exception:
+        app.logger.exception("Permission configuration update failed")
+        return jsonify(error="權限設定儲存失敗"),500
 
 
 @app.post("/api/auth/logout")
@@ -208,6 +324,9 @@ def passkey_accounts():
 @app.put("/api/passkey-accounts")
 def update_passkey_account():
     data=request.get_json(silent=True) or {}
+    if not g.access.designer and db.designer_owner_ref(str(data.get("accountType","")).upper(),
+                                                       str(data.get("ownerRef","")).strip()):
+        return jsonify(error="只有 Designer 可以管理 Designer 帳號"),403
     try:
         db.set_passkey_account_enabled(str(data.get("accountType","")).upper(),str(data.get("ownerRef","")).strip(),bool(data.get("enabled")))
         return jsonify(updated=True)
@@ -220,6 +339,8 @@ def update_passkey_account():
 def create_passkey_invitation():
     data=request.get_json(silent=True) or {};account_type=str(data.get("accountType","")).upper();owner_ref=str(data.get("ownerRef","")).strip()
     if not owner_ref:return jsonify(error="員工編號或經銷商代碼必填"),400
+    if not g.access.designer and db.designer_owner_ref(account_type, owner_ref):
+        return jsonify(error="只有 Designer 可以管理 Designer 帳號"),403
     try:
         token=auth.create_invitation(account_type,owner_ref,session["user"].get("employeeId"))
         return jsonify(token=token,registrationUrl=f"{auth.ORIGIN}/register?token={token}",expiresIn=900),201
@@ -234,9 +355,22 @@ def passkey_invitation_qr(token:str):
     return send_file(output,mimetype="image/png",max_age=0)
 
 
+@app.get("/api/passkey-login/qr/<account_type>.png")
+def passkey_login_qr(account_type: str):
+    if account_type not in {"employee", "dealer"}:
+        return jsonify(error="登入入口不正確"), 404
+    image = qrcode.make(f"{auth.ORIGIN}/login/{account_type}")
+    output = BytesIO()
+    image.save(output, format="PNG")
+    output.seek(0)
+    return send_file(output, mimetype="image/png", max_age=0)
+
+
 @app.post("/api/passkey-credentials/<int:credential_id>/revoke")
 def revoke_passkey_credential(credential_id:int):
     try:
+        if not g.access.designer and db.designer_credential(credential_id):
+            return jsonify(error="只有 Designer 可以管理 Designer 帳號"),403
         if not db.revoke_passkey_credential(credential_id):return jsonify(error="找不到可撤銷的 Passkey"),404
         return jsonify(revoked=True)
     except Exception as exc:return jsonify(error="Passkey 撤銷失敗："+str(exc)),500
@@ -244,12 +378,22 @@ def revoke_passkey_credential(credential_id:int):
 
 @app.get("/")
 def desktop_page():
+    if not g.access.can("tasks.view") and g.access.designer:
+        return redirect("/permissions")
     return send_from_directory(BASE_DIR, "LGSale_UI_Desktop.html")
 
 
 @app.get("/mobile")
 def mobile_page():
     return send_from_directory(BASE_DIR, "LGSale_UI_Wireframe.html")
+
+
+@app.get("/mobile-locked")
+def mobile_locked_page():
+    return """<!doctype html><html lang='zh-Hant'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
+    <title>LGSale｜手機資料不開放</title><body style='font:16px/1.6 sans-serif;max-width:420px;margin:55px auto;padding:20px'>
+    <h1>手機資料不開放</h1><p>此帳號可使用 Passkey 掃碼授權桌機登入；手機端不顯示任務、實銷或陳列資料。</p>
+    <a href='/login/employee'>返回登入</a></body></html>"""
 
 
 @app.get("/dealer")
@@ -273,7 +417,7 @@ def health():
 @app.get("/api/tasks")
 def tasks():
     try:
-        return jsonify(db.tasks())
+        return jsonify(db.tasks(g.access.dealer_ids))
     except Exception as exc:
         return jsonify(error="任務資料庫查詢失敗：" + str(exc)), 503
 
@@ -289,7 +433,9 @@ def create_task():
         return jsonify(error="完成期限不得早於開始日期"), 400
     try:
         payload = {**data, "title": str(data["title"]).strip(), "instruction": str(data["instruction"]).strip()}
-        return jsonify(db.create_task(payload)), 201
+        if not g.access.designer and g.access.role in {"SALES", "DIRECTOR"}:
+            payload["dealerIds"] = sorted(g.access.dealer_ids)
+        return jsonify(db.create_task(payload, creator_id=g.access.employee_id)), 201
     except Exception as exc:
         return jsonify(error="任務建立失敗：" + str(exc)), 500
 
@@ -297,9 +443,13 @@ def create_task():
 @app.post("/api/tasks/<int:task_id>/toggle")
 def toggle_task(task_id: int):
     try:
-        if not db.toggle_task(task_id):
+        if not g.access.designer and g.access.role not in {"MANAGER", "ADMIN"}:
+            return jsonify(error="此任務涵蓋多個負責範圍，只有全公司範圍可變更狀態"),403
+        if db.task_detail(task_id, g.access.dealer_ids) is None:
+            return jsonify(error="找不到可管理的任務"), 404
+        if not db.toggle_task(task_id, creator_id=g.access.employee_id):
             return jsonify(error="找不到任務"), 404
-        task = next(item for item in db.tasks() if item["id"] == task_id)
+        task = next(item for item in db.tasks(g.access.dealer_ids) if item["id"] == task_id)
         return jsonify(task)
     except Exception as exc:
         return jsonify(error="任務狀態更新失敗：" + str(exc)), 500
@@ -308,7 +458,7 @@ def toggle_task(task_id: int):
 @app.get("/api/tasks/<int:task_id>")
 def task_detail(task_id: int):
     try:
-        item = db.task_detail(task_id)
+        item = db.task_detail(task_id, g.access.dealer_ids)
         return jsonify(item) if item else (jsonify(error="找不到任務"), 404)
     except Exception as exc:
         return jsonify(error="任務詳情查詢失敗：" + str(exc)), 503
@@ -318,8 +468,10 @@ def task_detail(task_id: int):
 def update_task_photos(task_id:int,execution_id:int):
     data=request.get_json(silent=True) or {};user=session["user"]
     try:
+        if not g.access.has_dealer(db.task_execution_dealer_id(execution_id)):
+            return jsonify(error="沒有此任務回報的權限"),403
         db.update_task_photos(task_id,execution_id,data.get("photos") or [],set_sample=bool(data.get("setSample")),employee_id=user["employeeId"])
-        return jsonify(db.task_detail(task_id))
+        return jsonify(db.task_detail(task_id, g.access.dealer_ids))
     except LookupError as exc:return jsonify(error=str(exc)),404
     except ValueError as exc:return jsonify(error=str(exc)),409
     except Exception as exc:return jsonify(error="照片說明更新失敗："+str(exc)),500
@@ -329,7 +481,8 @@ def update_task_photos(task_id:int,execution_id:int):
 def dealers():
     try:
         user = session["user"]
-        return jsonify(db.dealers(user["dealerId"] if user["type"] == "DEALER" else None))
+        return jsonify(db.dealers(user["dealerId"] if user["type"] == "DEALER" else None,
+                                  None if g.access.can("dealers.manage") else g.access.dealer_ids))
     except Exception as exc:
         return jsonify(error="經銷商資料庫查詢失敗：" + str(exc)), 503
 
@@ -382,8 +535,16 @@ def update_dealer(dealer_id: int):
 def mobile_dashboard():
     try:
         user = session["user"]
-        return jsonify(db.mobile_dashboard(user.get("employeeId") if user["type"] == "EMPLOYEE" else None,
-                                           user.get("dealerId") if user["type"] == "DEALER" else None))
+        result=db.mobile_dashboard(user.get("employeeId") if g.access.role == "SALES" and not g.access.designer else None,
+                                   user.get("dealerId") if user["type"] == "DEALER" else None,
+                                   g.access.dealer_ids)
+        if not g.access.can("reports.edit"):
+            result["counts"]["locked"] += result["counts"]["editable"]
+            result["counts"]["editable"] = 0
+        if not g.access.can("reports.create"):
+            result["pendingDisplayPhotos"] = []
+            result["counts"]["pendingDisplayPhotos"] = 0
+        return jsonify(result)
     except Exception as exc:
         return jsonify(error="手機工作台查詢失敗：" + str(exc)), 503
 
@@ -392,7 +553,7 @@ def mobile_dashboard():
 def dealer_summary(dealer_id: int):
     try:
         user=session["user"]
-        if user["type"] == "DEALER" and user.get("dealerId") != dealer_id:
+        if not g.access.has_dealer(dealer_id):
             return jsonify(error="無權查看其他經銷商"),403
         return jsonify(db.dealer_summary(dealer_id))
     except Exception as exc:
@@ -426,6 +587,8 @@ def create_employee():
 
 @app.put("/api/employees/<int:employee_id>")
 def update_employee(employee_id: int):
+    if not g.access.designer and db.is_designer_employee(employee_id):
+        return jsonify(error="只有 Designer 可以修改 Designer 員工資料"),403
     data = request.get_json(silent=True) or {}
     try:
         if not db.update_employee(employee_id, data):
@@ -433,6 +596,23 @@ def update_employee(employee_id: int):
         return jsonify(next(row for row in db.employees() if row["id"] == employee_id))
     except Exception as exc:
         return jsonify(error="員工資料更新失敗：" + str(exc)), 500
+
+
+@app.post("/api/employees/<int:employee_id>/position")
+def change_employee_position(employee_id: int):
+    if not g.access.designer and db.is_designer_employee(employee_id):
+        return jsonify(error="只有 Designer 可以修改 Designer 員工資料"),403
+    data = request.get_json(silent=True) or {}
+    try:
+        db.change_employee_position(employee_id, str(data.get("position", "")),
+                                    str(data.get("effectiveAt", "")),
+                                    str(data.get("reason", "")), g.access.employee_id)
+        return jsonify(updated=True)
+    except LookupError as exc:return jsonify(error=str(exc)),404
+    except ValueError as exc:return jsonify(error=str(exc)),400
+    except Exception:
+        app.logger.exception("Position change failed")
+        return jsonify(error="職級異動失敗"),500
 
 
 @app.get("/api/organizations")
@@ -479,6 +659,8 @@ def products():
     try:
         dealer_id=request.args.get("dealerId",type=int)
         if session["user"]["type"] == "DEALER":dealer_id=session["user"]["dealerId"]
+        if dealer_id is not None and not g.access.has_dealer(dealer_id):
+            return jsonify(error="沒有此經銷商的權限"),403
         visit_id=request.args.get("visitId",type=int)
         return jsonify(db.reportable_products(dealer_id,visit_id) if dealer_id is not None else db.products())
     except Exception as exc:
@@ -492,7 +674,7 @@ def upload_display_photo():
         dealer_id=int(request.form.get("dealerId", ""));product_id=int(request.form.get("productId", ""))
     except ValueError:
         return jsonify(error="經銷商與型號必填"),400
-    if user["type"]=="DEALER" and dealer_id!=int(user["dealerId"]):
+    if not g.access.has_dealer(dealer_id):
         return jsonify(error="無權上傳其他經銷商的照片"),403
     original=request.files.get("original");thumbnail=request.files.get("thumbnail")
     if not original or not thumbnail:return jsonify(error="原圖與縮圖都必須上傳"),400
@@ -525,6 +707,7 @@ def display_photo(photo_id:int,variant:str):
     user=session["user"]
     item=db.display_photo_file(photo_id,variant,dealer_id=user.get("dealerId") if user["type"]=="DEALER" else None)
     if item is None:return jsonify(error="找不到照片或沒有存取權限"),404
+    if not g.access.has_dealer(item["dealerId"]):return jsonify(error="沒有此照片的權限"),403
     target=(BASE_DIR/item["path"]).resolve();root=DISPLAY_UPLOAD_DIR.resolve()
     if root not in target.parents or not target.is_file():return jsonify(error="照片檔案不存在"),404
     response=send_file(target,mimetype="image/jpeg",max_age=86400 if variant=="thumbnail" else 3600)
@@ -583,6 +766,8 @@ def create_visit():
         data = {**data, "entrySourceType": "EMPLOYEE", "userAccountId": user["id"]}
     if data.get("dealerId") is None or not data.get("details"):
         return jsonify(error="經銷商與至少一筆商品資料必填"), 400
+    if not g.access.has_dealer(int(data["dealerId"])):
+        return jsonify(error="沒有此經銷商的權限"),403
     try:
         visit_id, report_time = db.create_visit(data)
         return jsonify(storeVisitId=visit_id, reportDateTime=report_time.isoformat(timespec="seconds")), 201
@@ -598,15 +783,21 @@ def visit_list():
         user=session["user"]
         dealer_id=request.args.get("dealerId",type=int)
         if user["type"] == "DEALER":dealer_id=user["dealerId"]
-        return jsonify(db.visits(employee_id=user.get("employeeId") if user["type"]=="EMPLOYEE" and request.args.get("mine") == "1" else None,
-                                 dealer_id=dealer_id,account_id=user["id"],account_type=user["type"]))
+        if dealer_id is not None and not g.access.has_dealer(dealer_id):
+            return jsonify(error="沒有此經銷商的權限"),403
+        rows=db.visits(employee_id=user.get("employeeId") if user["type"]=="EMPLOYEE" and request.args.get("mine") == "1" else None,
+                       dealer_id=dealer_id,dealer_ids=g.access.dealer_ids,
+                       account_id=user["id"],account_type=user["type"])
+        if not g.access.can("reports.edit"):
+            for row in rows:row["canEdit"]=False
+        return jsonify(rows)
     except Exception as exc:
         return jsonify(error="巡店紀錄查詢失敗："+str(exc)),503
 
 
 @app.get("/api/report-details")
 def report_details():
-    try:return jsonify(db.report_details())
+    try:return jsonify(db.report_details(dealer_ids=g.access.dealer_ids))
     except Exception as exc:return jsonify(error="實銷與陳列明細查詢失敗："+str(exc)),503
 
 
@@ -616,9 +807,9 @@ def visit_detail(visit_id:int):
         item=db.visit_detail(visit_id)
         if item is None:return jsonify(error="找不到巡店回報"),404
         user=session["user"]
-        if user["type"]=='DEALER' and item['dealerId'] != user['dealerId']:
+        if not g.access.has_dealer(item["dealerId"]):
             return jsonify(error="無權查看其他經銷商"),403
-        item['canEdit']=item['recordStatus']=='ACTIVE' and datetime.now()<datetime.fromisoformat(item['editableUntil']) and ((user['type']=='EMPLOYEE' and item['entrySourceType']=='EMPLOYEE') or (user['type']=='DEALER' and item['createdByUserAccountId']==user['id']))
+        item['canEdit']=g.access.can('reports.edit') and item['recordStatus']=='ACTIVE' and datetime.now()<datetime.fromisoformat(item['editableUntil']) and ((user['type']=='EMPLOYEE' and item['entrySourceType']=='EMPLOYEE') or (user['type']=='DEALER' and item['createdByUserAccountId']==user['id']))
         return jsonify(item)
     except Exception as exc:return jsonify(error="巡店詳細查詢失敗："+str(exc)),503
 
@@ -628,6 +819,9 @@ def update_visit(visit_id:int):
     data=request.get_json(silent=True) or {};user=session["user"]
     if not data.get("details"):return jsonify(error="至少保留一筆商品資料"),400
     try:
+        item=db.visit_detail(visit_id)
+        if item is None:return jsonify(error="找不到巡店回報"),404
+        if not g.access.has_dealer(item["dealerId"]):return jsonify(error="沒有此經銷商的權限"),403
         db.update_visit(visit_id,data["details"],account_id=user["id"],account_type=user["type"])
         return jsonify(db.visit_detail(visit_id))
     except LookupError as exc:return jsonify(error=str(exc)),404
@@ -639,7 +833,12 @@ def update_visit(visit_id:int):
 @app.get("/api/photo-tasks")
 def photo_tasks():
     try:
-        return jsonify(db.photo_tasks(session["user"].get("employeeId")))
+        rows=db.photo_tasks(g.access.employee_id if g.access.role == "SALES" and not g.access.designer else None,
+                            g.access.dealer_ids)
+        for row in rows:
+            row["canEdit"] = bool(row["canEdit"] and g.access.can("mobile.tasks.execute")
+                                  and row["responsibleEmployeeId"] == g.access.employee_id)
+        return jsonify(rows)
     except Exception as exc:
         return jsonify(error="手機任務資料庫查詢失敗：" + str(exc)), 503
 
@@ -650,6 +849,8 @@ def upload_photo(execution_id: int):
     description = str(data.get("description", "")).strip()
     if not description:
         return jsonify(error="照片說明必填"), 400
+    if not g.access.has_dealer(db.task_execution_dealer_id(execution_id)):
+        return jsonify(error="沒有此任務的權限"),403
     try:
         sample_id=int(data.get("samplePhotoId")) if data.get("samplePhotoId") else None
         replace_photo_id=int(data.get("replacePhotoId")) if data.get("replacePhotoId") else None
@@ -674,6 +875,8 @@ def upload_photo(execution_id: int):
 
 @app.get("/uploads/task_photos/<path:filename>")
 def task_photo_file(filename:str):
+    if not db.can_view_task_photo(filename, g.access.dealer_ids):
+        return jsonify(error="沒有此照片的權限"),403
     return send_from_directory(UPLOAD_DIR,filename)
 
 
@@ -685,6 +888,8 @@ def complete_execution(execution_id: int):
     note = "" if raw_note is None else str(raw_note).strip()
     if photo_count == 0 and not note:
         return jsonify(error="不拍照完成時必須填寫原因"), 400
+    if not g.access.has_dealer(db.task_execution_dealer_id(execution_id)):
+        return jsonify(error="沒有此任務的權限"),403
     try:
         submitted_at = db.complete_execution(execution_id, note or None, session["user"].get("employeeId"))
         return jsonify(executionId=execution_id, completed=True, submittedAt=submitted_at.isoformat(timespec="seconds"), executionNote=note or None)

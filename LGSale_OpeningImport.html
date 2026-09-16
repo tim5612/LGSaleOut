@@ -26,6 +26,7 @@
 <details class="panel" id="notices" hidden><summary>沿用主檔差異</summary><ul id="noticeList"></ul></details>
 </main></div>
 <footer class="footer"><div><label><input id="confirmed" type="checkbox" disabled> 我已確認期初月份、完整庫存及本次新增資料</label><small id="footerHint">按「確認匯入」即寫入資料庫。</small></div><div class="actions"><button class="btn" id="cancel" disabled>取消匯入</button><button class="btn primary" id="commit" disabled>確認匯入</button></div></footer>
+<script src="/assets/menu.js"></script>
 <script>
 'use strict';
 const $=id=>document.getElementById(id),esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
