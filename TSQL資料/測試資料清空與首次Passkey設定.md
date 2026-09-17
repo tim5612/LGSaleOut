@@ -10,7 +10,7 @@
 | 2 | `建立初始測試帳戶.sql` | 建立測試處所、一位初始員工、任職／處所歷史及可登入的 UserAccount |
 | 3 | `產生初始Passkey註冊連結.sql` | 產生一次性、15 分鐘有效的註冊網址，不需先登入系統 |
 
-這三份檔案都使用 `USE [LGSaleOut]`。每次執行前，在 SSMS 確認目前連線是要重置的那台 SQL Server；若資料庫名稱不同，先修改 USE。三台應先同步最新程式並套用 `TSQL資料/20260916_權限與Menu.sql` 等尚未套用的 migration，不要重跑 CreateDB.sql 來清資料。
+這三份檔案都使用 `USE [LGSaleOut]`。每次執行前，在 SSMS 確認目前連線是要重置的那台 SQL Server；若資料庫名稱不同，先修改 USE。三台應先同步最新程式並套用 `TSQL資料/Migrations/20260916_權限與Menu.sql` 等尚未套用的 migration，不要重跑 CreateDB.sql 來清資料。
 
 ## 各機器操作
 

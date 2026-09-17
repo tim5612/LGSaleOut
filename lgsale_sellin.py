@@ -10,7 +10,7 @@ from pathlib import Path
 from zipfile import BadZipFile, ZipFile
 
 import openpyxl
-from flask import Blueprint, current_app, jsonify, request, send_from_directory, session
+from flask import Blueprint, current_app, g, jsonify, request, send_from_directory, session
 from werkzeug.exceptions import HTTPException
 
 import lgsale_db as db
@@ -20,6 +20,11 @@ BASE = Path(__file__).resolve().parent
 STORE = BASE / "uploads" / "sell_in"
 MAX_FILE = 15 * 1024 * 1024
 bp = Blueprint("sellin", __name__)
+
+
+def can_remove_batch():
+    access = getattr(g, "access", None)
+    return bool(access and (access.role == "ADMIN" or access.designer))
 
 REQUIRED_HEADERS = (
     "Category", "Order No", "Item", "Sold-to", "Model(Prefix)",
@@ -294,12 +299,118 @@ def context():
     conn = db.connect()
     try:
         cur = conn.cursor()
-        cur.execute("""SELECT TOP (10) ImportBatchId,OriginalFileName,ImportedAt,SuccessRowCount,ErrorRowCount,DataDate
-                       FROM dbo.ImportBatch WHERE ImportType='SELL_IN' ORDER BY ImportBatchId DESC""")
-        history = [{"batchId": row[0], "fileName": row[1], "importedAt": row[2].isoformat(sep=" ") if row[2] else "", "rows": row[3], "issues": row[4], "dataDate": row[5].isoformat() if row[5] else ""} for row in cur.fetchall()]
-        response = jsonify(csrf=session["sellin_csrf"], name=session["user"]["name"], history=history)
+        cur.execute("""SELECT TOP (10) ImportBatchId,OriginalFileName,ImportedAt,SuccessRowCount,ErrorRowCount,DataDate,
+                              TotalRowCount-SuccessRowCount-ErrorRowCount
+                       FROM dbo.ImportBatch WHERE ImportType='SELL_IN' AND ImportStatus='Official' ORDER BY ImportBatchId DESC""")
+        history = [{"batchId": row[0], "fileName": row[1], "importedAt": row[2].isoformat(sep=" ") if row[2] else "", "rows": row[3], "issues": row[4], "dataDate": row[5].isoformat() if row[5] else "", "removed": row[6]} for row in cur.fetchall()]
+        response = jsonify(csrf=session["sellin_csrf"], name=session["user"]["name"], history=history, canRemove=can_remove_batch())
         response.headers["Cache-Control"] = "no-store"
         return response
+    finally:
+        conn.close()
+
+
+@bp.get("/api/sellin-import/batches/<int:batch_id>/rows")
+def batch_rows(batch_id):
+    page = request.args.get("page", "1")
+    if not page.isdecimal() or not 1 <= int(page) <= 100000:
+        raise ValueError("頁碼無效")
+    page = int(page)
+    size = 50
+    conn = db.connect()
+    try:
+        cur = conn.cursor()
+        cur.execute("""SELECT ImportBatchId,SuccessRowCount FROM dbo.ImportBatch
+                       WHERE ImportBatchId=%s AND ImportType='SELL_IN' AND ImportStatus='Official'""", (batch_id,))
+        batch = cur.fetchone()
+        if not batch:
+            return jsonify(error="找不到此 SaleIn 匯入批次"), 404
+        cur.execute("""SELECT t.SellInTransactionId,t.SourceRowNumber,t.SalesDocumentNo,t.SalesDocumentItemNo,
+                              d.DealerCode,d.DealerName,p.ProductCode,p.ProductName,
+                              t.BillingDate,t.Quantity,t.TransactionType
+                       FROM dbo.SellInTransaction t
+                       JOIN dbo.Dealer d ON d.DealerId=t.DealerId
+                       JOIN dbo.Product p ON p.ProductId=t.ProductId
+                       WHERE t.ImportBatchId=%s
+                       ORDER BY t.SourceRowNumber,t.SellInTransactionId
+                       OFFSET %s ROWS FETCH NEXT %s ROWS ONLY""", (batch_id, (page - 1) * size, size))
+        rows = [dict(id=r[0], sourceRow=r[1], orderNo=r[2], itemNo=r[3], dealerCode=r[4], dealerName=r[5],
+                     productCode=r[6], productName=r[7], billingDate=r[8].isoformat(),
+                     quantity=str(r[9]), type=r[10]) for r in cur.fetchall()]
+        response = jsonify(batchId=batch_id, total=batch[1], page=page, pageSize=size, rows=rows)
+        response.headers["Cache-Control"] = "no-store"
+        return response
+    finally:
+        conn.close()
+
+
+@bp.post("/api/sellin-import/batches/<int:batch_id>/remove")
+def remove_batch(batch_id):
+    if not can_remove_batch():
+        return jsonify(error="僅管理權限可移除 SaleIn 匯入批次"), 403
+    if (request.get_json(silent=True) or {}).get("confirmed") is not True:
+        raise ValueError("請先確認要移除此批 SaleIn 資料")
+    conn = db.connect()
+    try:
+        cur = conn.cursor()
+        cur.execute("SET XACT_ABORT ON; SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;")
+        acquire_import_lock(cur)
+        cur.execute("""SELECT SuccessRowCount FROM dbo.ImportBatch WITH (UPDLOCK, HOLDLOCK)
+                       WHERE ImportBatchId=%s AND ImportType='SELL_IN' AND ImportStatus='Official'""", (batch_id,))
+        batch = cur.fetchone()
+        if not batch:
+            raise ValueError("找不到此 SaleIn 匯入批次，可能已被移除")
+        cur.execute("DELETE FROM dbo.SellInTransaction WHERE ImportBatchId=%s", (batch_id,))
+        removed = cur.rowcount
+        if removed != batch[0]:
+            raise ValueError("批次明細筆數與紀錄不符，未移除任何資料")
+        cur.execute("DELETE FROM dbo.ImportBatch WHERE ImportBatchId=%s AND ImportType='SELL_IN'", (batch_id,))
+        if cur.rowcount != 1:
+            raise ValueError("批次移除失敗，未移除任何資料")
+        conn.commit()
+        return jsonify(batchId=batch_id, removed=removed)
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+
+@bp.post("/api/sellin-import/batches/<int:batch_id>/remove-rows")
+def remove_batch_rows(batch_id):
+    if not can_remove_batch():
+        return jsonify(error="僅管理權限可移除 SaleIn 匯入資料"), 403
+    payload = request.get_json(silent=True) or {}
+    ids = payload.get("ids")
+    if payload.get("confirmed") is not True or not isinstance(ids, list) or not 1 <= len(ids) <= 1000:
+        raise ValueError("請先確認並選取 1 至 1000 筆資料")
+    if any(type(item) is not int or item <= 0 for item in ids) or len(set(ids)) != len(ids):
+        raise ValueError("選取資料識別碼無效")
+    conn = db.connect()
+    try:
+        cur = conn.cursor()
+        cur.execute("SET XACT_ABORT ON; SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;")
+        acquire_import_lock(cur)
+        cur.execute("""SELECT SuccessRowCount FROM dbo.ImportBatch WITH (UPDLOCK, HOLDLOCK)
+                       WHERE ImportBatchId=%s AND ImportType='SELL_IN' AND ImportStatus='Official'""", (batch_id,))
+        batch = cur.fetchone()
+        if not batch or batch[0] < len(ids):
+            raise ValueError("批次已變動，請重新載入明細")
+        placeholders = ",".join(["%s"] * len(ids))
+        cur.execute(f"""DELETE FROM dbo.SellInTransaction
+                         WHERE ImportBatchId=%s AND SellInTransactionId IN ({placeholders})""", (batch_id, *ids))
+        if cur.rowcount != len(ids):
+            raise ValueError("部分選取資料已變動或不屬於此批次，未移除任何資料")
+        cur.execute("""UPDATE dbo.ImportBatch SET SuccessRowCount=SuccessRowCount-%s
+                       WHERE ImportBatchId=%s AND ImportType='SELL_IN' AND ImportStatus='Official'
+                         AND SuccessRowCount>=%s""", (len(ids), batch_id, len(ids)))
+        if cur.rowcount != 1:
+            raise ValueError("批次筆數更新失敗，未移除任何資料")
+        conn.commit()
+        return jsonify(batchId=batch_id, removed=len(ids), remaining=batch[0] - len(ids))
+    except Exception:
+        conn.rollback()
+        raise
     finally:
         conn.close()
 
@@ -357,7 +468,12 @@ def commit():
         cur = conn.cursor()
         cur.execute("SET XACT_ABORT ON; SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;")
         acquire_import_lock(cur)
-        cur.execute("SELECT ImportBatchId,SuccessRowCount,ErrorRowCount FROM dbo.ImportBatch WHERE ImportType='SELL_IN' AND FileHash=%s AND ImportStatus='Official'", (meta["hash"],))
+        cur.execute("""SELECT TOP (1) ImportBatchId,SuccessRowCount,ErrorRowCount FROM dbo.ImportBatch
+                       WHERE ImportType='SELL_IN' AND FileHash=%s AND ImportStatus='Official'
+                         AND NOT EXISTS (SELECT 1 FROM dbo.ImportBatch WHERE ImportType='SELL_IN'
+                           AND FileHash=%s AND ImportStatus='Official'
+                           AND TotalRowCount>SuccessRowCount+ErrorRowCount)
+                       ORDER BY ImportBatchId DESC""", (meta["hash"], meta["hash"]))
         completed = cur.fetchone()
         if completed:
             conn.rollback()

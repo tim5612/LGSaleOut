@@ -8,7 +8,8 @@
     .side{box-sizing:border-box;padding:24px 12px;display:flex;flex-direction:column}
     .side .brand{padding:0 14px 28px;font:700 22px/1.5 "Segoe UI","Noto Sans TC",sans-serif}
     .side .brand small{display:block;color:#a9c0d4;font:400 12px/1.5 "Segoe UI","Noto Sans TC",sans-serif}
-    .side nav{display:grid;gap:5px;overflow-y:auto;align-content:start;min-height:0}
+    .side nav{display:grid;gap:5px;overflow-y:auto;align-content:start;min-height:0;scrollbar-width:none}
+    .side nav::-webkit-scrollbar{display:none}
     .side nav a{box-sizing:border-box;display:block;margin:0;padding:11px 16px;border-radius:8px;color:#c8d6e3;text-decoration:none;font:400 14px/1.5 "Segoe UI","Noto Sans TC",sans-serif}
     .side nav a.active,.side nav a:hover{background:#27577d;color:#fff}
     .side nav .nav-heading{margin:15px 0 5px;padding:8px 12px;background:#284760;border-left:3px solid #79cbee;border-radius:5px;color:#f5fbff;font:700 13px/1.5 "Segoe UI","Noto Sans TC",sans-serif;letter-spacing:.03em}

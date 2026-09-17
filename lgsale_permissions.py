@@ -127,6 +127,9 @@ def resolve(user: dict) -> Access:
     if principal["designer"]:
         admin_rules = role_rules if role == "ADMIN" else db.permission_rules("ADMIN", int(user["id"]))[0]
         capabilities |= effective_capabilities("ADMIN", admin_rules, {})
+        # The visit records the signed-in Designer as author while retaining
+        # the dealer's assigned employee as the responsible sales owner.
+        capabilities |= {"mobile.reports.view", "reports.create"}
     dealer_ids = db.permission_dealer_ids(
         "ADMIN" if principal["designer"] else role,
         principal["employeeId"], principal["dealerId"], principal["orgId"]

@@ -99,6 +99,8 @@ ENDPOINT_CAPABILITIES = {
     "sellin.page": ("sellin.manage",), "sellin.context": ("sellin.manage",),
     "sellin.upload": ("sellin.manage",), "sellin.preview": ("sellin.manage",),
     "sellin.commit": ("sellin.manage",), "sellin.cancel": ("sellin.manage",),
+    "sellin.batch_rows": ("sellin.manage",), "sellin.remove_batch": ("sellin.manage",),
+    "sellin.remove_batch_rows": ("sellin.manage",),
     "permissions_page": ("permissions.manage",),
     "permission_config": ("permissions.manage",),
     "permission_update": ("permissions.manage",),

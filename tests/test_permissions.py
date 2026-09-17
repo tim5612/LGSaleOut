@@ -1,5 +1,6 @@
 import unittest
 from dataclasses import replace
+from datetime import datetime
 from unittest.mock import patch
 
 import LGSale
@@ -54,6 +55,20 @@ class PermissionPolicyTests(unittest.TestCase):
         self.assertEqual(result.dealer_ids, frozenset({1, 2}))
         self.assertEqual(scope.call_args.args[0], "ADMIN")
 
+    def test_designer_can_create_visit_without_granting_all_admins(self):
+        principal = {"accountType": "EMPLOYEE", "employeeId": 11,
+                     "dealerId": None, "position": "ADMIN", "orgId": 3,
+                     "designer": True}
+        with patch.object(permissions.db, "permission_principal", return_value=principal), \
+             patch.object(permissions.db, "permission_rules", return_value=({}, {})), \
+             patch.object(permissions.db, "permission_dealer_ids", return_value={1, 2}):
+            result = permissions.resolve({"id": 7, "type": "EMPLOYEE"})
+        self.assertNotIn("reports.create", permissions.effective_capabilities("ADMIN", {}, {}))
+        self.assertTrue(result.can("reports.create"))
+        self.assertTrue(result.can("mobile.reports.view"))
+        self.assertFalse(result.can("reports.edit"))
+        self.assertTrue(result.has_dealer(2))
+
 
 class PermissionRouteTests(unittest.TestCase):
     def setUp(self):
@@ -85,6 +100,20 @@ class PermissionRouteTests(unittest.TestCase):
             response = self.client.get("/permissions")
             self.assertEqual(response.status_code, 200)
             response.close()
+
+    def test_designer_visit_records_real_author_for_assigned_dealer(self):
+        designer = replace(access("ADMIN", designer=True, dealer_ids=(2,)),
+                           capabilities=frozenset(permissions.ROLE_DEFAULTS["ADMIN"] |
+                                                  {"mobile.reports.view", "reports.create"}))
+        payload = {"dealerId": 2, "details": [{"productId": 3, "displayQuantity": 1}]}
+        with patch.object(LGSale.permissions, "resolve", return_value=designer), \
+             patch.object(LGSale.db, "create_visit", return_value=(19, datetime(2026, 9, 17, 10, 0))) as create:
+            response = self.client.post("/api/visits", json=payload)
+        self.assertEqual(response.status_code, 201)
+        sent = create.call_args.args[0]
+        self.assertEqual(sent["dealerId"], 2)
+        self.assertEqual(sent["userAccountId"], 7)
+        self.assertEqual(sent["entrySourceType"], "EMPLOYEE")
 
     def test_passkey_login_qr_uses_selected_entry_and_requires_management_access(self):
         with patch.object(LGSale.permissions, "resolve", return_value=access("SALES")):
