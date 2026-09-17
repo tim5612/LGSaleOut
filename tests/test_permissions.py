@@ -101,6 +101,19 @@ class PermissionRouteTests(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             response.close()
 
+    def test_display_photo_switch_is_designer_only_and_blocks_new_uploads(self):
+        with patch.object(LGSale.permissions, "resolve", return_value=access("SALES")), \
+             patch.object(LGSale.db, "display_photo_enabled", return_value=False):
+            self.assertEqual(self.client.put("/api/display-photo-setting", json={"enabled": True}).status_code, 403)
+            response = self.client.post("/api/display-photos", data={"dealerId": "1", "productId": "3"})
+            self.assertEqual(response.status_code, 403)
+            self.assertIn("目前關閉", response.json["error"])
+            self.assertEqual(self.client.get("/api/display-photo-setting").json, {"enabled": False})
+        with patch.object(LGSale.permissions, "resolve", return_value=access("SALES", designer=True)), \
+             patch.object(LGSale.db, "set_display_photo_enabled") as save:
+            self.assertEqual(self.client.put("/api/display-photo-setting", json={"enabled": True}).status_code, 200)
+            save.assert_called_once_with(True, 7)
+
     def test_designer_visit_records_real_author_for_assigned_dealer(self):
         designer = replace(access("ADMIN", designer=True, dealer_ids=(2,)),
                            capabilities=frozenset(permissions.ROLE_DEFAULTS["ADMIN"] |

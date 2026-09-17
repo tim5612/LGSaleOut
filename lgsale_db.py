@@ -365,6 +365,34 @@ def permission_audit(limit: int = 50) -> list[dict[str, Any]]:
                  "newValue": None if r[6] is None else bool(r[6])} for r in cur.fetchall()]
 
 
+def display_photo_enabled() -> bool:
+    with connect() as conn:
+        row = _one(conn.cursor(), "SELECT IsEnabled FROM dbo.FeatureSetting WHERE FeatureKey='display_photo'")
+    return bool(row[0]) if row else False
+
+
+def set_display_photo_enabled(enabled: bool, actor_id: int) -> None:
+    conn = connect()
+    try:
+        cur = conn.cursor()
+        row = _one(cur, "SELECT IsEnabled FROM dbo.FeatureSetting WITH (UPDLOCK,HOLDLOCK) WHERE FeatureKey='display_photo'")
+        old_value = bool(row[0]) if row else False
+        if row:
+            cur.execute("UPDATE dbo.FeatureSetting SET IsEnabled=%s,UpdatedByUserAccountId=%s,UpdatedAt=SYSDATETIME() WHERE FeatureKey='display_photo'", (int(enabled), actor_id))
+        else:
+            cur.execute("INSERT dbo.FeatureSetting(FeatureKey,IsEnabled,UpdatedByUserAccountId) VALUES('display_photo',%s,%s)", (int(enabled), actor_id))
+        if old_value != enabled:
+            cur.execute("""INSERT dbo.PermissionAudit(ActorUserAccountId,SubjectType,SubjectId,Capability,OldValue,NewValue)
+                           VALUES(%s,'SYSTEM','display_photo','display_photo.enabled',%s,%s)""",
+                        (actor_id, int(old_value), int(enabled)))
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+
 def set_permission_override(*, subject_type: str, subject: str, capability: str,
                             value: bool | None, actor_id: int) -> None:
     if subject_type not in {"ROLE", "ACCOUNT"}:
@@ -1025,7 +1053,10 @@ def save_display_photo(*, dealer_id:int, product_id:int, account_id:int, origina
     """Activate one monthly dealer/product photo and retain any replaced photo as history."""
     conn=connect()
     try:
-        cur=conn.cursor();month=_one(cur,"SELECT CONVERT(char(6),SYSDATETIME(),112)")[0]
+        cur=conn.cursor()
+        enabled=_one(cur,"SELECT IsEnabled FROM dbo.FeatureSetting WITH (HOLDLOCK) WHERE FeatureKey='display_photo'")
+        if enabled is None or not bool(enabled[0]):raise PermissionError("陳列拍照功能目前關閉")
+        month=_one(cur,"SELECT CONVERT(char(6),SYSDATETIME(),112)")[0]
         if _one(cur,"SELECT 1 FROM dbo.Product WHERE ProductId=%s AND IsActive=1",(product_id,)) is None:
             raise LookupError("找不到可用的商品")
         previous=_one(cur,"""SELECT DisplayPhotoId FROM dbo.DealerProductDisplayPhoto WITH (UPDLOCK,HOLDLOCK)

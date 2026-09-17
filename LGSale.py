@@ -104,6 +104,8 @@ ENDPOINT_CAPABILITIES = {
     "permissions_page": ("permissions.manage",),
     "permission_config": ("permissions.manage",),
     "permission_update": ("permissions.manage",),
+    "display_photo_setting": ("mobile.reports.view",),
+    "display_photo_setting_update": ("permissions.manage",),
     "menu_script": (),
     "desktop_approval_approve": (),
 }
@@ -275,7 +277,8 @@ def permission_config():
         for account in accounts:
             account["overrides"] = db.permission_rules(account["role"], account["id"])[1]
         return jsonify(capabilities=permissions.CAPABILITIES, roles=roles,
-                       accounts=accounts, audit=db.permission_audit())
+                       accounts=accounts, audit=db.permission_audit(),
+                       displayPhotoEnabled=db.display_photo_enabled())
     except Exception:
         app.logger.exception("Permission configuration read failed")
         return jsonify(error="權限設定讀取失敗"),503
@@ -306,6 +309,30 @@ def permission_update():
     except Exception:
         app.logger.exception("Permission configuration update failed")
         return jsonify(error="權限設定儲存失敗"),500
+
+
+@app.get("/api/display-photo-setting")
+def display_photo_setting():
+    try:
+        response = jsonify(enabled=db.display_photo_enabled())
+        response.headers["Cache-Control"] = "no-store"
+        return response
+    except Exception:
+        app.logger.exception("Display photo setting read failed")
+        return jsonify(error="陳列拍照設定讀取失敗"),503
+
+
+@app.put("/api/display-photo-setting")
+def display_photo_setting_update():
+    data = request.get_json(silent=True) or {}
+    if type(data.get("enabled")) is not bool:
+        return jsonify(error="開關設定值不正確"),400
+    try:
+        db.set_display_photo_enabled(data["enabled"], g.access.account_id)
+        return jsonify(enabled=data["enabled"])
+    except Exception:
+        app.logger.exception("Display photo setting update failed")
+        return jsonify(error="陳列拍照設定儲存失敗"),500
 
 
 @app.post("/api/auth/logout")
@@ -543,10 +570,13 @@ def mobile_dashboard():
         if not g.access.can("reports.edit"):
             result["counts"]["locked"] += result["counts"]["editable"]
             result["counts"]["editable"] = 0
-        if not g.access.can("reports.create"):
+        result["displayPhotoEnabled"] = db.display_photo_enabled()
+        if not g.access.can("reports.create") or not result["displayPhotoEnabled"]:
             result["pendingDisplayPhotos"] = []
             result["counts"]["pendingDisplayPhotos"] = 0
-        return jsonify(result)
+        response = jsonify(result)
+        response.headers["Cache-Control"] = "no-store"
+        return response
     except Exception as exc:
         return jsonify(error="手機工作台查詢失敗：" + str(exc)), 503
 
@@ -673,6 +703,12 @@ def products():
 def upload_display_photo():
     user=session["user"]
     try:
+        if not db.display_photo_enabled():
+            return jsonify(error="陳列拍照功能目前關閉"),403
+    except Exception:
+        app.logger.exception("Display photo setting read failed")
+        return jsonify(error="陳列拍照設定無法確認"),503
+    try:
         dealer_id=int(request.form.get("dealerId", ""));product_id=int(request.form.get("productId", ""))
     except ValueError:
         return jsonify(error="經銷商與型號必填"),400
@@ -698,6 +734,8 @@ def upload_display_photo():
                        thumbnailUrl=f'/api/display-photos/{saved["id"]}/thumbnail')
     except LookupError as exc:
         original_path.unlink(missing_ok=True);thumbnail_path.unlink(missing_ok=True);return jsonify(error=str(exc)),404
+    except PermissionError as exc:
+        original_path.unlink(missing_ok=True);thumbnail_path.unlink(missing_ok=True);return jsonify(error=str(exc)),403
     except Exception as exc:
         original_path.unlink(missing_ok=True);thumbnail_path.unlink(missing_ok=True)
         return jsonify(error="陳列照片上傳失敗："+str(exc)),500
