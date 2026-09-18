@@ -1,6 +1,6 @@
 /* SSMS 手動執行：清空 LGSaleOut 全部測試資料，不備份、不刪除表結構。
    執行前先停止本台 LGSale；不重設 IDENTITY，避免舊登入 cookie 對應新帳戶。
-   下一步：建立初始測試帳戶.sql → 產生初始Passkey註冊連結.sql。 */
+   成功後先執行同目錄「清除初始化圖片.cmd -Apply」清除本機照片，再建立初始帳戶及 Passkey 連結。 */
 
 USE [LGSaleOut];
 GO
@@ -19,6 +19,11 @@ BEGIN TRY
 
     UPDATE dbo.VisitTaskPhoto SET SampleTaskPhotoId = NULL;
     UPDATE dbo.ImportBatch SET ReplacedBatchId = NULL;
+
+    IF OBJECT_ID(N'dbo.DealerProductDisplayPhoto',N'U') IS NOT NULL
+        EXEC(N'UPDATE dbo.DealerProductDisplayPhoto SET ReplacedPhotoId=NULL; DELETE FROM dbo.DealerProductDisplayPhoto;');
+    IF OBJECT_ID(N'dbo.FeatureSetting',N'U') IS NOT NULL
+        EXEC(N'UPDATE dbo.FeatureSetting SET UpdatedByUserAccountId=NULL, IsEnabled=0, UpdatedAt=SYSDATETIME();');
 
     /* Child tables to parent tables. */
     DELETE FROM dbo.VisitTaskPhoto;
@@ -105,6 +110,8 @@ BEGIN TRY
     SELECT N'VisitTaskPhoto' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.VisitTaskPhoto;
     IF OBJECT_ID(N'dbo.OpeningInventoryCorrection',N'U') IS NOT NULL
         EXEC(N'SELECT N''OpeningInventoryCorrection'' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.OpeningInventoryCorrection;');
+    IF OBJECT_ID(N'dbo.DealerProductDisplayPhoto',N'U') IS NOT NULL
+        EXEC(N'SELECT N''DealerProductDisplayPhoto'' AS TableName, COUNT_BIG(*) AS RemainingRows FROM dbo.DealerProductDisplayPhoto;');
 END TRY
 BEGIN CATCH
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;

@@ -33,6 +33,7 @@ import lgsale_db as db
 import lgsale_permissions as permissions
 import lgsale_auth as auth
 from lgsale_opening import bp as opening_blueprint
+from lgsale_initial_import import bp as initial_import_blueprint
 from lgsale_sellin import bp as sellin_blueprint
 from lgsale_psi import bp as psi_blueprint
 from lgsale_config import required
@@ -45,6 +46,7 @@ PORT = int(required("LGSALEOUT_PORT"))
 app = Flask(__name__)
 app.secret_key = os.getenv("LGSALEOUT_SESSION_SECRET") or secrets.token_hex(32)
 app.register_blueprint(opening_blueprint)
+app.register_blueprint(initial_import_blueprint)
 app.register_blueprint(sellin_blueprint)
 app.register_blueprint(psi_blueprint)
 app.config.update(
@@ -96,6 +98,13 @@ ENDPOINT_CAPABILITIES = {
     "opening.page": ("opening.manage",), "opening.context": ("opening.manage",),
     "opening.upload": ("opening.manage",), "opening.preview": ("opening.manage",),
     "opening.commit": ("opening.manage",), "opening.cancel": ("opening.manage",),
+    "initial_import.page": ("permissions.manage",),
+    "initial_import.context": ("permissions.manage",),
+    "initial_import.upload": ("permissions.manage",),
+    "initial_import.organizations": ("permissions.manage",),
+    "initial_import.commit_organizations": ("permissions.manage",),
+    "initial_import.preview": ("permissions.manage",),
+    "initial_import.commit": ("permissions.manage",),
     "sellin.page": ("sellin.manage",), "sellin.context": ("sellin.manage",),
     "sellin.upload": ("sellin.manage",), "sellin.preview": ("sellin.manage",),
     "sellin.commit": ("sellin.manage",), "sellin.cancel": ("sellin.manage",),
@@ -517,22 +526,27 @@ def dealers():
 
 
 def _dealer_payload(data: dict) -> dict:
-    required = {"code":"經銷商代碼","name":"經銷商名稱","taxId":"統一編號","area":"區域","level":"經銷商級別","condition":"狀況"}
+    required = {"code":"經銷商代碼","name":"經銷商名稱","condition":"狀況"}
     missing = [label for key,label in required.items() if not str(data.get(key, "")).strip()]
     if missing:
         raise ValueError("缺少欄位：" + "、".join(missing))
-    tax_id = str(data["taxId"]).strip()
-    if len(tax_id) != 8 or not tax_id.isdigit():
-        raise ValueError("統一編號必須是 8 位數字")
-    level = str(data["level"]).strip().upper()
-    if level not in {"A","B","C","D","E","Z"}:
+    tax_id = str(data.get("taxId") or "").strip()
+    if tax_id and (len(tax_id) != 8 or not tax_id.isdigit()):
+        raise ValueError("統一編號須留空或填寫 8 位數字")
+    level = str(data["level"]).strip()
+    if level and level not in {"一般店","DC店","專售店","AC店","批店","失聯店"}:
         raise ValueError("經銷商級別不正確")
     condition = str(data["condition"]).strip().upper()
     if condition not in {"ACTIVE","PENDING","CLOSED"}:
         raise ValueError("經銷商狀況不正確")
+    extra = {key: str(data.get(key) or "").strip() for key in
+             ("shortName", "contactName", "mobilePhone", "companyPhone", "postalCode", "streetAddress")}
+    for key, limit in (("shortName",150),("contactName",100),("mobilePhone",30),("companyPhone",30),("postalCode",20),("streetAddress",500)):
+        if len(extra[key]) > limit:
+            raise ValueError(f"{key} 超過 {limit} 字")
     return {"code":str(data["code"]).strip().upper(),"name":str(data["name"]).strip(),"taxId":tax_id,
-            "area":str(data["area"]).strip(),"level":level,"condition":condition,
-            "employeeId":int(data["employeeId"]) if data.get("employeeId") else None}
+            "area":str(data.get("area") or "").strip(),"level":level,"condition":condition,
+            "employeeId":int(data["employeeId"]) if data.get("employeeId") else None, **extra}
 
 
 @app.post("/api/dealers")

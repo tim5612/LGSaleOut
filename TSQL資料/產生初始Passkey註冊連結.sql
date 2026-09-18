@@ -7,7 +7,7 @@ GO
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
-DECLARE @EmployeeNo nvarchar(30) = N'E0001'; -- 與初始帳戶 SQL 相同
+DECLARE @EmployeeNo nvarchar(30) = N'T0001'; -- 與初始帳戶 SQL 相同
 DECLARE @Origin varchar(500) = 'https://lgdeva.superb-supplies.com.tw'; -- 本機 民生東路
 --DECLARE @Origin varchar(500) = 'https://lgdevb.superb-supplies.com.tw'; -- 本機 內湖
 

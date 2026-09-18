@@ -76,12 +76,12 @@ BEGIN TRY
     DECLARE @D6 bigint=(SELECT DealerId FROM dbo.Dealer WHERE DealerCode='D1305');
 
     INSERT dbo.DealerLevelHistory (DealerId, DealerStatus, StartDateTime, EndDateTime, ChangeReason)
-    VALUES (@D1,'A','2024-01-01',NULL,N'重點經銷商'),
-           (@D2,'B','2024-01-01',NULL,N'一般經銷商'),
-           (@D3,'C','2024-01-01',NULL,N'一般經銷商'),
-           (@D4,'D','2024-01-01',NULL,N'觀察名單'),
-           (@D5,'E','2024-01-01',NULL,N'低頻交易'),
-           (@D6,'Z','2024-01-01',NULL,N'停止經銷');
+    VALUES (@D1,N'DC店','2024-01-01',NULL,N'測試經銷商'),
+           (@D2,N'一般店','2024-01-01',NULL,N'測試經銷商'),
+           (@D3,N'專售店','2024-01-01',NULL,N'測試經銷商'),
+           (@D4,N'AC店','2024-01-01',NULL,N'測試經銷商'),
+           (@D5,N'批店','2024-01-01',NULL,N'測試經銷商'),
+           (@D6,N'失聯店','2024-01-01',NULL,N'測試經銷商');
 
     INSERT dbo.DealerAssignmentHistory
         (DealerId, EmployeeId, StartDateTime, EndDateTime, ChangeReason, CreatedByEmployeeId)

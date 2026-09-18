@@ -169,6 +169,12 @@ CREATE TABLE dbo.Dealer
     DealerId       bigint IDENTITY(1,1) NOT NULL,
     DealerCode     varchar(30) NOT NULL,
     DealerName     nvarchar(150) NOT NULL,
+    ShortName      nvarchar(150) NULL,
+    ContactName    nvarchar(100) NULL,
+    MobilePhone    nvarchar(30) NULL,
+    CompanyPhone   nvarchar(30) NULL,
+    PostalCode     nvarchar(20) NULL,
+    StreetAddress  nvarchar(500) NULL,
     TaxId          varchar(20) NULL,
     Area           nvarchar(100) NULL,
     DealerCondition varchar(20) NOT NULL
@@ -187,7 +193,7 @@ CREATE TABLE dbo.DealerLevelHistory
 (
     DealerLevelHistoryId  bigint IDENTITY(1,1) NOT NULL,
     DealerId              bigint NOT NULL,
-    DealerStatus          char(1) NOT NULL,
+    DealerStatus          nvarchar(20) NOT NULL,
     StartDateTime         datetime2(0) NOT NULL,
     EndDateTime           datetime2(0) NULL,
     ChangeReason          varchar(max) NULL,
@@ -199,7 +205,7 @@ CREATE TABLE dbo.DealerLevelHistory
     CONSTRAINT FK_DealerLevelHistory_Dealer
         FOREIGN KEY (DealerId) REFERENCES dbo.Dealer (DealerId),
     CONSTRAINT CK_DealerLevelHistory_Status
-        CHECK (DealerStatus IN ('A','B','C','D','E','Z')),
+        CHECK (DealerStatus IN (N'一般店',N'DC店',N'專售店',N'AC店',N'批店',N'失聯店')),
     CONSTRAINT CK_DealerLevelHistory_Period
         CHECK (EndDateTime IS NULL OR EndDateTime > StartDateTime)
 );

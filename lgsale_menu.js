@@ -35,7 +35,10 @@
       ["其他", "手機巡店介面", "/mobile", "mobile.reports.view"],
       ["其他", "手機任務介面", "/photo", "mobile.tasks.view"],
     ];
-    if (user.designer) entries.push(["其他", "權限與 Menu", "/permissions", null]);
+    if (user.designer) {
+      entries.push(["Designer 專用", "權限與 Menu", "/permissions", null]);
+      entries.push(["Designer 專用", "初始化主檔匯入", "/initial-import", null]);
+    }
     let group = "";
     nav.replaceChildren();
     for (const [section, label, href, capability] of entries) {
