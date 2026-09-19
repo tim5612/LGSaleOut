@@ -22,7 +22,7 @@ import lgsale_db as db
 
 bp = Blueprint("psi", __name__)
 BASE = Path(__file__).resolve().parent
-METRICS = ["陳列", "期初", "Sell In", "退貨", "Sell Out", "期末", "可銷售"]
+METRICS = ["陳列", "期初", "Sell In", "Sell Out", "期末", "可銷售"]
 _SOURCE_CACHE = {}
 _SOURCE_CACHE_LOCK = threading.RLock()
 _SOURCE_CACHE_SECONDS = 8
@@ -76,9 +76,7 @@ def load_source(month=None):
             WHERE b.ImportType='OPENING_INVENTORY' AND b.ImportStatus='Official' AND b.DataMonth=%s
             GROUP BY i.DealerId,i.ProductId""", (key,))
         opening = list(cur.fetchall())
-        cur.execute("""SELECT t.DealerId,t.ProductId,
-                SUM(CASE WHEN t.Quantity>0 THEN t.Quantity ELSE 0 END),
-                SUM(CASE WHEN t.Quantity<0 THEN t.Quantity ELSE 0 END)
+        cur.execute("""SELECT t.DealerId,t.ProductId,SUM(CAST(t.Quantity AS bigint))
             FROM dbo.SellInTransaction t JOIN dbo.ImportBatch b ON b.ImportBatchId=t.ImportBatchId
             WHERE b.ImportType='SELL_IN' AND b.ImportStatus='Official'
               AND t.TransactionStatus='VALID' AND t.ReviewStatus='APPROVED'
@@ -142,17 +140,17 @@ def number(value):
 
 def metrics(fact):
     opening = fact.get("opening")
-    incoming, returned, outgoing = (fact.get(k, 0) for k in ("incoming", "returned", "outgoing"))
+    incoming, outgoing = (fact.get(k, 0) for k in ("incoming", "outgoing"))
     display = fact.get("display")
-    closing = None if opening is None else opening + incoming + returned - outgoing
+    closing = None if opening is None else opening + incoming - outgoing
     available = None if closing is None or display is None else closing - display
-    return [None if n is None else number(n) for n in (display, opening, incoming, returned, outgoing, closing, available)]
+    return [None if n is None else number(n) for n in (display, opening, incoming, outgoing, closing, available)]
 
 
 def sum_values(values):
     values = list(values)
     result = []
-    for i in range(7):
+    for i in range(len(METRICS)):
         column = [v[i] for v in values]
         if not column or any(v is None for v in column):
             result.append(None)
@@ -232,13 +230,13 @@ def build_report(source, filters, allowed_dealer_ids=None):
         if quantity != 0:
             facts[int(d), int(p)]["opening"] = quantity
     # PSI membership starts with a non-zero official opening balance, or with
-    # valid in-month Sale In/return activity for a product launched mid-month.
-    for d, p, pos, neg in source["incoming"]:
+    # valid signed in-month Sale In activity for a product launched mid-month.
+    for d, p, quantity in source["incoming"]:
         key = (int(d), int(p))
-        incoming, returned = Decimal(pos), Decimal(neg)
-        if incoming != 0 or returned != 0:
+        incoming = Decimal(quantity)
+        if incoming != 0:
             facts[key].setdefault("opening", Decimal(0))
-            facts[key].update(incoming=Decimal(pos), returned=Decimal(neg))
+            facts[key]["incoming"] = incoming
     active_pairs = set(facts)
     for d, p, n in source["outgoing"]:
         key = (int(d), int(p))
@@ -299,10 +297,10 @@ def build_report(source, filters, allowed_dealer_ids=None):
                      missingDisplay=sum("display" not in f for f in facts.values()),
                      sellOutReportedPairs=sum("outgoing" in f for f in facts.values()),
                      excludedPairs=excluded, excludedProducts=excluded_products),
-        notes=["期末 = 期初 + Sell In + 退貨（負數）− Sell Out；可銷售 = 期末 − 陳列。",
+        notes=["Sell In 為帶正負號的淨進貨量；期末 = 期初 + Sell In − Sell Out；可銷售 = 期末 − 陳列。",
                "實銷按 SellOutDate 加總有效回報（含事後補登與修改）；未回報不代表實際無銷售。期末為依已登錄資料推算。",
                "陳列取該經銷商截至日最後一次有效巡店的商品明細（可沿用前月），不是巡店累加；該次未填陳列時可銷售留白。",
-               "PSI 納入當月正式非零期初，或當月有有效 Sell In／退貨的客戶／商品；僅有 Sell Out 或陳列不能單獨建立商品列。",
+               "PSI 納入當月正式非零期初，或當月有有效正／負 Sell In 的客戶／商品；僅有 Sell Out 或陳列不能單獨建立商品列。",
                "依截至日的區域與業務歸屬分組，套用有效 PSI 排除規則；售價待新增，零值留白。"])
 
 
@@ -355,17 +353,18 @@ def export():
         raise ValueError("Excel 照片選項無效")
     result = matrix(build_report(cached_source(request.args.get("month")), request.args,
                                  g.access.dealer_ids), request.args.get("level", "dealer"))
+    metric_count = len(METRICS)
     book = openpyxl.Workbook()
     sheet = book.active
     sheet.title = "PSI"
     sheet.append([f"PSI 月報 {result['month']}｜截至 {result['asOf']}｜單位：台"])
-    sheet.append(["商品基本資料", "", "", ""] + [v for c in result["columns"] for v in [c["org"]] + [None]*6])
-    sheet.append([None]*4 + [v for c in result["columns"] for v in [c["employee"] + "｜" + c["title"].replace("\n", " ")] + [None]*6])
+    sheet.append(["商品基本資料", "", "", ""] + [v for c in result["columns"] for v in [c["org"]] + [None]*(metric_count-1)])
+    sheet.append([None]*4 + [v for c in result["columns"] for v in [c["employee"] + "｜" + c["title"].replace("\n", " ")] + [None]*(metric_count-1)])
     sheet.append(["大分類", "品類", "型號", "建議售價（待新增）"] + METRICS * len(result["columns"]))
     sheet.merge_cells(start_row=2, start_column=1, end_row=3, end_column=4)
     for i in range(len(result["columns"])):
         for r in (2, 3):
-            sheet.merge_cells(start_row=r, start_column=5 + i*7, end_row=r, end_column=11 + i*7)
+            sheet.merge_cells(start_row=r, start_column=5 + i*metric_count, end_row=r, end_column=4 + (i+1)*metric_count)
     for row in result["rows"]:
         sheet.append([row["category"], row["subcategory"], row["code"], None] + [v for group in row["values"] for v in group])
         excel_row = sheet.max_row
@@ -374,7 +373,7 @@ def export():
             if row["kind"] != "product":
                 cell.fill = PatternFill("solid", fgColor="D4E6C4" if row["kind"] == "total" else "E5EEDB")
                 cell.font = Font(bold=True)
-            elif cell.column > 4 and result["columns"][(cell.column-5)//7]["total"]:
+            elif cell.column > 4 and result["columns"][(cell.column-5)//metric_count]["total"]:
                 cell.fill = PatternFill("solid", fgColor="FFF3E4")
             # Database labels must remain literal text, not executable spreadsheet formulas.
             if isinstance(cell.value, str):
@@ -390,7 +389,7 @@ def export():
                     continue
                 picture = ExcelImage(str(target))
                 picture.width = picture.height = 48
-                sheet.add_image(picture, f"{get_column_letter(5 + group_index * 7)}{excel_row}")
+                sheet.add_image(picture, f"{get_column_letter(5 + group_index * metric_count)}{excel_row}")
                 sheet.row_dimensions[excel_row].height = max(sheet.row_dimensions[excel_row].height or 15, 42)
     for row in sheet.iter_rows(min_row=1, max_row=4):
         for cell in row:
@@ -399,7 +398,7 @@ def export():
             cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
             if isinstance(cell.value, str):
                 cell.data_type = "s"
-    for i, w in enumerate([18, 16, 24, 20] + [10]*7*len(result["columns"]), 1):
+    for i, w in enumerate([18, 16, 24, 20] + [10]*metric_count*len(result["columns"]), 1):
         sheet.column_dimensions[get_column_letter(i)].width = w
     sheet.row_dimensions[3].height = 36
     sheet.freeze_panes = "E5"

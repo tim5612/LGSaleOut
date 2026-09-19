@@ -19,7 +19,7 @@ def source():
                 dealers=[dict(id=i, code=f"D{i}", name=f"Dealer {i}", employeeId=i, employee=f"E{i}", orgId=1, org="Region") for i in (1, 2)],
                 products=[dict(id=1, code="P1", name="Product 1", category="HA", subcategory="Fridge", price=None),
                           dict(id=2, code="P2", name="Product 2", category="TV", subcategory="OLED", price=None)],
-                opening=[(1, 1, 10), (2, 1, 5), (1, 2, 2)], incoming=[(1, 1, Decimal("3"), Decimal("-1"))],
+                opening=[(1, 1, 10), (2, 1, 5), (1, 2, 2)], incoming=[(1, 1, Decimal("2"))],
                 outgoing=[(1, 1, 4)], displays=[(1, 1, 2, datetime(2026, 8, 30)), (2, 1, 1, datetime(2026, 9, 1)), (1, 2, 1, datetime(2026, 9, 1))], exclusions=[],
                 displayPhotos=[(1,1,91,datetime(2026,9,2,10),"E1")])
 
@@ -38,6 +38,8 @@ class CalculationTests(unittest.TestCase):
         self.assertIn("t.TransactionStatus='VALID'", incoming.args[0])
         self.assertIn("t.ReviewStatus='APPROVED'", incoming.args[0])
         self.assertIn("b.ImportStatus='Official'", incoming.args[0])
+        self.assertIn("SUM(CAST(t.Quantity AS bigint))", incoming.args[0])
+        self.assertNotIn("CASE WHEN t.Quantity", incoming.args[0])
         outgoing = next(c for c in calls if "SUM(CAST(p.SellOutQuantity" in c.args[0])
         self.assertIn("v.RecordStatus='ACTIVE'", outgoing.args[0])
         self.assertEqual(outgoing.args[1][0], now)  # late-entered August sales still count
@@ -48,23 +50,28 @@ class CalculationTests(unittest.TestCase):
         self.assertIn("WHERE v.rn=1", snapshot.args[0])
         self.assertEqual(snapshot.args[1][0].date().isoformat(), "2026-08-31")
 
-    def test_balance_returns_and_display(self):
+    def test_balance_signed_sellin_and_display(self):
         r = psi.build_report(source(), {})
-        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, 3, -1, 4, 8, 6])
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, 2, 4, 8, 6])
         self.assertTrue(r["rows"][0]["cells"]["1"]["displayAt"].startswith("2026-08"))
         self.assertEqual(r["rows"][0]["cells"]["1"]["displayPhoto"]["id"],91)
+
+    def test_negative_sellin_stays_in_single_sellin_metric(self):
+        s = source(); s["incoming"] = [(1, 1, Decimal("-2"))]
+        r = psi.build_report(s, {})
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, -2, 4, 4, 2])
 
     def test_no_snapshot_is_unknown_not_zero(self):
         s = source(); s["displays"] = []
         r = psi.build_report(s, {})
-        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [None, 10, 3, -1, 4, 8, None])
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [None, 10, 2, 4, 8, None])
         self.assertEqual(r["quality"]["missingDisplay"], 3)
 
     def test_salein_without_opening_creates_psi_with_zero_baseline(self):
         s = source(); s["opening"] = []
         r = psi.build_report(s, {})
         self.assertEqual(len(r["rows"]), 1)
-        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 0, 3, -1, 4, -2, -4])
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 0, 2, 4, -2, -4])
         self.assertEqual([d["id"] for d in r["dealers"]], [1])
 
     def test_zero_opening_without_salein_does_not_create_psi_rows(self):
@@ -76,7 +83,7 @@ class CalculationTests(unittest.TestCase):
         self.assertEqual(r["dealers"], [])
 
     def test_explicit_zero_and_negative_stock(self):
-        self.assertEqual(psi.metrics(dict(opening=0, display=0, outgoing=2)), [0, 0, 0, 0, 2, -2, -2])
+        self.assertEqual(psi.metrics(dict(opening=0, display=0, outgoing=2)), [0, 0, 0, 2, -2, -2])
 
     def test_global_and_dealer_exclusions(self):
         s = source(); s["exclusions"] = [(2, None), (1, 2)]
@@ -88,15 +95,15 @@ class CalculationTests(unittest.TestCase):
     def test_filters_and_no_duplicate_business_totals(self):
         r = psi.matrix(psi.build_report(source(), {}))
         self.assertEqual(len(r["columns"]), 5)  # 2 dealers + 2 sales totals + one scope total
-        self.assertEqual(r["rows"][-1]["values"][-1], [4, 17, 3, -1, 4, 15, 11])
+        self.assertEqual(r["rows"][-1]["values"][-1], [4, 17, 2, 4, 15, 11])
         filtered = psi.matrix(psi.build_report(source(), {"employee": "1", "category": "HA"}))
-        self.assertEqual(filtered["rows"][-1]["values"][-1], [2, 10, 3, -1, 4, 8, 6])
+        self.assertEqual(filtered["rows"][-1]["values"][-1], [2, 10, 2, 4, 8, 6])
         self.assertEqual(filtered["dealerCount"], 1)
 
     def test_partial_totals_remain_unknown(self):
         s = source(); s["displays"] = s["displays"][:1]
         r = psi.matrix(psi.build_report(s, {}))
-        self.assertEqual(r["rows"][-1]["values"][-1], [None, 17, 3, -1, 4, 15, None])
+        self.assertEqual(r["rows"][-1]["values"][-1], [None, 17, 2, 4, 15, None])
 
     def test_search_and_empty(self):
         self.assertEqual(len(psi.build_report(source(), {"q": "p2"})["rows"]), 1)
@@ -111,7 +118,7 @@ class CalculationTests(unittest.TestCase):
         with self.assertRaises(ValueError): psi.matrix(report, "bad")
 
     def test_decimal_precision(self):
-        self.assertEqual(psi.sum_values([[0, 0, .1, 0, 0, .1, .1], [0, 0, .2, 0, 0, .2, .2]]), [0, 0, .3, 0, 0, .3, .3])
+        self.assertEqual(psi.sum_values([[0, 0, .1, 0, .1, .1], [0, 0, .2, 0, .2, .2]]), [0, 0, .3, 0, .3, .3])
 
     def test_month_boundaries(self):
         now = datetime(2026, 9, 14, 10)
@@ -165,7 +172,7 @@ class RouteTests(unittest.TestCase):
         self.login()
         s = source(); load.return_value = s
         def closing():
-            return self.client.get("/api/psi?level=company&fresh=1").json["rows"][-1]["values"][-1][5]
+            return self.client.get("/api/psi?level=company&fresh=1").json["rows"][-1]["values"][-1][4]
         self.assertEqual(closing(), 15)
         s["outgoing"] = [(1, 1, 7)]
         self.assertEqual(closing(), 12)
@@ -183,7 +190,7 @@ class RouteTests(unittest.TestCase):
         sheet = book["PSI"]
         self.assertEqual(sheet.freeze_panes, "E5")
         self.assertEqual(sheet["C5"].data_type, "s")
-        self.assertEqual([sheet.cell(sheet.max_row, c).value for c in range(5, 12)], [4, 17, 3, -1, 4, 15, 11])
+        self.assertEqual([sheet.cell(sheet.max_row, c).value for c in range(5, 11)], [4, 17, 2, 4, 15, 11])
         self.assertIn("計算說明", book.sheetnames)
 
     @patch.object(psi, "load_source")

@@ -21,9 +21,8 @@ class LiveTests(unittest.TestCase):
         pairs = {(d["id"], p["id"]) for d in report["dealers"] for p in report["rows"] if str(d["id"]) in p["cells"]}
         self.assertEqual(sum(n for d, p, n in s["opening"] if (d, p) in pairs),
                          sum(c["values"][1] or 0 for r in report["rows"] for c in r["cells"].values()))
-        total = psi.matrix(report)["rows"][-1]["values"][-1] if report["rows"] else [0]*7
-        self.assertEqual(sum(pos for d, p, pos, neg in s["incoming"] if (d, p) in pairs), total[2])
-        self.assertEqual(sum(neg for d, p, pos, neg in s["incoming"] if (d, p) in pairs), total[3])
+        total = psi.matrix(report)["rows"][-1]["values"][-1] if report["rows"] else [0]*6
+        self.assertEqual(sum(quantity for d, p, quantity in s["incoming"] if (d, p) in pairs), total[2])
 
     def test_full_application_routes(self):
         from LGSale import app

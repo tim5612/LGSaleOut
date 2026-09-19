@@ -59,20 +59,20 @@
 <script>
 'use strict';
 const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const widths=[44,52,58,48,58,52,64], fixed=[84,84,140,96], rowHeight=32, headerHeight=140;
+const widths=[44,52,58,58,52,64], groupWidth=widths.reduce((sum,width)=>sum+width,0),metricCount=widths.length,fixed=[84,84,140,96],rowHeight=32,headerHeight=140;
 let data=null, controller=null, sequence=0, renderedStart=-1, renderedEnd=-1, renderedColumnStart=-1, renderedColumnEnd=-1, pendingFrame=0, searchTimer=0, selectedRowIndex=null;
 const fmt=new Intl.NumberFormat('zh-TW',{maximumFractionDigits:3});
 function params(){const p=new URLSearchParams();for(const id of ['month','org','employee','category','level'])if($(id).value)p.set(id,$(id).value);if($('search').value.trim())p.set('q',$('search').value.trim());return p;}
 function options(id,items,label){const old=$(id).value,oldLabel=$(id).selectedOptions[0]?.textContent||old;$(id).innerHTML=`<option value="">${label}：全部</option>`+items.map(i=>`<option value="${esc(i.id)}">${esc(i.name)}</option>`).join('');if(old&&!items.some(i=>String(i.id)===old))$(id).insertAdjacentHTML('beforeend',`<option value="${esc(old)}">${esc(oldLabel)}</option>`);$(id).value=old;}
 function headers(columnStart,columnEnd){
-  const cols=data.columns.slice(columnStart,columnEnd),leftWidth=columnStart*376,rightWidth=(data.columns.length-columnEnd)*376;
+  const cols=data.columns.slice(columnStart,columnEnd),leftWidth=columnStart*groupWidth,rightWidth=(data.columns.length-columnEnd)*groupWidth;
   const spacer=(width,tag='th')=>width?`<${tag} class="virtual-spacer" style="width:${width}px;min-width:${width}px"></${tag}>`:'';
-  function band(field){let out='';for(let i=0;i<cols.length;){let j=i+1;while(j<cols.length&&cols[j][field]===cols[i][field]&&(field!=='employee'||cols[j].org===cols[i].org))j++;out+=`<th class="band" colspan="${(j-i)*7}" title="${esc(cols[i][field])}"><span>${field==='org'?'區域：':'業務：'}${esc(cols[i][field])}</span></th>`;i=j;}return out;}
+  function band(field){let out='';for(let i=0;i<cols.length;){let j=i+1;while(j<cols.length&&cols[j][field]===cols[i][field]&&(field!=='employee'||cols[j].org===cols[i].org))j++;out+=`<th class="band" colspan="${(j-i)*metricCount}" title="${esc(cols[i][field])}"><span>${field==='org'?'區域：':'業務：'}${esc(cols[i][field])}</span></th>`;i=j;}return out;}
   return `<colgroup>${fixed.map(w=>`<col style="width:${w}px">`).join('')}${leftWidth?`<col style="width:${leftWidth}px">`:''}${cols.flatMap(()=>widths).map(w=>`<col style="width:${w}px">`).join('')}${rightWidth?`<col style="width:${rightWidth}px">`:''}</colgroup><thead>
     <tr><th colspan="4" rowspan="3" class="fixed basic">商品基本資料（固定欄）</th>${spacer(leftWidth)}${band('org')}${spacer(rightWidth)}</tr>
     <tr>${spacer(leftWidth)}${band('employee')}${spacer(rightWidth)}</tr>
-    <tr>${spacer(leftWidth)}${cols.map(c=>`<th colspan="7" class="group-end ${c.total?'ttl':''}" title="${esc(c.title)}">${esc(c.title).replace(/\n/g,'<br>')}</th>`).join('')}${spacer(rightWidth)}</tr>
-    <tr>${['大分類','品類','型號','建議售價'].map((s,i)=>`<th class="fixed f${i}" title="${i===3?'欄位保留，待 Product 加入售價':s}">${s}</th>`).join('')}${spacer(leftWidth)}${cols.map(c=>data.metrics.map((m,i)=>`<th class="${c.total?'ttl ':''}${i===6?'group-end':''}">${m==='Sell Out'?'Sell<br>Out':esc(m)}</th>`).join('')).join('')}${spacer(rightWidth)}</tr></thead>`;
+    <tr>${spacer(leftWidth)}${cols.map(c=>`<th colspan="${metricCount}" class="group-end ${c.total?'ttl':''}" title="${esc(c.title)}">${esc(c.title).replace(/\n/g,'<br>')}</th>`).join('')}${spacer(rightWidth)}</tr>
+    <tr>${['大分類','品類','型號','建議售價'].map((s,i)=>`<th class="fixed f${i}" title="${i===3?'欄位保留，待 Product 加入售價':s}">${s}</th>`).join('')}${spacer(leftWidth)}${cols.map(c=>data.metrics.map((m,i)=>`<th class="${c.total?'ttl ':''}${i===metricCount-1?'group-end':''}">${m==='Sell Out'?'Sell<br>Out':esc(m)}</th>`).join('')).join('')}${spacer(rightWidth)}</tr></thead>`;
 }
 function groupSpan(rows,index,end,key){let span=1;while(index+span<end&&rows[index+span].kind==='product'&&rows[index+span].category===rows[index].category&&(key==='category'||rows[index+span].subcategory===rows[index].subcategory))span++;return span;}
 function renderRow(r,index,rows=null,end=0,windowStart=0,columnStart=0,columnEnd=data.columns.length,labelIndex=windowStart){
@@ -87,29 +87,29 @@ function renderRow(r,index,rows=null,end=0,windowStart=0,columnStart=0,columnEnd
   }else{
     [r.category,r.subcategory,r.code,''].forEach((v,i)=>{html+=`<td class="fixed f${i}" title="${esc(i===3?'建議售價待新增':v)}">${esc(v)}</td>`;});
   }
-  if(columnStart)html+=`<td class="virtual-spacer" style="width:${columnStart*376}px;min-width:${columnStart*376}px"></td>`;
+  if(columnStart)html+=`<td class="virtual-spacer" style="width:${columnStart*groupWidth}px;min-width:${columnStart*groupWidth}px"></td>`;
   r.values.slice(columnStart,columnEnd).forEach((vs,visibleGroup)=>{const g=columnStart+visibleGroup;vs.forEach((v,i)=>{
-    const reason=v===null?(i===0?'尚無陳列快照，或合計包含尚未回報的商品':i===1?'缺少當月期初基準，或合計包含缺少基準的商品':i===5?'缺少當月期初基準，無法推算完整期末':'期初或陳列資料未齊，無法推算完整可銷售數量'):(v===0?'0 台':`${fmt.format(v)} 台`);
+    const reason=v===null?(i===0?'尚無陳列快照，或合計包含尚未回報的商品':i===1?'缺少當月期初基準，或合計包含缺少基準的商品':i===4?'缺少當月期初基準，無法推算完整期末':'期初或陳列資料未齊，無法推算完整可銷售數量'):(v===0?'0 台':`${fmt.format(v)} 台`);
     const photo=!total&&i===0?r.photos?.[g]:null,photoAttrs=photo?` data-photo-id="${photo.id}" data-photo-code="${esc(r.code)}" data-photo-captured="${esc(photo.capturedAt)}" data-photo-uploader="${esc(photo.uploader)}"`:'';
-    html+=`<td class="num ${data.columns[g].total?'ttl ':''}${i===6?'saleable group-end ':''}${v===null?'unknown ':''}${v<0?'negative ':''}${photo?'photo-cell':''}" title="${esc(photo?'點選查看陳列照片':reason)}"${photoAttrs}>${v===null||v===0?'':fmt.format(v)}${photo?' 📷':''}</td>`;
+    html+=`<td class="num ${data.columns[g].total?'ttl ':''}${i===metricCount-1?'saleable group-end ':''}${v===null?'unknown ':''}${v<0?'negative ':''}${photo?'photo-cell':''}" title="${esc(photo?'點選查看陳列照片':reason)}"${photoAttrs}>${v===null||v===0?'':fmt.format(v)}${photo?' 📷':''}</td>`;
   })});
-  if(columnEnd<data.columns.length)html+=`<td class="virtual-spacer" style="width:${(data.columns.length-columnEnd)*376}px;min-width:${(data.columns.length-columnEnd)*376}px"></td>`;
+  if(columnEnd<data.columns.length)html+=`<td class="virtual-spacer" style="width:${(data.columns.length-columnEnd)*groupWidth}px;min-width:${(data.columns.length-columnEnd)*groupWidth}px"></td>`;
   return html+'</tr>';
 }
 function renderWindow(force=false){
   if(!data)return;
   const rows=data.rows.filter(r=>r.kind!=='total'), rect=$('scroll').getBoundingClientRect(), visible=Math.ceil(innerHeight/rowHeight)+12;
   const labelIndex=Math.max(0,Math.min(rows.length-1,Math.ceil(Math.max(0,-rect.top)/rowHeight))),start=Math.max(0,Math.min(rows.length,Math.floor(Math.max(0,-rect.top-headerHeight)/rowHeight)-6)),end=Math.min(rows.length,start+visible);
-  const columnVisible=Math.ceil(Math.max(376,innerWidth-parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navw'))-404)/376)+3;
-  const columnStart=Math.max(0,Math.min(data.columns.length,Math.floor(scrollX/376)-1)),columnEnd=Math.min(data.columns.length,columnStart+columnVisible);
+  const columnVisible=Math.ceil(Math.max(groupWidth,innerWidth-parseInt(getComputedStyle(document.documentElement).getPropertyValue('--navw'))-404)/groupWidth)+3;
+  const columnStart=Math.max(0,Math.min(data.columns.length,Math.floor(scrollX/groupWidth)-1)),columnEnd=Math.min(data.columns.length,columnStart+columnVisible);
   const columnChanged=columnStart!==renderedColumnStart||columnEnd!==renderedColumnEnd;
   if(!force&&!columnChanged&&start===renderedStart&&end===renderedEnd)return;
   renderedStart=start;renderedEnd=end;renderedColumnStart=columnStart;renderedColumnEnd=columnEnd;
   if(columnChanged||!$('bodyRows')){
     const total=data.rows.find(r=>r.kind==='total');
-    $('scroll').innerHTML=`<table aria-label="PSI 月報" aria-rowcount="${data.rows.length+4}" style="width:${404+data.columns.length*376}px">${headers(columnStart,columnEnd)}<tbody id="bodyRows"></tbody><tfoot>${total?renderRow(total,data.rows.length-1,null,0,0,columnStart,columnEnd):''}</tfoot></table>`;
+    $('scroll').innerHTML=`<table aria-label="PSI 月報" aria-rowcount="${data.rows.length+4}" style="width:${404+data.columns.length*groupWidth}px">${headers(columnStart,columnEnd)}<tbody id="bodyRows"></tbody><tfoot>${total?renderRow(total,data.rows.length-1,null,0,0,columnStart,columnEnd):''}</tfoot></table>`;
   }
-  const spacer=h=>h>0?`<tr class="spacer" aria-hidden="true"><td colspan="${6+(columnEnd-columnStart)*7}" style="height:${h}px"></td></tr>`:'';
+  const spacer=h=>h>0?`<tr class="spacer" aria-hidden="true"><td colspan="${6+(columnEnd-columnStart)*metricCount}" style="height:${h}px"></td></tr>`:'';
   $('bodyRows').innerHTML=spacer(start*rowHeight)+rows.slice(start,end).map((r,i)=>renderRow(r,start+i,rows,end,start,columnStart,columnEnd,labelIndex)).join('')+spacer((rows.length-end)*rowHeight);
 }
 function render(preserve){
