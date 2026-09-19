@@ -34,6 +34,9 @@ class CalculationTests(unittest.TestCase):
         cur.fetchall.side_effect = [[], [], [], [], [], [], [], [], []]
         psi.load_source("2026-08")
         calls = cur.execute.call_args_list
+        dealer_query = next(c for c in calls if "FROM dbo.Dealer d" in c.args[0])
+        self.assertIn("o.OrgUnitId,e.EmployeeId,d.DealerCode", dealer_query.args[0])
+        self.assertNotIn("ORDER BY o.OrgUnitName", dealer_query.args[0])
         incoming = next(c for c in calls if "FROM dbo.SellInTransaction" in c.args[0])
         self.assertIn("t.TransactionStatus='VALID'", incoming.args[0])
         self.assertIn("t.ReviewStatus='APPROVED'", incoming.args[0])
@@ -110,6 +113,17 @@ class CalculationTests(unittest.TestCase):
         filtered = psi.matrix(psi.build_report(source(), {"employee": "1", "category": "HA"}))
         self.assertEqual(filtered["rows"][-1]["values"][-1], [2, 10, 2, 4, None, -2])
         self.assertEqual(filtered["dealerCount"], 1)
+
+    def test_region_order_uses_org_unit_id_not_name(self):
+        s = source()
+        s["dealers"] = [
+            dict(id=2, code="D2", name="Dealer 2", employeeId=2, employee="E2", orgId=20, org="AC Team"),
+            dict(id=1, code="D1", name="Dealer 1", employeeId=1, employee="E1", orgId=10, org="嘉南營銷處"),
+        ]
+        report = psi.build_report(s, {})
+        self.assertEqual([item["id"] for item in report["options"]["orgs"]], [10, 20])
+        dealer_columns = [column for column in psi.matrix(report)["columns"] if not column["total"]]
+        self.assertEqual([column["org"] for column in dealer_columns], ["嘉南營銷處", "AC Team"])
 
     def test_partial_totals_remain_unknown(self):
         s = source(); s["displays"] = s["displays"][:1]

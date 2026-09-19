@@ -65,7 +65,8 @@ def load_source(month=None):
                   AND (h.EndDateTime IS NULL OR h.EndDateTime>%s)
                 ORDER BY h.StartDateTime DESC,h.EmployeeOrgAssignmentId DESC) h
             LEFT JOIN dbo.OrganizationUnit o ON o.OrgUnitId=h.OrgUnitId
-            ORDER BY o.OrgUnitName,e.EmployeeName,d.DealerCode""", (as_of,)*4)
+            ORDER BY CASE WHEN o.OrgUnitId IS NULL THEN 1 ELSE 0 END,
+                     o.OrgUnitId,e.EmployeeId,d.DealerCode""", (as_of,)*4)
         dealers = [dict(id=int(r[0]), code=r[1], name=r[2], employeeId=int(r[3] or 0),
                         employee=r[4] or "未指派業務", orgId=int(r[5] or 0), org=r[6] or "未歸屬區域")
                    for r in cur.fetchall()]
@@ -348,6 +349,7 @@ def build_report(source, filters, allowed_dealer_ids=None):
     active_dealers = {d for d, _ in facts}
     dealers = [d for d in source["dealers"] if d["id"] in active_dealers and
                (allowed_dealer_ids is None or d["id"] in allowed_dealer_ids)]
+    dealers.sort(key=lambda d: (d["orgId"] == 0, d["orgId"], d["employeeId"], d["code"]))
     fact_products = {pid for _, pid in facts}
     options = dict(orgs=list({d["orgId"]: {"id": d["orgId"], "name": d["org"]} for d in dealers}.values()),
                    employees=list({d["employeeId"]: {"id": d["employeeId"], "name": d["employee"], "orgId": d["orgId"]} for d in dealers}.values()),
