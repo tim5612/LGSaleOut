@@ -89,7 +89,8 @@ function renderRow(r,index,rows=null,end=0,windowStart=0,columnStart=0,columnEnd
   }
   if(columnStart)html+=`<td class="virtual-spacer" style="width:${columnStart*groupWidth}px;min-width:${columnStart*groupWidth}px"></td>`;
   r.values.slice(columnStart,columnEnd).forEach((vs,visibleGroup)=>{const g=columnStart+visibleGroup;vs.forEach((v,i)=>{
-    const reason=v===null?(i===0?'尚無陳列快照，或合計包含尚未回報的商品':i===1?'缺少當月期初基準，或合計包含缺少基準的商品':i===4?'缺少當月期初基準，無法推算完整期末':'期初或陳列資料未齊，無法推算完整可銷售數量'):(v===0?'0 台':`${fmt.format(v)} 台`);
+    const closingReason=data.isCurrentMonth&&!data.isLastDay?'本月尚未結束，期末將於月底產生':'尚無下月正式期初，無法確認本月期末';
+    const reason=v===null?(i===0?'尚無陳列快照，或合計包含尚未回報的商品':i===1?'缺少當月期初基準，或合計包含缺少基準的商品':i===4?closingReason:'陳列或 Sale Out 資料未齊，無法計算可銷售數量'):(v===0?'0 台':`${fmt.format(v)} 台`);
     const photo=!total&&i===0?r.photos?.[g]:null,photoAttrs=photo?` data-photo-id="${photo.id}" data-photo-code="${esc(r.code)}" data-photo-captured="${esc(photo.capturedAt)}" data-photo-uploader="${esc(photo.uploader)}"`:'';
     html+=`<td class="num ${data.columns[g].total?'ttl ':''}${i===metricCount-1?'saleable group-end ':''}${v===null?'unknown ':''}${v<0?'negative ':''}${photo?'photo-cell':''}" title="${esc(photo?'點選查看陳列照片':reason)}"${photoAttrs}>${v===null||v===0?'':fmt.format(v)}${photo?' 📷':''}</td>`;
   })});

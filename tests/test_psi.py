@@ -31,7 +31,7 @@ class CalculationTests(unittest.TestCase):
         connect.return_value.__enter__.return_value.cursor.return_value = cur
         now = datetime(2026, 9, 14, 12)
         cur.fetchone.return_value = (now,)
-        cur.fetchall.side_effect = [[], [], [], [], [], [], [], []]
+        cur.fetchall.side_effect = [[], [], [], [], [], [], [], [], []]
         psi.load_source("2026-08")
         calls = cur.execute.call_args_list
         incoming = next(c for c in calls if "FROM dbo.SellInTransaction" in c.args[0])
@@ -52,26 +52,37 @@ class CalculationTests(unittest.TestCase):
 
     def test_balance_signed_sellin_and_display(self):
         r = psi.build_report(source(), {})
-        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, 2, 4, 8, 6])
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, 2, 4, None, -2])
         self.assertTrue(r["rows"][0]["cells"]["1"]["displayAt"].startswith("2026-08"))
         self.assertEqual(r["rows"][0]["cells"]["1"]["displayPhoto"]["id"],91)
 
     def test_negative_sellin_stays_in_single_sellin_metric(self):
         s = source(); s["incoming"] = [(1, 1, Decimal("-2"))]
         r = psi.build_report(s, {})
-        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, -2, 4, 4, 2])
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, -2, 4, None, -6])
+
+    def test_last_day_shows_calculated_closing(self):
+        s = source(); s["isCurrentMonth"] = True; s["isLastDay"] = True
+        r = psi.build_report(s, {})
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, 2, 4, 8, -2])
+
+    def test_historical_closing_and_sellout_come_from_next_opening(self):
+        s = source(); s["isCurrentMonth"] = False; s["isLastDay"] = False
+        s["nextOpening"] = [(1, 1, 7)]
+        r = psi.build_report(s, {})
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, 2, 5, 7, -3])
 
     def test_no_snapshot_is_unknown_not_zero(self):
         s = source(); s["displays"] = []
         r = psi.build_report(s, {})
-        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [None, 10, 2, 4, 8, None])
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [None, 10, 2, 4, None, None])
         self.assertEqual(r["quality"]["missingDisplay"], 3)
 
     def test_salein_without_opening_creates_psi_with_zero_baseline(self):
         s = source(); s["opening"] = []
         r = psi.build_report(s, {})
         self.assertEqual(len(r["rows"]), 1)
-        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 0, 2, 4, -2, -4])
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 0, 2, 4, None, -2])
         self.assertEqual([d["id"] for d in r["dealers"]], [1])
 
     def test_zero_opening_without_salein_does_not_create_psi_rows(self):
@@ -83,7 +94,7 @@ class CalculationTests(unittest.TestCase):
         self.assertEqual(r["dealers"], [])
 
     def test_explicit_zero_and_negative_stock(self):
-        self.assertEqual(psi.metrics(dict(opening=0, display=0, outgoing=2)), [0, 0, 0, 2, -2, -2])
+        self.assertEqual(psi.metrics(dict(opening=0, display=0, outgoing=2)), [0, 0, 0, 2, None, -2])
 
     def test_global_and_dealer_exclusions(self):
         s = source(); s["exclusions"] = [(2, None), (1, 2)]
@@ -95,15 +106,15 @@ class CalculationTests(unittest.TestCase):
     def test_filters_and_no_duplicate_business_totals(self):
         r = psi.matrix(psi.build_report(source(), {}))
         self.assertEqual(len(r["columns"]), 5)  # 2 dealers + 2 sales totals + one scope total
-        self.assertEqual(r["rows"][-1]["values"][-1], [4, 17, 2, 4, 15, 11])
+        self.assertEqual(r["rows"][-1]["values"][-1], [4, 17, 2, 4, None, -2])
         filtered = psi.matrix(psi.build_report(source(), {"employee": "1", "category": "HA"}))
-        self.assertEqual(filtered["rows"][-1]["values"][-1], [2, 10, 2, 4, 8, 6])
+        self.assertEqual(filtered["rows"][-1]["values"][-1], [2, 10, 2, 4, None, -2])
         self.assertEqual(filtered["dealerCount"], 1)
 
     def test_partial_totals_remain_unknown(self):
         s = source(); s["displays"] = s["displays"][:1]
         r = psi.matrix(psi.build_report(s, {}))
-        self.assertEqual(r["rows"][-1]["values"][-1], [None, 17, 2, 4, 15, None])
+        self.assertEqual(r["rows"][-1]["values"][-1], [None, 17, 2, 4, None, None])
 
     def test_search_and_empty(self):
         self.assertEqual(len(psi.build_report(source(), {"q": "p2"})["rows"]), 1)
@@ -127,6 +138,30 @@ class CalculationTests(unittest.TestCase):
         self.assertEqual(psi.period("2024-02", now)[3].day, 29)
         for invalid in ("2026-13", "2026-9", "2026-10", "9999-12", "x"):
             with self.assertRaises(ValueError): psi.period(invalid, now)
+
+    @patch("lgsale_psi.db.connect")
+    def test_month_end_rollover_creates_next_opening_once(self, connect):
+        conn, cur = MagicMock(), MagicMock()
+        connect.return_value = conn; conn.cursor.return_value = cur
+        cur.fetchone.side_effect = [
+            (datetime(2026, 9, 30, 23, 50),),
+            None,
+            (88,),
+        ]
+        cur.fetchall.return_value = [(1, 1, 8), (1, 2, -2)]
+        self.assertTrue(psi.ensure_month_end_rollover(7))
+        inserted = cur.executemany.call_args.args[1]
+        self.assertEqual(inserted, [(88, 1, 1, 1, 8), (88, 2, 1, 2, -2)])
+        conn.commit.assert_called_once()
+
+    @patch("lgsale_psi.db.connect")
+    def test_month_end_rollover_skips_when_next_opening_exists(self, connect):
+        conn, cur = MagicMock(), MagicMock()
+        connect.return_value = conn; conn.cursor.return_value = cur
+        cur.fetchone.side_effect = [(datetime(2026, 9, 30, 12),), (55,)]
+        self.assertFalse(psi.ensure_month_end_rollover(7))
+        cur.executemany.assert_not_called()
+        conn.commit.assert_called_once()
 
 
 class RouteTests(unittest.TestCase):
@@ -171,13 +206,13 @@ class RouteTests(unittest.TestCase):
     def test_reload_reflects_sellout_edits_and_voids(self, load):
         self.login()
         s = source(); load.return_value = s
-        def closing():
-            return self.client.get("/api/psi?level=company&fresh=1").json["rows"][-1]["values"][-1][4]
-        self.assertEqual(closing(), 15)
+        def available():
+            return self.client.get("/api/psi?level=company&fresh=1").json["rows"][-1]["values"][-1][5]
+        self.assertEqual(available(), -2)
         s["outgoing"] = [(1, 1, 7)]
-        self.assertEqual(closing(), 12)
+        self.assertEqual(available(), -5)
         s["outgoing"] = []
-        self.assertEqual(closing(), 19)
+        self.assertEqual(available(), 2)
         self.assertEqual(load.call_count, 3)
 
     @patch.object(psi, "load_source")
@@ -190,7 +225,7 @@ class RouteTests(unittest.TestCase):
         sheet = book["PSI"]
         self.assertEqual(sheet.freeze_panes, "E5")
         self.assertEqual(sheet["C5"].data_type, "s")
-        self.assertEqual([sheet.cell(sheet.max_row, c).value for c in range(5, 11)], [4, 17, 2, 4, 15, 11])
+        self.assertEqual([sheet.cell(sheet.max_row, c).value for c in range(5, 11)], [4, 17, 2, 4, None, -2])
         self.assertIn("計算說明", book.sheetnames)
 
     @patch.object(psi, "load_source")
@@ -210,7 +245,7 @@ class RouteTests(unittest.TestCase):
         self.assertEqual(result.status_code, 200)
         book = openpyxl.load_workbook(BytesIO(result.data))
         self.assertEqual(len(book["PSI"]._images), 1)
-        self.assertIn("已在客戶明細", book["計算說明"]["A7"].value)
+        self.assertIn("已在客戶明細", book["計算說明"]["A8"].value)
 
     @patch.object(psi, "load_source", side_effect=source)
     def test_export_rejects_unknown_photo_mode(self, load):

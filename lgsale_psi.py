@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import re
 import math
+import hashlib
 import threading
 import time
 from collections import defaultdict
@@ -76,6 +77,12 @@ def load_source(month=None):
             WHERE b.ImportType='OPENING_INVENTORY' AND b.ImportStatus='Official' AND b.DataMonth=%s
             GROUP BY i.DealerId,i.ProductId""", (key,))
         opening = list(cur.fetchall())
+        next_key = end.strftime("%Y%m")
+        cur.execute("""SELECT i.DealerId,i.ProductId,SUM(CAST(i.OpeningQuantity AS bigint))
+            FROM dbo.MonthlyOpeningInventoryDetail i JOIN dbo.ImportBatch b ON b.ImportBatchId=i.ImportBatchId
+            WHERE b.ImportType='OPENING_INVENTORY' AND b.ImportStatus='Official' AND b.DataMonth=%s
+            GROUP BY i.DealerId,i.ProductId""", (next_key,))
+        next_opening = list(cur.fetchall())
         cur.execute("""SELECT t.DealerId,t.ProductId,SUM(CAST(t.Quantity AS bigint))
             FROM dbo.SellInTransaction t JOIN dbo.ImportBatch b ON b.ImportBatchId=t.ImportBatchId
             WHERE b.ImportType='SELL_IN' AND b.ImportStatus='Official'
@@ -110,9 +117,84 @@ def load_source(month=None):
             WHERE p.DataMonth=%s AND p.RecordStatus='ACTIVE'""",(key,))
         display_photos=list(cur.fetchall())
     return dict(month=month, asOf=as_of.isoformat(timespec="seconds"), fetchedAt=now.isoformat(timespec="seconds"),
-                currentMonth=now.strftime("%Y-%m"), dealers=dealers, products=products,
+                currentMonth=now.strftime("%Y-%m"), isCurrentMonth=month == now.strftime("%Y-%m"),
+                isLastDay=month == now.strftime("%Y-%m") and now.date() == (end - timedelta(days=1)).date(),
+                dealers=dealers, products=products,
                 opening=opening, incoming=incoming, outgoing=outgoing, displays=displays,
-                exclusions=exclusions, displayPhotos=display_photos)
+                nextOpening=next_opening, exclusions=exclusions, displayPhotos=display_photos)
+
+
+def ensure_month_end_rollover(employee_id: int | None) -> bool:
+    """On the last calendar day, persist the calculated closing as next month's opening."""
+    if not employee_id:
+        return False
+    conn = db.connect()
+    try:
+        cur = conn.cursor()
+        cur.execute("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE")
+        cur.execute("SELECT SYSDATETIME()")
+        now = cur.fetchone()[0]
+        month, start, end, _ = period(None, now)
+        if now.date() != (end - timedelta(days=1)).date():
+            conn.rollback()
+            return False
+        source_key, next_key = month.replace("-", ""), end.strftime("%Y%m")
+        cur.execute("""SELECT TOP 1 ImportBatchId FROM dbo.ImportBatch WITH (UPDLOCK,HOLDLOCK)
+            WHERE ImportType='OPENING_INVENTORY' AND DataMonth=%s AND ImportStatus='Official'""", (next_key,))
+        if cur.fetchone():
+            conn.commit()
+            return False
+        cur.execute("""WITH opening AS (
+                SELECT i.DealerId,i.ProductId,SUM(CAST(i.OpeningQuantity AS bigint)) Quantity
+                FROM dbo.MonthlyOpeningInventoryDetail i JOIN dbo.ImportBatch b ON b.ImportBatchId=i.ImportBatchId
+                WHERE b.ImportType='OPENING_INVENTORY' AND b.ImportStatus='Official' AND b.DataMonth=%s
+                GROUP BY i.DealerId,i.ProductId),
+            incoming AS (
+                SELECT t.DealerId,t.ProductId,SUM(CAST(t.Quantity AS bigint)) Quantity
+                FROM dbo.SellInTransaction t JOIN dbo.ImportBatch b ON b.ImportBatchId=t.ImportBatchId
+                WHERE b.ImportType='SELL_IN' AND b.ImportStatus='Official' AND t.TransactionStatus='VALID'
+                  AND t.ReviewStatus='APPROVED' AND t.InventoryEffectiveDate>=%s AND t.InventoryEffectiveDate<%s
+                GROUP BY t.DealerId,t.ProductId),
+            outgoing AS (
+                SELECT v.DealerId,p.ProductId,SUM(CAST(p.SellOutQuantity AS bigint)) Quantity
+                FROM dbo.StoreVisit v JOIN dbo.StoreVisitProductDetail p ON p.StoreVisitId=v.StoreVisitId
+                WHERE v.RecordStatus='ACTIVE' AND p.SellOutDate>=%s AND p.SellOutDate<%s
+                  AND p.SellOutQuantity IS NOT NULL
+                GROUP BY v.DealerId,p.ProductId),
+            pairs AS (SELECT DealerId,ProductId FROM opening UNION SELECT DealerId,ProductId FROM incoming)
+            SELECT p.DealerId,p.ProductId,
+                   COALESCE(o.Quantity,0)+COALESCE(i.Quantity,0)-COALESCE(s.Quantity,0)
+            FROM pairs p LEFT JOIN opening o ON o.DealerId=p.DealerId AND o.ProductId=p.ProductId
+            LEFT JOIN incoming i ON i.DealerId=p.DealerId AND i.ProductId=p.ProductId
+            LEFT JOIN outgoing s ON s.DealerId=p.DealerId AND s.ProductId=p.ProductId
+            ORDER BY p.DealerId,p.ProductId""",
+            (source_key, start.date(), end.date(), start.date(), end.date()))
+        rows = [(int(d), int(p), int(q)) for d, p, q in cur.fetchall()]
+        if not rows:
+            conn.rollback()
+            return False
+        marker = f"SYSTEM-MONTH-END:{source_key}:{next_key}"
+        cur.execute("""INSERT dbo.ImportBatch
+            (ImportType,DataMonth,OriginalFileName,StoredFilePath,FileHash,FileSize,ImportStatus,
+             TotalRowCount,SuccessRowCount,ErrorRowCount,ImportedByEmployeeId)
+            OUTPUT inserted.ImportBatchId
+            VALUES('OPENING_INVENTORY',%s,%s,%s,%s,0,'Official',%s,%s,0,%s)""",
+            (next_key, f"系統月結 {source_key}", f"system://month-end/{source_key}",
+             hashlib.sha256(marker.encode()).hexdigest(), len(rows), len(rows), employee_id))
+        batch_id = int(cur.fetchone()[0])
+        cur.executemany("""INSERT dbo.MonthlyOpeningInventoryDetail
+            (ImportBatchId,SourceRowNumber,DealerId,ProductId,OpeningQuantity)
+            VALUES(%s,%s,%s,%s,%s)""",
+            [(batch_id, index, dealer_id, product_id, quantity)
+             for index, (dealer_id, product_id, quantity) in enumerate(rows, 1)])
+        conn.commit()
+        _SOURCE_CACHE.clear()
+        return True
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 def cached_source(month=None, fresh=False):
@@ -138,12 +220,16 @@ def number(value):
     return int(value) if value == value.to_integral_value() else float(value)
 
 
-def metrics(fact):
+def metrics(fact, *, is_current_month=True, is_last_day=False):
     opening = fact.get("opening")
     incoming, outgoing = (fact.get(k, 0) for k in ("incoming", "outgoing"))
     display = fact.get("display")
-    closing = None if opening is None else opening + incoming - outgoing
-    available = None if closing is None or display is None else closing - display
+    if is_current_month:
+        closing = None if not is_last_day or opening is None else opening + incoming - outgoing
+    else:
+        closing = fact.get("nextOpening")
+        outgoing = None if opening is None or closing is None else opening + incoming - closing
+    available = None if display is None or outgoing is None else display + incoming - outgoing - display
     return [None if n is None else number(n) for n in (display, opening, incoming, outgoing, closing, available)]
 
 
@@ -242,6 +328,10 @@ def build_report(source, filters, allowed_dealer_ids=None):
         key = (int(d), int(p))
         if key in active_pairs:
             facts[key]["outgoing"] = Decimal(n)
+    for d, p, n in source.get("nextOpening", []):
+        key = (int(d), int(p))
+        if key in facts:
+            facts[key]["nextOpening"] = Decimal(n)
     for d, p, n, stamp in source["displays"]:
         key = (int(d), int(p))
         if key in active_pairs:
@@ -284,7 +374,9 @@ def build_report(source, filters, allowed_dealer_ids=None):
     cells_by_product = defaultdict(dict)
     for (dealer_id, product_id), fact in facts.items():
         cells_by_product[product_id][str(dealer_id)] = {
-            "values": metrics(fact), "displayAt": fact.get("displayAt"), "displayPhoto":fact.get("displayPhoto"),
+            "values": metrics(fact, is_current_month=source.get("isCurrentMonth", True),
+                              is_last_day=source.get("isLastDay", False)),
+            "displayAt": fact.get("displayAt"), "displayPhoto":fact.get("displayPhoto"),
             "sellOutReported": "outgoing" in fact}
     rows = []
     for p in products:
@@ -297,8 +389,9 @@ def build_report(source, filters, allowed_dealer_ids=None):
                      missingDisplay=sum("display" not in f for f in facts.values()),
                      sellOutReportedPairs=sum("outgoing" in f for f in facts.values()),
                      excludedPairs=excluded, excludedProducts=excluded_products),
-        notes=["Sell In 為帶正負號的淨進貨量；期末 = 期初 + Sell In − Sell Out；可銷售 = 期末 − 陳列。",
-               "實銷按 SellOutDate 加總有效回報（含事後補登與修改）；未回報不代表實際無銷售。期末為依已登錄資料推算。",
+        notes=["Sell In 為帶正負號的淨進貨量；歷史 Sale Out = 期初 + Sell In − 期末。",
+               "月中期末留白；月底以期初 + Sell In − 已回報 Sale Out 形成期末並建立下月期初。歷史期末取下月正式期初。",
+               "可銷售依即時回報計算：(陳列 + Sell In) − Sale Out − 陳列。",
                "陳列取該經銷商截至日最後一次有效巡店的商品明細（可沿用前月），不是巡店累加；該次未填陳列時可銷售留白。",
                "PSI 納入當月正式非零期初，或當月有有效正／負 Sell In 的客戶／商品；僅有 Sell Out 或陳列不能單獨建立商品列。",
                "依截至日的區域與業務歸屬分組，套用有效 PSI 排除規則；售價待新增，零值留白。"])
@@ -336,6 +429,7 @@ def page():
 
 @bp.get("/api/psi")
 def report():
+    ensure_month_end_rollover(getattr(g.access, "employee_id", None))
     source = cached_source(request.args.get("month"), request.args.get("fresh") == "1")
     return jsonify(matrix(build_report(source, request.args, g.access.dealer_ids),
                           request.args.get("level", "dealer")))
@@ -351,6 +445,7 @@ def export():
     photo_mode = request.args.get("photos", "")
     if photo_mode not in {"", "thumbnail"}:
         raise ValueError("Excel 照片選項無效")
+    ensure_month_end_rollover(getattr(g.access, "employee_id", None))
     result = matrix(build_report(cached_source(request.args.get("month")), request.args,
                                  g.access.dealer_ids), request.args.get("level", "dealer"))
     metric_count = len(METRICS)
