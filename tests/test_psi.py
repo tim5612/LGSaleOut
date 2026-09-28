@@ -21,7 +21,9 @@ def source():
                           dict(id=2, code="P2", name="Product 2", category="TV", subcategory="OLED", price=None)],
                 opening=[(1, 1, 10), (2, 1, 5), (1, 2, 2)], incoming=[(1, 1, Decimal("2"))],
                 outgoing=[(1, 1, 4)], displays=[(1, 1, 2, datetime(2026, 8, 30)), (2, 1, 1, datetime(2026, 9, 1)), (1, 2, 1, datetime(2026, 9, 1))], exclusions=[],
-                displayPhotos=[(1,1,91,datetime(2026,9,2,10),"E1")])
+                displayPhotos=[(1,1,91,datetime(2026,9,2,10),"E1","主要店面")],
+                averageFrom="2026-06", averageTo="2026-09", averageMonths=4,
+                averageSales=[(1,1,40),(2,1,20),(1,2,8)])
 
 
 class CalculationTests(unittest.TestCase):
@@ -31,7 +33,7 @@ class CalculationTests(unittest.TestCase):
         connect.return_value.__enter__.return_value.cursor.return_value = cur
         now = datetime(2026, 9, 14, 12)
         cur.fetchone.return_value = (now,)
-        cur.fetchall.side_effect = [[], [], [], [], [], [], [], [], []]
+        cur.fetchall.side_effect = [[], [], [], [], [], [], [], [], [], []]
         psi.load_source("2026-08")
         calls = cur.execute.call_args_list
         dealer_query = next(c for c in calls if "FROM dbo.Dealer d" in c.args[0])
@@ -49,55 +51,76 @@ class CalculationTests(unittest.TestCase):
         self.assertEqual(outgoing.args[1][1].isoformat(), "2026-08-01")
         self.assertEqual(outgoing.args[1][2].isoformat(), "2026-09-01")
         snapshot = next(c for c in calls if "WITH latest_visits" in c.args[0])
-        self.assertIn("PARTITION BY v.DealerId", snapshot.args[0])
+        self.assertIn("PARTITION BY v.DealerLocationId", snapshot.args[0])
         self.assertIn("WHERE v.rn=1", snapshot.args[0])
         self.assertEqual(snapshot.args[1][0].date().isoformat(), "2026-08-31")
+        averages = next(c for c in calls if "WITH eligible AS" in c.args[0])
+        self.assertIn("MonthlyOpeningInventoryDetail", averages.args[0])
+        self.assertIn("SellInTransaction", averages.args[0])
+        self.assertIn("SellOutQuantity", averages.args[0])
 
     def test_balance_signed_sellin_and_display(self):
         r = psi.build_report(source(), {})
-        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, 2, 4, None, -2])
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, 2, 4, 8, 6, '10 / 14'])
         self.assertTrue(r["rows"][0]["cells"]["1"]["displayAt"].startswith("2026-08"))
         self.assertEqual(r["rows"][0]["cells"]["1"]["displayPhoto"]["id"],91)
 
     def test_negative_sellin_stays_in_single_sellin_metric(self):
         s = source(); s["incoming"] = [(1, 1, Decimal("-2"))]
         r = psi.build_report(s, {})
-        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, -2, 4, None, -6])
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, -2, 4, 4, 2, '10 / 18'])
 
     def test_last_day_shows_calculated_closing(self):
         s = source(); s["isCurrentMonth"] = True; s["isLastDay"] = True
         r = psi.build_report(s, {})
-        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, 2, 4, 8, -2])
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, 2, 4, 8, 6, '10 / 14'])
 
-    def test_historical_closing_and_sellout_come_from_next_opening(self):
+    def test_historical_closing_uses_recorded_flows_not_next_opening(self):
         s = source(); s["isCurrentMonth"] = False; s["isLastDay"] = False
         s["nextOpening"] = [(1, 1, 7)]
         r = psi.build_report(s, {})
-        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, 2, 5, 7, -3])
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 10, 2, 4, 8, 6, '10 / 14'])
 
     def test_no_snapshot_is_unknown_not_zero(self):
         s = source(); s["displays"] = []
         r = psi.build_report(s, {})
-        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [None, 10, 2, 4, None, None])
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [None, 10, 2, 4, 8, 8, '10 / 12'])
         self.assertEqual(r["quality"]["missingDisplay"], 3)
+
+    def test_missing_display_is_zero_for_available_when_closing_exists(self):
+        s = source(); s["displays"] = []; s["isCurrentMonth"] = True; s["isLastDay"] = True
+        r = psi.build_report(s, {})
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [None, 10, 2, 4, 8, 8, '10 / 12'])
 
     def test_salein_without_opening_creates_psi_with_zero_baseline(self):
         s = source(); s["opening"] = []
         r = psi.build_report(s, {})
         self.assertEqual(len(r["rows"]), 1)
-        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 0, 2, 4, None, -2])
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [2, 0, 2, 4, -2, -4, '10 / 24'])
         self.assertEqual([d["id"] for d in r["dealers"]], [1])
+
+    def test_opening_only_still_calculates_closing_and_available(self):
+        r = psi.build_report(source(), {})
+        self.assertEqual(r["rows"][0]["cells"]["2"]["values"], [1, 5, 0, 0, 5, 4, '5 / 6'])
+
+    def test_sellout_only_creates_psi_row_with_zero_baseline(self):
+        s = source(); s["opening"] = []; s["incoming"] = []; s["outgoing"] = [(1,1,3)]
+        s["displays"] = []
+        r = psi.build_report(s, {})
+        self.assertEqual(len(r["rows"]), 1)
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"], [None, 0, 0, 3, -3, -3, '10 / 23'])
 
     def test_zero_opening_without_salein_does_not_create_psi_rows(self):
         s = source()
         s["opening"] = [(1, 1, 0)]
         s["incoming"] = []
+        s["outgoing"] = []
         r = psi.build_report(s, {})
         self.assertEqual(r["rows"], [])
         self.assertEqual(r["dealers"], [])
 
     def test_explicit_zero_and_negative_stock(self):
-        self.assertEqual(psi.metrics(dict(opening=0, display=0, outgoing=2)), [0, 0, 0, 2, None, -2])
+        self.assertEqual(psi.metrics(dict(opening=0, display=0, outgoing=2)), [0, 0, 0, 2, -2, -2, None])
 
     def test_global_and_dealer_exclusions(self):
         s = source(); s["exclusions"] = [(2, None), (1, 2)]
@@ -109,9 +132,9 @@ class CalculationTests(unittest.TestCase):
     def test_filters_and_no_duplicate_business_totals(self):
         r = psi.matrix(psi.build_report(source(), {}))
         self.assertEqual(len(r["columns"]), 5)  # 2 dealers + 2 sales totals + one scope total
-        self.assertEqual(r["rows"][-1]["values"][-1], [4, 17, 2, 4, None, -2])
+        self.assertEqual(r["rows"][-1]["values"][-1], [4, 17, 2, 4, 15, 11, None])
         filtered = psi.matrix(psi.build_report(source(), {"employee": "1", "category": "HA"}))
-        self.assertEqual(filtered["rows"][-1]["values"][-1], [2, 10, 2, 4, None, -2])
+        self.assertEqual(filtered["rows"][-1]["values"][-1], [2, 10, 2, 4, 8, 6, None])
         self.assertEqual(filtered["dealerCount"], 1)
 
     def test_region_order_uses_org_unit_id_not_name(self):
@@ -128,7 +151,7 @@ class CalculationTests(unittest.TestCase):
     def test_partial_totals_remain_unknown(self):
         s = source(); s["displays"] = s["displays"][:1]
         r = psi.matrix(psi.build_report(s, {}))
-        self.assertEqual(r["rows"][-1]["values"][-1], [None, 17, 2, 4, None, None])
+        self.assertEqual(r["rows"][-1]["values"][-1], [None, 17, 2, 4, 15, 13, None])
 
     def test_search_and_empty(self):
         self.assertEqual(len(psi.build_report(source(), {"q": "p2"})["rows"]), 1)
@@ -143,7 +166,7 @@ class CalculationTests(unittest.TestCase):
         with self.assertRaises(ValueError): psi.matrix(report, "bad")
 
     def test_decimal_precision(self):
-        self.assertEqual(psi.sum_values([[0, 0, .1, 0, .1, .1], [0, 0, .2, 0, .2, .2]]), [0, 0, .3, 0, .3, .3])
+        self.assertEqual(psi.sum_values([[0, 0, .1, 0, .1, .1, None], [0, 0, .2, 0, .2, .2, None]]), [0, 0, .3, 0, .3, .3, None])
 
     def test_month_boundaries(self):
         now = datetime(2026, 9, 14, 10)
@@ -152,6 +175,25 @@ class CalculationTests(unittest.TestCase):
         self.assertEqual(psi.period("2024-02", now)[3].day, 29)
         for invalid in ("2026-13", "2026-9", "2026-10", "9999-12", "x"):
             with self.assertRaises(ValueError): psi.period(invalid, now)
+
+    def test_average_period_includes_report_month(self):
+        start, end = psi.average_period(datetime(2026, 9, 1))
+        self.assertEqual((start, end), (datetime(2026, 6, 1), datetime(2026, 10, 1)))
+        self.assertEqual(psi.average_period(datetime(2026, 9, 1), "2026-01"),
+                         (datetime(2026, 1, 1), datetime(2026, 10, 1)))
+        with self.assertRaises(ValueError):
+            psi.average_period(datetime(2026, 9, 1), "2026-10")
+
+    def test_replenishment_uses_monthly_averages_and_rounds_shortage_up(self):
+        s = source(); s["isCurrentMonth"] = True; s["isLastDay"] = True
+        s["averageSales"] = [(1,1,41),(2,1,16)]
+        r = psi.build_report(s, {})
+        # Dealer monthly average ceil(41/4)=11; WOS 8 means two months, so 22-6=16.
+        self.assertEqual(r["rows"][0]["cells"]["1"]["values"][-1], "11 / 16")
+        self.assertEqual(psi.build_report(s, {"wos":"4"})["rows"][0]["cells"]["1"]["values"][-1], "11 / 5")
+        self.assertEqual(psi.build_report(s, {"wos":"12"})["rows"][0]["cells"]["1"]["values"][-1], "11 / 27")
+        with self.assertRaises(ValueError):
+            psi.build_report(s, {"wos":"6"})
 
     @patch("lgsale_psi.db.connect")
     def test_month_end_rollover_creates_next_opening_once(self, connect):
@@ -219,14 +261,14 @@ class RouteTests(unittest.TestCase):
     @patch.object(psi, "load_source")
     def test_reload_reflects_sellout_edits_and_voids(self, load):
         self.login()
-        s = source(); load.return_value = s
+        s = source(); s["isCurrentMonth"] = True; s["isLastDay"] = True; load.return_value = s
         def available():
             return self.client.get("/api/psi?level=company&fresh=1").json["rows"][-1]["values"][-1][5]
-        self.assertEqual(available(), -2)
+        self.assertEqual(available(), 11)
         s["outgoing"] = [(1, 1, 7)]
-        self.assertEqual(available(), -5)
+        self.assertEqual(available(), 8)
         s["outgoing"] = []
-        self.assertEqual(available(), 2)
+        self.assertEqual(available(), 15)
         self.assertEqual(load.call_count, 3)
 
     @patch.object(psi, "load_source")
@@ -239,7 +281,7 @@ class RouteTests(unittest.TestCase):
         sheet = book["PSI"]
         self.assertEqual(sheet.freeze_panes, "E5")
         self.assertEqual(sheet["C5"].data_type, "s")
-        self.assertEqual([sheet.cell(sheet.max_row, c).value for c in range(5, 11)], [4, 17, 2, 4, None, -2])
+        self.assertEqual([sheet.cell(sheet.max_row, c).value for c in range(5, 12)], [4, 17, 2, 4, 15, 11, None])
         self.assertIn("計算說明", book.sheetnames)
 
     @patch.object(psi, "load_source")
@@ -259,7 +301,7 @@ class RouteTests(unittest.TestCase):
         self.assertEqual(result.status_code, 200)
         book = openpyxl.load_workbook(BytesIO(result.data))
         self.assertEqual(len(book["PSI"]._images), 1)
-        self.assertIn("已在客戶明細", book["計算說明"]["A8"].value)
+        self.assertTrue(any("已在客戶明細" in str(cell.value) for cell in book["計算說明"]["A"]))
 
     @patch.object(psi, "load_source", side_effect=source)
     def test_export_rejects_unknown_photo_mode(self, load):

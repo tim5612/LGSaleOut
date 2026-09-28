@@ -129,7 +129,7 @@ def resolve(user: dict) -> Access:
         capabilities |= effective_capabilities("ADMIN", admin_rules, {})
         # The visit records the signed-in Designer as author while retaining
         # the dealer's assigned employee as the responsible sales owner.
-        capabilities |= {"mobile.reports.view", "reports.create"}
+        capabilities |= {"mobile.reports.view", "reports.create", "mobile.tasks.execute"}
     dealer_ids = db.permission_dealer_ids(
         "ADMIN" if principal["designer"] else role,
         principal["employeeId"], principal["dealerId"], principal["orgId"]

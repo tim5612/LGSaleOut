@@ -32,6 +32,17 @@ def test_mapped_workbook_deduplicates_dealer(tmp_path):
     assert len(reviewed["dealers"]) == 1
     assert reviewed["dealers"][0]["employeeNo"] == "e001"
     assert reviewed["dealers"][0]["level"] == "DC店"
+    assert reviewed["dealers"][0]["area"] == "台北營銷處"
+
+
+def test_employee_number_can_be_omitted(tmp_path):
+    path, mapping = sample_workbook(tmp_path)
+    mapping["staffColumns"]["number"] = None
+    dealers, staff, orgs = source_data(path, mapping)
+    reviewed = review_source(dealers, staff, orgs[0], "2026-09-01")
+    assert reviewed["errors"] == []
+    assert reviewed["employees"][0]["number"].startswith("AUTO-")
+    assert reviewed["dealers"][0]["employeeNo"] == reviewed["employees"][0]["number"].casefold()
 
 
 def test_conflicting_selected_field_blocks_import(tmp_path):

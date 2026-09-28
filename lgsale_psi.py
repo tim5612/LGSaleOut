@@ -12,7 +12,7 @@ import threading
 import time
 from collections import defaultdict
 from datetime import datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, ROUND_CEILING
 from io import BytesIO
 from pathlib import Path
 
@@ -23,7 +23,7 @@ import lgsale_db as db
 
 bp = Blueprint("psi", __name__)
 BASE = Path(__file__).resolve().parent
-METRICS = ["陳列", "期初", "Sell In", "Sell Out", "期末", "可銷售"]
+METRICS = ["陳列", "期初", "Sell In", "Sell Out", "期末", "可銷售", "補貨建議"]
 _SOURCE_CACHE = {}
 _SOURCE_CACHE_LOCK = threading.RLock()
 _SOURCE_CACHE_SECONDS = 8
@@ -44,12 +44,32 @@ def period(month, now):
     return month, start, end, as_of
 
 
-def load_source(month=None):
+def shift_month(value, offset):
+    index = value.year * 12 + value.month - 1 + offset
+    return datetime(index // 12, index % 12 + 1, 1)
+
+
+def average_period(report_start, average_from=None):
+    default_start, end = shift_month(report_start, -3), shift_month(report_start, 1)
+    if not average_from:
+        return default_start, end
+    try:
+        start = datetime.strptime(average_from, "%Y-%m")
+    except ValueError:
+        raise ValueError("補貨建議起始月份格式必須為 YYYY-MM") from None
+    if start >= end:
+        raise ValueError("補貨建議起始月份不可晚於 PSI 顯示月份")
+    return start, end
+
+
+def load_source(month=None, average_from=None):
     with db.connect() as conn:
         cur = conn.cursor()
         cur.execute("SELECT SYSDATETIME()")
         now = cur.fetchone()[0]
         month, start, end, as_of = period(month, now)
+        average_start, average_end = average_period(start, average_from)
+        average_months = (average_end.year-average_start.year)*12 + average_end.month-average_start.month
         key = month.replace("-", "")
         # Assignment at the report cutoff: each dealer appears once, including unassigned dealers.
         cur.execute("""SELECT d.DealerId,d.DealerCode,d.DealerName,e.EmployeeId,e.EmployeeName,
@@ -99,30 +119,62 @@ def load_source(month=None):
             GROUP BY v.DealerId,p.ProductId""", (now, start.date(), end.date(), as_of.date()))
         outgoing = list(cur.fetchall())
         cur.execute("""WITH latest_visits AS (
-            SELECT v.StoreVisitId,v.DealerId,v.ReportDateTime,
-                ROW_NUMBER() OVER (PARTITION BY v.DealerId
+            SELECT v.StoreVisitId,v.DealerId,v.DealerLocationId,v.ReportDateTime,
+                ROW_NUMBER() OVER (PARTITION BY v.DealerLocationId
                     ORDER BY v.ReportDateTime DESC,v.StoreVisitId DESC) AS rn
             FROM dbo.StoreVisit v
             WHERE v.RecordStatus='ACTIVE' AND v.ReportDateTime<=%s)
-            SELECT v.DealerId,p.ProductId,p.DisplayQuantity,v.ReportDateTime
+            SELECT v.DealerId,p.ProductId,SUM(CAST(p.DisplayQuantity AS bigint)),MAX(v.ReportDateTime)
             FROM latest_visits v JOIN dbo.StoreVisitProductDetail p ON p.StoreVisitId=v.StoreVisitId
-            WHERE v.rn=1 AND p.DisplayQuantity IS NOT NULL""", (as_of,))
+            WHERE v.rn=1 AND p.DisplayQuantity IS NOT NULL
+            GROUP BY v.DealerId,p.ProductId""", (as_of,))
         displays = list(cur.fetchall())
         cur.execute("""SELECT ProductId,DealerId FROM dbo.OpeningInventoryProductExclusion
             WHERE EffectiveFromMonth<=%s AND (EffectiveToMonth IS NULL OR EffectiveToMonth>=%s)""", (key, key))
         exclusions = list(cur.fetchall())
         cur.execute("""SELECT p.DealerId,p.ProductId,p.DisplayPhotoId,p.CapturedAt,
-                   COALESCE(e.EmployeeName,d.DealerName,'—')
+                   COALESCE(e.EmployeeName,d.DealerName,'—'),l.LocationName
             FROM dbo.DealerProductDisplayPhoto p JOIN dbo.UserAccount a ON a.UserAccountId=p.UploadedByUserAccountId
+            JOIN dbo.DealerLocation l ON l.DealerLocationId=p.DealerLocationId
             LEFT JOIN dbo.Employee e ON e.EmployeeId=a.EmployeeId LEFT JOIN dbo.Dealer d ON d.DealerId=a.DealerId
             WHERE p.DataMonth=%s AND p.RecordStatus='ACTIVE'""",(key,))
         display_photos=list(cur.fetchall())
+        average_from_key, average_to_key = average_start.strftime("%Y%m"), (average_end-timedelta(days=1)).strftime("%Y%m")
+        cur.execute("""WITH eligible AS (
+                SELECT i.DealerId,i.ProductId
+                FROM dbo.MonthlyOpeningInventoryDetail i JOIN dbo.ImportBatch b ON b.ImportBatchId=i.ImportBatchId
+                WHERE b.ImportType='OPENING_INVENTORY' AND b.ImportStatus='Official'
+                  AND b.DataMonth>=%s AND b.DataMonth<=%s
+                UNION
+                SELECT t.DealerId,t.ProductId
+                FROM dbo.SellInTransaction t JOIN dbo.ImportBatch b ON b.ImportBatchId=t.ImportBatchId
+                WHERE b.ImportType='SELL_IN' AND b.ImportStatus='Official'
+                  AND t.TransactionStatus='VALID' AND t.ReviewStatus='APPROVED'
+                  AND t.InventoryEffectiveDate>=%s AND t.InventoryEffectiveDate<%s
+                UNION
+                SELECT v.DealerId,p.ProductId
+                FROM dbo.StoreVisit v JOIN dbo.StoreVisitProductDetail p ON p.StoreVisitId=v.StoreVisitId
+                WHERE v.RecordStatus='ACTIVE' AND p.SellOutQuantity IS NOT NULL
+                  AND p.SellOutDate>=%s AND p.SellOutDate<%s),
+            sales AS (
+                SELECT v.DealerId,p.ProductId,SUM(CAST(p.SellOutQuantity AS bigint)) Quantity
+                FROM dbo.StoreVisit v JOIN dbo.StoreVisitProductDetail p ON p.StoreVisitId=v.StoreVisitId
+                WHERE v.RecordStatus='ACTIVE' AND v.ReportDateTime<=%s
+                  AND p.SellOutQuantity IS NOT NULL AND p.SellOutDate>=%s AND p.SellOutDate<%s
+                GROUP BY v.DealerId,p.ProductId)
+            SELECT e.DealerId,e.ProductId,COALESCE(s.Quantity,0)
+            FROM eligible e LEFT JOIN sales s ON s.DealerId=e.DealerId AND s.ProductId=e.ProductId""",
+            (average_from_key,average_to_key,average_start.date(),average_end.date(),average_start.date(),average_end.date(),
+             now,average_start.date(),average_end.date()))
+        average_sales=list(cur.fetchall())
     return dict(month=month, asOf=as_of.isoformat(timespec="seconds"), fetchedAt=now.isoformat(timespec="seconds"),
                 currentMonth=now.strftime("%Y-%m"), isCurrentMonth=month == now.strftime("%Y-%m"),
                 isLastDay=month == now.strftime("%Y-%m") and now.date() == (end - timedelta(days=1)).date(),
                 dealers=dealers, products=products,
                 opening=opening, incoming=incoming, outgoing=outgoing, displays=displays,
-                nextOpening=next_opening, exclusions=exclusions, displayPhotos=display_photos)
+                nextOpening=next_opening, exclusions=exclusions, displayPhotos=display_photos,
+                averageFrom=average_start.strftime("%Y-%m"), averageTo=shift_month(average_end,-1).strftime("%Y-%m"),
+                averageMonths=average_months, averageSales=average_sales)
 
 
 def ensure_month_end_rollover(employee_id: int | None) -> bool:
@@ -198,15 +250,15 @@ def ensure_month_end_rollover(employee_id: int | None) -> bool:
         conn.close()
 
 
-def cached_source(month=None, fresh=False):
+def cached_source(month=None, fresh=False, average_from=None):
     """Briefly reuse raw facts while a user changes filters; explicit refresh bypasses it."""
-    key = month or "CURRENT"
+    key = (month or "CURRENT", average_from or "DEFAULT")
     now = time.monotonic()
     with _SOURCE_CACHE_LOCK:
         cached = _SOURCE_CACHE.get(key)
         if not fresh and cached and now - cached[0] < _SOURCE_CACHE_SECONDS:
             return cached[1]
-    result = load_source(month)
+    result = load_source(month, average_from) if average_from else load_source(month)
     with _SOURCE_CACHE_LOCK:
         _SOURCE_CACHE[key] = (time.monotonic(), result)
         # Only current/recent filter activity is useful; avoid unbounded month keys.
@@ -225,19 +277,34 @@ def metrics(fact, *, is_current_month=True, is_last_day=False):
     opening = fact.get("opening")
     incoming, outgoing = (fact.get(k, 0) for k in ("incoming", "outgoing"))
     display = fact.get("display")
-    if is_current_month:
-        closing = None if not is_last_day or opening is None else opening + incoming - outgoing
-    else:
-        closing = fact.get("nextOpening")
-        outgoing = None if opening is None or closing is None else opening + incoming - closing
-    available = None if display is None or outgoing is None else display + incoming - outgoing - display
-    return [None if n is None else number(n) for n in (display, opening, incoming, outgoing, closing, available)]
+    closing = None if opening is None else opening + incoming - outgoing
+    available = None if closing is None else closing - (display if display is not None else Decimal(0))
+    return [None if n is None else number(n) for n in (display, opening, incoming, outgoing, closing, available)] + [None]
+
+
+def replenishment_values(average_sales, months):
+    by_pair = {(int(d), int(p)): Decimal(quantity) / months for d, p, quantity in average_sales}
+    return {key: int(value.to_integral_value(rounding=ROUND_CEILING)) for key, value in by_pair.items()}
+
+
+def replenishment_label(product_id, dealer_id, values, pair_averages, wos):
+    dealer_average = pair_averages.get((dealer_id, product_id), 0)
+    available = values[5]
+    recommendation = "-"
+    if available is not None:
+        shortage = Decimal(dealer_average * (wos // 4)) - Decimal(str(available))
+        if shortage > 0:
+            recommendation = str(int(shortage.to_integral_value(rounding=ROUND_CEILING)))
+    return f"{dealer_average} / {recommendation}"
 
 
 def sum_values(values):
     values = list(values)
     result = []
     for i in range(len(METRICS)):
+        if i == len(METRICS)-1:
+            result.append(None)
+            continue
         column = [v[i] for v in values]
         if not column or any(v is None for v in column):
             result.append(None)
@@ -292,7 +359,7 @@ def matrix(report, level="dealer"):
         values = []
         for c in columns:
             present = [row["cells"][str(d)]["values"] for d in c["dealerIds"] if str(d) in row["cells"]]
-            values.append(present[0] if len(present) == 1 else sum_values(present))
+            values.append(present[0] if not c["total"] and len(present) == 1 else sum_values(present))
         photos=[]
         for c in columns:
             present=[row["cells"][str(d)].get("displayPhoto") for d in c["dealerIds"] if str(d) in row["cells"]]
@@ -312,6 +379,14 @@ def matrix(report, level="dealer"):
 
 def build_report(source, filters, allowed_dealer_ids=None):
     facts = defaultdict(dict)
+    average_months = int(source.get("averageMonths", 4))
+    pair_averages = replenishment_values(source.get("averageSales", []), average_months)
+    try:
+        wos = int(filters.get("wos", 8))
+    except (TypeError, ValueError):
+        raise ValueError("WOS 必須是 4、8、12 或 16") from None
+    if wos not in {4, 8, 12, 16}:
+        raise ValueError("WOS 必須是 4、8、12 或 16")
     for d, p, n in source["opening"]:
         quantity = Decimal(n)
         if quantity != 0:
@@ -324,11 +399,13 @@ def build_report(source, filters, allowed_dealer_ids=None):
         if incoming != 0:
             facts[key].setdefault("opening", Decimal(0))
             facts[key]["incoming"] = incoming
-    active_pairs = set(facts)
     for d, p, n in source["outgoing"]:
         key = (int(d), int(p))
-        if key in active_pairs:
+        outgoing = Decimal(n)
+        if outgoing != 0:
+            facts[key].setdefault("opening", Decimal(0))
             facts[key]["outgoing"] = Decimal(n)
+    active_pairs = set(facts)
     for d, p, n in source.get("nextOpening", []):
         key = (int(d), int(p))
         if key in facts:
@@ -337,10 +414,10 @@ def build_report(source, filters, allowed_dealer_ids=None):
         key = (int(d), int(p))
         if key in active_pairs:
             facts[key].update(display=Decimal(n), displayAt=stamp.isoformat(timespec="seconds"))
-    for d,p,photo_id,captured_at,uploader in source.get("displayPhotos",[]):
+    for d,p,photo_id,captured_at,uploader,location in source.get("displayPhotos",[]):
         key=(int(d),int(p))
         if key in active_pairs:
-            facts[key]["displayPhoto"]={"id":int(photo_id),"capturedAt":captured_at.isoformat(timespec="seconds"),"uploader":uploader}
+            facts[key].setdefault("displayPhotos",[]).append({"id":int(photo_id),"capturedAt":captured_at.isoformat(timespec="seconds"),"uploader":uploader,"location":location})
     global_ex = {int(p) for p, d in source["exclusions"] if d is None}
     pair_ex = {(int(d), int(p)) for p, d in source["exclusions"] if d is not None}
     excluded = sum(p in global_ex or (d, p) in pair_ex for d, p in facts)
@@ -375,10 +452,12 @@ def build_report(source, filters, allowed_dealer_ids=None):
     dealers = [d for d in dealers if any(k[0] == d["id"] for k in facts)]
     cells_by_product = defaultdict(dict)
     for (dealer_id, product_id), fact in facts.items():
+        values = metrics(fact, is_current_month=source.get("isCurrentMonth", True),
+                         is_last_day=source.get("isLastDay", False))
+        values[-1] = replenishment_label(product_id, dealer_id, values, pair_averages, wos)
         cells_by_product[product_id][str(dealer_id)] = {
-            "values": metrics(fact, is_current_month=source.get("isCurrentMonth", True),
-                              is_last_day=source.get("isLastDay", False)),
-            "displayAt": fact.get("displayAt"), "displayPhoto":fact.get("displayPhoto"),
+            "values": values,
+            "displayAt": fact.get("displayAt"), "displayPhoto":({"id":fact["displayPhotos"][0]["id"],"count":len(fact["displayPhotos"]),"items":fact["displayPhotos"]} if fact.get("displayPhotos") else None),
             "sellOutReported": "outgoing" in fact}
     rows = []
     for p in products:
@@ -386,16 +465,20 @@ def build_report(source, filters, allowed_dealer_ids=None):
         if values:
             rows.append({**p, "cells": values})
     return {k: source[k] for k in ("month", "asOf", "fetchedAt", "currentMonth")} | dict(
+        averageFrom=source.get("averageFrom"), averageTo=source.get("averageTo"), averageMonths=average_months,
+        averageMax=source["month"], wos=wos,
         dealers=dealers, rows=rows, options=options, metrics=METRICS,
         quality=dict(missingOpening=sum("opening" not in f for f in facts.values()),
                      missingDisplay=sum("display" not in f for f in facts.values()),
                      sellOutReportedPairs=sum("outgoing" in f for f in facts.values()),
                      excludedPairs=excluded, excludedProducts=excluded_products),
-        notes=["Sell In 為帶正負號的淨進貨量；歷史 Sale Out = 期初 + Sell In − 期末。",
-               "月中期末留白；月底以期初 + Sell In − 已回報 Sale Out 形成期末並建立下月期初。歷史期末取下月正式期初。",
-               "可銷售依即時回報計算：(陳列 + Sell In) − Sale Out − 陳列。",
-               "陳列取該經銷商截至日最後一次有效巡店的商品明細（可沿用前月），不是巡店累加；該次未填陳列時可銷售留白。",
-               "PSI 納入當月正式非零期初，或當月有有效正／負 Sell In 的客戶／商品；僅有 Sell Out 或陳列不能單獨建立商品列。",
+        notes=["Sell In 為帶正負號的淨進貨量；Sell Out 採用當月已登錄且有效的實銷回報。",
+               "期末 = 期初 + Sell In − Sell Out；本月與歷史月份皆即時計算，不依賴下月期初。沒有期初但當月有 Sell In 時，期初以 0 計算。",
+               "可銷售 = 期末 − 陳列；陳列尚未回報時以 0 計算，期末尚未產生時留白。",
+               "陳列取該經銷商截至日最後一次有效巡店的商品明細（可沿用前月），不是巡店累加；尚未回報時陳列欄留白、可銷售以陳列 0 計算。",
+               "補貨建議顯示：自家月均 / 建議補貨台數。自家月均為起始月份至 PSI 顯示月份（含首尾月份）的 Sell Out 總和除以月份數，結果無條件進位。",
+               "建議補貨 = 自家月均 × (WOS ÷ 4) − 可銷售；有缺口時顯示補貨台數，沒有缺口顯示「-」。",
+               "PSI 納入當月正式非零期初，或當月有有效正／負 Sell In、Sell Out 的客戶／商品；只有陳列不能單獨建立商品列。",
                "依截至日的區域與業務歸屬分組，套用有效 PSI 排除規則；售價待新增，零值留白。"])
 
 
@@ -432,7 +515,8 @@ def page():
 @bp.get("/api/psi")
 def report():
     ensure_month_end_rollover(getattr(g.access, "employee_id", None))
-    source = cached_source(request.args.get("month"), request.args.get("fresh") == "1")
+    source = cached_source(request.args.get("month"), request.args.get("fresh") == "1",
+                           request.args.get("averageFrom"))
     return jsonify(matrix(build_report(source, request.args, g.access.dealer_ids),
                           request.args.get("level", "dealer")))
 
@@ -448,7 +532,8 @@ def export():
     if photo_mode not in {"", "thumbnail"}:
         raise ValueError("Excel 照片選項無效")
     ensure_month_end_rollover(getattr(g.access, "employee_id", None))
-    result = matrix(build_report(cached_source(request.args.get("month")), request.args,
+    result = matrix(build_report(cached_source(request.args.get("month"), False,
+                                               request.args.get("averageFrom")), request.args,
                                  g.access.dealer_ids), request.args.get("level", "dealer"))
     metric_count = len(METRICS)
     book = openpyxl.Workbook()
@@ -495,14 +580,15 @@ def export():
             cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
             if isinstance(cell.value, str):
                 cell.data_type = "s"
-    for i, w in enumerate([18, 16, 24, 20] + [10]*metric_count*len(result["columns"]), 1):
+    metric_widths = [10] * (metric_count - 1) + [12]
+    for i, w in enumerate([18, 16, 24, 20] + metric_widths*len(result["columns"]), 1):
         sheet.column_dimensions[get_column_letter(i)].width = w
     sheet.row_dimensions[3].height = 36
     sheet.freeze_panes = "E5"
     note = book.create_sheet("計算說明")
     for line in result["notes"]:
         note.append([line])
-    note.append(["空白可能為零值或資料未齊；缺少期初或陳列時，相關合計也留白，不以部分資料冒充完整庫存。"])
+    note.append(["空白可能為零值或資料未齊；缺少期初時相關合計留白。缺少陳列時陳列欄留白，可銷售以陳列 0 計算。"])
     note.append(["照片匯出：" + ("已在客戶明細的陳列欄插入固定尺寸縮圖；原圖請回到 PSI 點擊相機圖示查看。" if photo_mode else "本檔未插入照片，以維持較小檔案。")])
     note.column_dimensions["A"].width = 120
     output = BytesIO()

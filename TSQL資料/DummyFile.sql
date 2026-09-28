@@ -74,6 +74,11 @@ BEGIN TRY
     DECLARE @D4 bigint=(SELECT DealerId FROM dbo.Dealer WHERE DealerCode='D1201');
     DECLARE @D5 bigint=(SELECT DealerId FROM dbo.Dealer WHERE DealerCode='D1260');
     DECLARE @D6 bigint=(SELECT DealerId FROM dbo.Dealer WHERE DealerCode='D1305');
+    DECLARE @L1 bigint=(SELECT DealerLocationId FROM dbo.DealerLocation WHERE DealerId=@D1 AND IsPrimary=1);
+    DECLARE @L2 bigint=(SELECT DealerLocationId FROM dbo.DealerLocation WHERE DealerId=@D2 AND IsPrimary=1);
+    DECLARE @L3 bigint=(SELECT DealerLocationId FROM dbo.DealerLocation WHERE DealerId=@D3 AND IsPrimary=1);
+    DECLARE @L4 bigint=(SELECT DealerLocationId FROM dbo.DealerLocation WHERE DealerId=@D4 AND IsPrimary=1);
+    DECLARE @L5 bigint=(SELECT DealerLocationId FROM dbo.DealerLocation WHERE DealerId=@D5 AND IsPrimary=1);
 
     INSERT dbo.DealerLevelHistory (DealerId, DealerStatus, StartDateTime, EndDateTime, ChangeReason)
     VALUES (@D1,N'DC店','2024-01-01',NULL,N'測試經銷商'),
@@ -164,10 +169,10 @@ BEGIN TRY
 
     /* Employee-entered and dealer-entered visit reports */
     INSERT dbo.StoreVisit
-        (DealerId,DealerAssignmentId,EntrySourceType,ReportDateTime,RecordStatus,CreatedAt,CreatedByUserAccountId)
-    VALUES (@D1,@A1,'EMPLOYEE','2026-08-06 15:20','ACTIVE','2026-08-06 15:20',@WangAccount),
-           (@D2,@A2,'DEALER','2026-08-07 11:10','ACTIVE','2026-08-07 11:10',@DealerAccount),
-           (@D3,@A3,'EMPLOYEE','2026-07-30 14:00','VOIDED','2026-07-30 14:00',(SELECT UserAccountId FROM dbo.UserAccount WHERE EmployeeId=@Zhang));
+        (DealerId,DealerLocationId,DealerAssignmentId,EntrySourceType,ReportDateTime,RecordStatus,CreatedAt,CreatedByUserAccountId)
+    VALUES (@D1,@L1,@A1,'EMPLOYEE','2026-08-06 15:20','ACTIVE','2026-08-06 15:20',@WangAccount),
+           (@D2,@L2,@A2,'DEALER','2026-08-07 11:10','ACTIVE','2026-08-07 11:10',@DealerAccount),
+           (@D3,@L3,@A3,'EMPLOYEE','2026-07-30 14:00','VOIDED','2026-07-30 14:00',(SELECT UserAccountId FROM dbo.UserAccount WHERE EmployeeId=@Zhang));
 
     DECLARE @V1 bigint=(SELECT StoreVisitId FROM dbo.StoreVisit WHERE DealerId=@D1 AND ReportDateTime='2026-08-06 15:20');
     DECLARE @V2 bigint=(SELECT StoreVisitId FROM dbo.StoreVisit WHERE DealerId=@D2 AND ReportDateTime='2026-08-07 11:10');
@@ -192,14 +197,14 @@ BEGIN TRY
     DECLARE @T4 bigint=(SELECT VisitTaskId FROM dbo.VisitTask WHERE TaskTitle=N'已取消的舊版陳列任務');
 
     INSERT dbo.VisitTaskExecution
-        (VisitTaskId,DealerId,ResponsibleEmployeeId,CompletedByEmployeeId,ExecutionNote,SubmittedAt)
-    VALUES (@T1,@D1,@Wang,@Wang,NULL,'2026-08-06 16:00'),
-           (@T1,@D2,@Wang,NULL,NULL,NULL),
-           (@T1,@D3,@Zhang,@Zhang,NULL,'2026-08-07 13:30'),
-           (@T2,@D1,@Wang,@Wang,N'現場施工，無法拍照。','2026-08-09 10:00'),
-           (@T2,@D2,@Wang,NULL,NULL,NULL),
-           (@T3,@D4,@Li,NULL,NULL,NULL),
-           (@T4,@D5,@Chen,NULL,NULL,NULL);
+        (VisitTaskId,DealerId,DealerLocationId,ResponsibleEmployeeId,CompletedByEmployeeId,ExecutionNote,SubmittedAt)
+    VALUES (@T1,@D1,@L1,@Wang,@Wang,NULL,'2026-08-06 16:00'),
+           (@T1,@D2,@L2,@Wang,NULL,NULL,NULL),
+           (@T1,@D3,@L3,@Zhang,@Zhang,NULL,'2026-08-07 13:30'),
+           (@T2,@D1,@L1,@Wang,@Wang,N'現場施工，無法拍照。','2026-08-09 10:00'),
+           (@T2,@D2,@L2,@Wang,NULL,NULL,NULL),
+           (@T3,@D4,@L4,@Li,NULL,NULL,NULL),
+           (@T4,@D5,@L5,@Chen,NULL,NULL,NULL);
 
     DECLARE @E11 bigint=(SELECT TaskExecutionId FROM dbo.VisitTaskExecution WHERE VisitTaskId=@T1 AND DealerId=@D1);
     DECLARE @E13 bigint=(SELECT TaskExecutionId FROM dbo.VisitTaskExecution WHERE VisitTaskId=@T1 AND DealerId=@D3);

@@ -1,4 +1,4 @@
-"""SQL Server repository for the LGSale prototype UI."""
+"""SQL Server repository for LGSale."""
 
 from __future__ import annotations
 
@@ -492,6 +492,7 @@ def tasks(dealer_ids: set[int] | frozenset[int] | None = None) -> list[dict[str,
     SELECT t.VisitTaskId,t.TaskTitle,t.Instruction,t.ValidFrom,t.DueDate,t.RecordStatus,t.CreatedAt,
            creator.EmployeeName,
            t.SampleTaskExecutionId,t.SampleApprovedAt,sampleDealer.DealerName,sampleDealer.DealerId,
+           approver.EmployeeName,t.ScopeOrgUnitId,t.ScopeNameSnapshot,t.ScopeDealerCount,t.ScopeExecutionCount,
            COUNT(DISTINCT e.TaskExecutionId),
            COUNT(DISTINCT CASE WHEN e.SubmittedAt IS NOT NULL OR p.TaskPhotoId IS NOT NULL THEN e.TaskExecutionId END),
            COUNT(DISTINCT p.TaskPhotoId),
@@ -502,25 +503,33 @@ def tasks(dealer_ids: set[int] | frozenset[int] | None = None) -> list[dict[str,
       LEFT JOIN dbo.VisitTaskPhoto p ON p.TaskExecutionId=e.TaskExecutionId
       LEFT JOIN dbo.VisitTaskExecution sampleExecution ON sampleExecution.TaskExecutionId=t.SampleTaskExecutionId
       LEFT JOIN dbo.Dealer sampleDealer ON sampleDealer.DealerId=sampleExecution.DealerId
+      LEFT JOIN dbo.Employee approver ON approver.EmployeeId=t.SampleApprovedByEmployeeId
       LEFT JOIN dbo.VisitTaskPhoto samplePhoto ON samplePhoto.TaskExecutionId=t.SampleTaskExecutionId
     """ + scoped + """
      GROUP BY t.VisitTaskId,t.TaskTitle,t.Instruction,t.ValidFrom,t.DueDate,t.RecordStatus,t.CreatedAt,
-              creator.EmployeeName,t.SampleTaskExecutionId,t.SampleApprovedAt,sampleDealer.DealerName,sampleDealer.DealerId
+              creator.EmployeeName,t.SampleTaskExecutionId,t.SampleApprovedAt,sampleDealer.DealerName,sampleDealer.DealerId,
+              approver.EmployeeName,t.ScopeOrgUnitId,t.ScopeNameSnapshot,t.ScopeDealerCount,t.ScopeExecutionCount
      ORDER BY t.CreatedAt DESC,t.VisitTaskId DESC
     """
     with connect() as conn:
         cur = conn.cursor(); cur.execute(sql, tuple(sorted(dealer_ids)) if dealer_ids is not None else ()); rows = cur.fetchall()
     result = []
     for row in rows:
-        task_id, title, instruction, valid_from, due_date, status, created_at, creator, sample_execution, approved_at, sample_dealer, sample_dealer_id, total, completed, photo_count, sample_photos = row
+        task_id, title, instruction, valid_from, due_date, status, created_at, creator, sample_execution, approved_at, sample_dealer, sample_dealer_id, approver, scope_org_id, scope_name, scope_dealers, scope_executions, total, completed, photo_count, sample_photos = row
         today = date.today()
         phase = "VOIDED" if status == "VOIDED" else "UPCOMING" if today < valid_from else "CLOSED" if today > due_date else "ACTIVE"
         result.append({
             "id": int(task_id), "code": f"VT-{created_at:%Y%m}-{int(task_id):03d}", "title": title,
             "instruction": instruction, "validFrom": valid_from.isoformat(), "dueDate": due_date.isoformat(),
             "recordStatus": status, "phase": phase, "creator": creator,
+            "createdAt": created_at.isoformat(timespec="minutes"),
+            "scopeOrgUnitId": int(scope_org_id) if scope_org_id is not None else None,
+            "scopeName": scope_name, "scopeDealerCount": int(scope_dealers),
+            "scopeExecutionCount": int(scope_executions),
             "sampleStatus": "APPROVED" if sample_execution is not None and approved_at is not None else "PENDING",
             "sampleDealer": sample_dealer if dealer_ids is None or sample_dealer_id in dealer_ids else "範圍外樣本",
+            "sampleApprovedBy": approver,
+            "sampleApprovedAt": approved_at.isoformat(timespec="minutes") if approved_at else None,
             "samplePhotos": int(sample_photos), "completed": int(completed),
             "total": int(total), "photoCount": int(photo_count),
             "progress": round(int(completed) / int(total) * 100) if total else 0,
@@ -528,30 +537,84 @@ def tasks(dealer_ids: set[int] | frozenset[int] | None = None) -> list[dict[str,
     return result
 
 
+def task_scopes(valid_from: str, dealer_ids: set[int] | frozenset[int] | None = None) -> list[dict[str, Any]]:
+    if dealer_ids is not None and not dealer_ids:
+        return []
+    dealer_scope = " AND a.DealerId IN (" + ",".join("%s" for _ in dealer_ids) + ")" if dealer_ids is not None else ""
+    sql = """SELECT o.OrgUnitId,o.OrgUnitName,COUNT(DISTINCT a.DealerId),COUNT(DISTINCT l.DealerLocationId)
+      FROM dbo.OrganizationUnit o
+      JOIN dbo.EmployeeOrgAssignmentHistory h ON h.OrgUnitId=o.OrgUnitId
+       AND h.StartDateTime<DATEADD(day,1,CAST(%s AS date))
+       AND (h.EndDateTime IS NULL OR h.EndDateTime>=CAST(%s AS date))
+      JOIN dbo.Employee e ON e.EmployeeId=h.EmployeeId
+       AND e.HireDate<=CAST(%s AS date)
+       AND (e.TerminationDate IS NULL OR e.TerminationDate>=CAST(%s AS date))
+      JOIN dbo.DealerAssignmentHistory a ON a.EmployeeId=e.EmployeeId
+       AND a.StartDateTime<DATEADD(day,1,CAST(%s AS date))
+       AND (a.EndDateTime IS NULL OR a.EndDateTime>=CAST(%s AS date))
+      JOIN dbo.DealerLocation l ON l.DealerId=a.DealerId AND l.IsActive=1
+     WHERE o.IsActive=1""" + dealer_scope + """
+     GROUP BY o.OrgUnitId,o.OrgUnitName
+     ORDER BY o.OrgUnitId"""
+    params = (valid_from,) * 6 + tuple(sorted(dealer_ids) if dealer_ids is not None else ())
+    with connect() as conn:
+        cur = conn.cursor(); cur.execute(sql, params)
+        rows = [{"orgUnitId": int(r[0]), "name": r[1], "dealerCount": int(r[2]),
+                 "executionCount": int(r[3])} for r in cur.fetchall()]
+    if rows:
+        rows.insert(0, {"orgUnitId": None, "name": "全部有效經銷商",
+                        "dealerCount": sum(r["dealerCount"] for r in rows),
+                        "executionCount": sum(r["executionCount"] for r in rows)})
+    return rows
+
+
 def create_task(data: dict[str, Any], creator_id: int | None = None) -> dict[str, Any]:
     conn = connect()
     try:
         cur = conn.cursor(); creator_id = creator_id or _creator_id(cur)
-        row = _one(cur, """
-            INSERT dbo.VisitTask(TaskTitle,Instruction,ValidFrom,DueDate,RecordStatus,CreatedByEmployeeId)
-            OUTPUT inserted.VisitTaskId,inserted.CreatedAt
-            VALUES(%s,%s,%s,%s,'ACTIVE',%s)
-        """, (data["title"], data["instruction"], data["validFrom"], data["dueDate"], creator_id))
-        task_id, created_at = int(row[0]), row[1]
-        limit = int(data.get("total") or 2147483647)
         dealer_ids = data.get("dealerIds")
         if dealer_ids is not None and not dealer_ids:
             raise ValueError("目前沒有可建立任務的經銷商")
-        scoped = " AND d.DealerId IN (" + ",".join("%s" for _ in dealer_ids) + ")" if dealer_ids is not None else ""
-        cur.execute("""
-            SELECT TOP (%s) d.DealerId,a.EmployeeId
-              FROM dbo.Dealer d
-              JOIN dbo.DealerAssignmentHistory a ON a.DealerId=d.DealerId AND a.EndDateTime IS NULL
-              JOIN dbo.Employee e ON e.EmployeeId=a.EmployeeId AND e.TerminationDate IS NULL
-            """ + scoped + " ORDER BY d.DealerId", (limit, *(dealer_ids or ())))
+        scoped = " AND a.DealerId IN (" + ",".join("%s" for _ in dealer_ids) + ")" if dealer_ids is not None else ""
+        org_id = data.get("orgUnitId")
+        org_scoped = " AND h.OrgUnitId=%s" if org_id is not None else ""
+        cur.execute("""WITH selected AS (
+            SELECT DISTINCT a.DealerId,a.EmployeeId
+              FROM dbo.DealerAssignmentHistory a
+              JOIN dbo.Employee e ON e.EmployeeId=a.EmployeeId
+               AND e.HireDate<=CAST(%s AS date)
+               AND (e.TerminationDate IS NULL OR e.TerminationDate>=CAST(%s AS date))
+              JOIN dbo.EmployeeOrgAssignmentHistory h ON h.EmployeeId=e.EmployeeId
+               AND h.StartDateTime<DATEADD(day,1,CAST(%s AS date))
+               AND (h.EndDateTime IS NULL OR h.EndDateTime>=CAST(%s AS date))
+             WHERE a.StartDateTime<DATEADD(day,1,CAST(%s AS date))
+               AND (a.EndDateTime IS NULL OR a.EndDateTime>=CAST(%s AS date))""" + scoped + org_scoped + """
+        )
+            SELECT s.DealerId,s.EmployeeId,l.DealerLocationId
+              FROM selected s JOIN dbo.DealerLocation l ON l.DealerId=s.DealerId AND l.IsActive=1
+             ORDER BY s.DealerId,l.IsPrimary DESC,l.DealerLocationId""",
+            (data["validFrom"],) * 6 + tuple(dealer_ids or ()) + ((int(org_id),) if org_id is not None else ()))
         assignments = cur.fetchall()
-        for dealer_id, employee_id in assignments:
-            cur.execute("INSERT dbo.VisitTaskExecution(VisitTaskId,DealerId,ResponsibleEmployeeId) VALUES(%s,%s,%s)", (task_id, dealer_id, employee_id))
+        if not assignments:
+            raise ValueError("所選執行範圍目前沒有有效的經銷商店點")
+        scope_dealer_count=len({int(r[0]) for r in assignments})
+        scope_execution_count=len(assignments)
+        scope_name="全部有效經銷商"
+        if org_id is not None:
+            scope_row=_one(cur,"SELECT OrgUnitName FROM dbo.OrganizationUnit WHERE OrgUnitId=%s AND IsActive=1",(int(org_id),))
+            if scope_row is None:raise ValueError("找不到有效的執行處別")
+            scope_name=scope_row[0]
+        row = _one(cur, """
+            INSERT dbo.VisitTask(TaskTitle,Instruction,ValidFrom,DueDate,ScopeOrgUnitId,ScopeNameSnapshot,
+                                  ScopeDealerCount,ScopeExecutionCount,RecordStatus,CreatedByEmployeeId)
+            OUTPUT inserted.VisitTaskId,inserted.CreatedAt
+            VALUES(%s,%s,%s,%s,%s,%s,%s,%s,'ACTIVE',%s)
+        """, (data["title"],data["instruction"],data["validFrom"],data["dueDate"],
+              int(org_id) if org_id is not None else None,scope_name,scope_dealer_count,
+              scope_execution_count,creator_id))
+        task_id, created_at = int(row[0]), row[1]
+        for dealer_id, employee_id, location_id in assignments:
+            cur.execute("INSERT dbo.VisitTaskExecution(VisitTaskId,DealerId,DealerLocationId,ResponsibleEmployeeId) VALUES(%s,%s,%s,%s)", (task_id, dealer_id, location_id, employee_id))
         conn.commit()
         return {"id": task_id, "code": f"VT-{created_at:%Y%m}-{task_id:03d}", "executionCount": len(assignments)}
     except Exception:
@@ -583,12 +646,14 @@ def dealers(dealer_id: int | None = None, dealer_ids: set[int] | frozenset[int] 
     scoped = " AND d.DealerId IN (" + ",".join("%s" for _ in dealer_ids) + ")" if dealer_ids is not None else ""
     sql = """
     SELECT d.DealerId,d.DealerCode,d.DealerName,COALESCE(l.DealerStatus,'—'),COALESCE(e.EmployeeName,'未指派'),MAX(v.ReportDateTime),
-           d.TaxId,d.Area,d.DealerCondition,d.ShortName,d.ContactName,d.MobilePhone,d.CompanyPhone,d.PostalCode,d.StreetAddress
+           d.TaxId,d.Area,d.DealerCondition,d.ShortName,d.ContactName,d.MobilePhone,d.CompanyPhone,d.PostalCode,d.StreetAddress,
+           COUNT(DISTINCT CASE WHEN loc.IsActive=1 THEN loc.DealerLocationId END)
       FROM dbo.Dealer d
       LEFT JOIN dbo.DealerLevelHistory l ON l.DealerId=d.DealerId AND l.EndDateTime IS NULL
       LEFT JOIN dbo.DealerAssignmentHistory a ON a.DealerId=d.DealerId AND a.EndDateTime IS NULL
       LEFT JOIN dbo.Employee e ON e.EmployeeId=a.EmployeeId
       LEFT JOIN dbo.StoreVisit v ON v.DealerId=d.DealerId AND v.RecordStatus='ACTIVE'
+      LEFT JOIN dbo.DealerLocation loc ON loc.DealerId=d.DealerId
      WHERE (%s IS NULL OR d.DealerId=%s)
     """ + scoped + """
      GROUP BY d.DealerId,d.DealerCode,d.DealerName,l.DealerStatus,e.EmployeeName,d.TaxId,d.Area,d.DealerCondition,d.ShortName,d.ContactName,d.MobilePhone,d.CompanyPhone,d.PostalCode,d.StreetAddress
@@ -599,7 +664,56 @@ def dealers(dealer_id: int | None = None, dealer_ids: set[int] | frozenset[int] 
         return [{"id":int(r[0]),"code":r[1],"name":r[2],"level":r[3],"employee":r[4],"lastVisit":r[5].date().isoformat() if r[5] else None,
                  "taxId":r[6] or "","area":r[7] or "","condition":r[8],
                  "shortName":r[9] or "","contactName":r[10] or "","mobilePhone":r[11] or "",
-                 "companyPhone":r[12] or "","postalCode":r[13] or "","streetAddress":r[14] or ""} for r in cur.fetchall()]
+                 "companyPhone":r[12] or "","postalCode":r[13] or "","streetAddress":r[14] or "",
+                 "locationCount":int(r[15])} for r in cur.fetchall()]
+
+
+def dealer_locations(dealer_id: int, *, include_inactive: bool = False) -> list[dict[str, Any]]:
+    sql="""SELECT DealerLocationId,LocationName,COALESCE(StreetAddress,''),COALESCE(ContactName,''),
+                  COALESCE(Phone,''),IsPrimary,IsActive
+             FROM dbo.DealerLocation WHERE DealerId=%s""" + ("" if include_inactive else " AND IsActive=1") + \
+        " ORDER BY IsPrimary DESC,DealerLocationId"
+    with connect() as conn:
+        cur=conn.cursor();cur.execute(sql,(dealer_id,));rows=cur.fetchall()
+    return [{"id":int(r[0]),"name":r[1],"streetAddress":r[2],"contactName":r[3],"phone":r[4],
+             "isPrimary":bool(r[5]),"isActive":bool(r[6])} for r in rows]
+
+
+def create_dealer_location(dealer_id: int, data: dict[str, Any]) -> int:
+    conn=connect()
+    try:
+        cur=conn.cursor()
+        if _one(cur,"SELECT 1 FROM dbo.Dealer WHERE DealerId=%s",(dealer_id,)) is None:raise LookupError("找不到經銷商")
+        row=_one(cur,"""INSERT dbo.DealerLocation(DealerId,LocationName,StreetAddress,ContactName,Phone,IsPrimary,IsActive)
+                         OUTPUT inserted.DealerLocationId VALUES(%s,%s,%s,%s,%s,0,1)""",
+                 (dealer_id,data["name"],data.get("streetAddress") or None,data.get("contactName") or None,data.get("phone") or None))
+        conn.commit();return int(row[0])
+    except Exception:conn.rollback();raise
+    finally:conn.close()
+
+
+def update_dealer_location(dealer_id:int, location_id:int, data:dict[str,Any]) -> bool:
+    conn=connect()
+    try:
+        cur=conn.cursor();cur.execute("""UPDATE dbo.DealerLocation SET LocationName=%s,StreetAddress=%s,ContactName=%s,
+                              Phone=%s,IsActive=%s,UpdatedAt=SYSDATETIME()
+                         WHERE DealerLocationId=%s AND DealerId=%s""",
+                    (data["name"],data.get("streetAddress") or None,data.get("contactName") or None,
+                     data.get("phone") or None,1 if data.get("isActive",True) else 0,location_id,dealer_id))
+        changed=cur.rowcount>0;conn.commit();return changed
+    except Exception:conn.rollback();raise
+    finally:conn.close()
+
+
+def _location_id(cur, dealer_id:int, requested:int|None=None) -> int:
+    if requested is not None:
+        row=_one(cur,"SELECT DealerLocationId FROM dbo.DealerLocation WHERE DealerLocationId=%s AND DealerId=%s AND IsActive=1",(requested,dealer_id))
+    else:
+        row=_one(cur,"SELECT DealerLocationId FROM dbo.DealerLocation WHERE DealerId=%s AND IsActive=1 ORDER BY IsPrimary DESC,DealerLocationId",(dealer_id,))
+    if row is None:raise ValueError("此經銷商沒有可用的店面")
+    if requested is None and _one(cur,"SELECT COUNT(*) FROM dbo.DealerLocation WHERE DealerId=%s AND IsActive=1",(dealer_id,))[0] > 1:
+        raise ValueError("請選擇本次巡店的分店")
+    return int(row[0])
 
 
 def create_dealer(data: dict[str, Any]) -> int:
@@ -638,6 +752,11 @@ def update_dealer(dealer_id: int, data: dict[str, Any]) -> bool:
                      *(data[key] or None for key in ("shortName","contactName","mobilePhone","companyPhone","postalCode","streetAddress")), dealer_id))
         if cur.rowcount == 0:
             conn.rollback(); return False
+        cur.execute("""UPDATE dbo.DealerLocation SET LocationName=%s,StreetAddress=%s,ContactName=%s,
+                           Phone=%s,UpdatedAt=SYSDATETIME()
+                        WHERE DealerId=%s AND IsPrimary=1""",
+                    (data["name"],data["streetAddress"] or None,data["contactName"] or None,
+                     data["companyPhone"] or data["mobilePhone"] or None,dealer_id))
         current_level = _one(cur, "SELECT DealerLevelHistoryId,DealerStatus FROM dbo.DealerLevelHistory WHERE DealerId=%s AND EndDateTime IS NULL", (dealer_id,))
         if current_level is None or current_level[1] != data["level"]:
             if current_level is not None:
@@ -854,7 +973,10 @@ def photo_tasks(employee_id: int | None = None, dealer_ids: set[int] | frozenset
     if dealer_ids is not None and not dealer_ids:
         return []
     scoped = " AND e.DealerId IN (" + ",".join("%s" for _ in dealer_ids) + ")" if dealer_ids is not None else ""
-    sql="""SELECT e.TaskExecutionId,t.VisitTaskId,t.TaskTitle,t.Instruction,d.DealerId,d.DealerName,t.ValidFrom,t.DueDate,e.SubmittedAt,t.SampleTaskExecutionId,e.ExecutionNote,e.ResponsibleEmployeeId FROM dbo.VisitTaskExecution e JOIN dbo.VisitTask t ON t.VisitTaskId=e.VisitTaskId JOIN dbo.Dealer d ON d.DealerId=e.DealerId WHERE t.RecordStatus='ACTIVE' AND (%s IS NULL OR e.ResponsibleEmployeeId=%s)""" + scoped + " ORDER BY t.DueDate,e.TaskExecutionId"
+    sql="""SELECT e.TaskExecutionId,t.VisitTaskId,t.TaskTitle,t.Instruction,d.DealerId,d.DealerName,t.ValidFrom,t.DueDate,e.SubmittedAt,t.SampleTaskExecutionId,e.ExecutionNote,e.ResponsibleEmployeeId,l.DealerLocationId,l.LocationName,l.StreetAddress
+      FROM dbo.VisitTaskExecution e JOIN dbo.VisitTask t ON t.VisitTaskId=e.VisitTaskId JOIN dbo.Dealer d ON d.DealerId=e.DealerId
+      JOIN dbo.DealerLocation l ON l.DealerLocationId=e.DealerLocationId
+      WHERE t.RecordStatus='ACTIVE' AND (%s IS NULL OR e.ResponsibleEmployeeId=%s)""" + scoped + " ORDER BY t.DueDate,e.TaskExecutionId"
     with connect() as conn:
         cur=conn.cursor();cur.execute(sql,(employee_id,employee_id,*(sorted(dealer_ids) if dealer_ids is not None else ())));rows=cur.fetchall();result=[]
         for r in rows:
@@ -864,18 +986,19 @@ def photo_tasks(employee_id: int | None = None, dealer_ids: set[int] | frozenset
             cur.execute("SELECT TaskPhotoId,PhotoDescription,StoredFileName,StoredFilePath,SortOrder,SampleTaskPhotoId FROM dbo.VisitTaskPhoto WHERE TaskExecutionId=%s ORDER BY SortOrder,TaskPhotoId",(r[0],))
             photos=[{"photoId":int(x[0]),"description":x[1] or "照片","fileName":x[2],"filePath":x[3],"sortOrder":int(x[4]),"samplePhotoId":int(x[5]) if x[5] else None} for x in cur.fetchall()]
             edit_until = r[8] + timedelta(hours=72) if r[8] else None
-            result.append({"executionId":int(r[0]),"taskId":int(r[1]),"title":r[2],"instruction":r[3],"dealerId":int(r[4]),"dealer":r[5],"validFrom":r[6].isoformat(),"dueDate":r[7].isoformat(),"sample":samples,"photos":photos,"completed":r[8] is not None,"submittedAt":r[8].isoformat(timespec="minutes") if r[8] else None,"editUntil":edit_until.isoformat(timespec="minutes") if edit_until else None,"canEdit":r[8] is None or datetime.now() < edit_until,"executionNote":r[10],"responsibleEmployeeId":int(r[11])})
+            result.append({"executionId":int(r[0]),"taskId":int(r[1]),"title":r[2],"instruction":r[3],"dealerId":int(r[4]),"dealer":r[5],"validFrom":r[6].isoformat(),"dueDate":r[7].isoformat(),"sample":samples,"photos":photos,"completed":r[8] is not None,"submittedAt":r[8].isoformat(timespec="minutes") if r[8] else None,"editUntil":edit_until.isoformat(timespec="minutes") if edit_until else None,"canEdit":r[8] is None or datetime.now() < edit_until,"executionNote":r[10],"responsibleEmployeeId":int(r[11]),"locationId":int(r[12]),"location":r[13],"locationAddress":r[14] or ""})
         return result
 
 
-def add_photo(execution_id:int,description:str,stored_file_name:str|None=None,stored_file_path:str|None=None,sample_photo_id:int|None=None,employee_id:int|None=None,replace_photo_id:int|None=None) -> tuple[int,datetime]:
+def add_photo(execution_id:int,description:str,stored_file_name:str|None=None,stored_file_path:str|None=None,sample_photo_id:int|None=None,employee_id:int|None=None,replace_photo_id:int|None=None,allow_any_employee:bool=False) -> tuple[int,datetime]:
     conn=connect()
     try:
         token=stored_file_name or uuid.uuid4().hex+".jpg";path=stored_file_path or "prototype://"+token;cur=conn.cursor()
         allowed=_one(cur,"""SELECT SubmittedAt FROM dbo.VisitTaskExecution
                             WHERE TaskExecutionId=%s
-                              AND (%s IS NULL OR ResponsibleEmployeeId=%s)
-                              AND (SubmittedAt IS NULL OR DATEADD(hour,72,SubmittedAt)>SYSDATETIME())""",(execution_id,employee_id,employee_id))
+                              AND (%s=1 OR %s IS NULL OR ResponsibleEmployeeId=%s)
+                              AND (SubmittedAt IS NULL OR DATEADD(hour,72,SubmittedAt)>SYSDATETIME())""",
+                     (execution_id,1 if allow_any_employee else 0,employee_id,employee_id))
         if allowed is None:raise PermissionError("此任務不存在、不屬於目前登入人員或已超過 72 小時修改期限")
         if replace_photo_id is not None:
             row=_one(cur,"""UPDATE dbo.VisitTaskPhoto SET SampleTaskPhotoId=%s,PhotoDescription=%s,
@@ -895,7 +1018,31 @@ def add_photo(execution_id:int,description:str,stored_file_name:str|None=None,st
     finally:conn.close()
 
 
-def complete_execution(execution_id:int,note:str|None,employee_id:int|None=None) -> datetime:
+def update_execution_photo_descriptions(execution_id:int,photos:list[dict[str,Any]],employee_id:int|None=None,allow_any_employee:bool=False) -> None:
+    conn=connect()
+    try:
+        cur=conn.cursor()
+        allowed=_one(cur,"""SELECT 1 FROM dbo.VisitTaskExecution
+                              WHERE TaskExecutionId=%s
+                                AND (%s=1 OR %s IS NULL OR ResponsibleEmployeeId=%s)
+                                AND SubmittedAt IS NOT NULL
+                                AND DATEADD(hour,72,SubmittedAt)>SYSDATETIME()""",
+                     (execution_id,1 if allow_any_employee else 0,employee_id,employee_id))
+        if allowed is None:raise PermissionError("此任務不屬於目前登入人員或已超過 72 小時修改期限")
+        known={int(r[0]) for r in cur.execute("SELECT TaskPhotoId FROM dbo.VisitTaskPhoto WHERE TaskExecutionId=%s",(execution_id,)).fetchall()}
+        submitted={int(p["photoId"]) for p in photos}
+        if not submitted or submitted != known:raise ValueError("照片資料與目前任務不一致，請重新載入後再修改")
+        for photo in photos:
+            description=str(photo.get("description") or "").strip()
+            if not description:raise ValueError("所有照片說明必填")
+            cur.execute("UPDATE dbo.VisitTaskPhoto SET PhotoDescription=%s WHERE TaskPhotoId=%s AND TaskExecutionId=%s",
+                        (description,int(photo["photoId"]),execution_id))
+        conn.commit()
+    except Exception:conn.rollback();raise
+    finally:conn.close()
+
+
+def complete_execution(execution_id:int,note:str|None,employee_id:int|None=None,allow_any_employee:bool=False) -> datetime:
     conn=connect()
     try:
         cur=conn.cursor();state=_one(cur,"""SELECT t.SampleTaskExecutionId,e.ResponsibleEmployeeId,e.SubmittedAt,
@@ -904,7 +1051,7 @@ def complete_execution(execution_id:int,note:str|None,employee_id:int|None=None)
             (SELECT COUNT(*) FROM dbo.VisitTaskPhoto p WHERE p.TaskExecutionId=e.TaskExecutionId)
             FROM dbo.VisitTaskExecution e JOIN dbo.VisitTask t ON t.VisitTaskId=e.VisitTaskId WHERE e.TaskExecutionId=%s""",(execution_id,))
         if state is None:raise LookupError("找不到任務執行資料")
-        if employee_id is not None and int(state[1]) != employee_id:raise PermissionError("此任務不屬於目前登入人員")
+        if not allow_any_employee and employee_id is not None and int(state[1]) != employee_id:raise PermissionError("此任務不屬於目前登入人員")
         if state[2] is not None:
             return state[2]
         if note is None and state[0] is not None and int(state[4]) < int(state[3]):raise ValueError("尚有樣本對應照片未完成")
@@ -921,18 +1068,17 @@ def complete_execution(execution_id:int,note:str|None,employee_id:int|None=None)
 def create_visit(data:dict[str,Any]) -> tuple[int,datetime]:
     conn=connect()
     try:
-        cur=conn.cursor();dealer_id=int(data["dealerId"]);assignment=_one(cur,"SELECT DealerAssignmentId FROM dbo.DealerAssignmentHistory WHERE DealerId=%s AND EndDateTime IS NULL",(dealer_id,));account=(data.get("userAccountId"),) if data.get("userAccountId") else _one(cur,"SELECT TOP 1 UserAccountId FROM dbo.UserAccount WHERE AccountType='EMPLOYEE' AND IsLoginEnabled=1 ORDER BY UserAccountId")
+        cur=conn.cursor();dealer_id=int(data["dealerId"]);location_id=_location_id(cur,dealer_id,int(data["locationId"]) if data.get("locationId") else None);assignment=_one(cur,"SELECT DealerAssignmentId FROM dbo.DealerAssignmentHistory WHERE DealerId=%s AND EndDateTime IS NULL",(dealer_id,));account=(data.get("userAccountId"),) if data.get("userAccountId") else _one(cur,"SELECT TOP 1 UserAccountId FROM dbo.UserAccount WHERE AccountType='EMPLOYEE' AND IsLoginEnabled=1 ORDER BY UserAccountId")
         if account is None:raise ValueError("找不到可用的員工帳號")
-        _validate_sell_out_inventory(cur,dealer_id,data["details"])
-        row=_one(cur,"""INSERT dbo.StoreVisit(DealerId,DealerAssignmentId,EntrySourceType,CreatedByUserAccountId) OUTPUT inserted.StoreVisitId,inserted.ReportDateTime VALUES(%s,%s,%s,%s)""",(dealer_id,assignment[0] if assignment else None,data.get("entrySourceType","EMPLOYEE"),account[0]));visit_id=int(row[0])
+        row=_one(cur,"""INSERT dbo.StoreVisit(DealerId,DealerLocationId,DealerAssignmentId,EntrySourceType,CreatedByUserAccountId) OUTPUT inserted.StoreVisitId,inserted.ReportDateTime VALUES(%s,%s,%s,%s,%s)""",(dealer_id,location_id,assignment[0] if assignment else None,data.get("entrySourceType","EMPLOYEE"),account[0]));visit_id=int(row[0])
         for item in data["details"]:
             sell=_optional_quantity(item,"sellOutQuantity","實銷");display=_optional_quantity(item,"displayQuantity","陳列")
             cur.execute("INSERT dbo.StoreVisitProductDetail(StoreVisitId,ProductId,SellOutQuantity,SellOutDate,DisplayQuantity) VALUES(%s,%s,%s,%s,%s)",(visit_id,int(item["productId"]),sell,item.get("sellOutDate") if sell else None,display))
             if item.get("displayPhotoId"):
                 cur.execute("""UPDATE dbo.DealerProductDisplayPhoto SET SourceStoreVisitId=COALESCE(SourceStoreVisitId,%s)
-                               WHERE DisplayPhotoId=%s AND DealerId=%s AND ProductId=%s
+                               WHERE DisplayPhotoId=%s AND DealerId=%s AND DealerLocationId=%s AND ProductId=%s
                                  AND DataMonth=CONVERT(char(6),SYSDATETIME(),112) AND RecordStatus='ACTIVE'""",
-                            (visit_id,int(item["displayPhotoId"]),dealer_id,int(item["productId"])))
+                            (visit_id,int(item["displayPhotoId"]),dealer_id,location_id,int(item["productId"])))
         conn.commit();return visit_id,row[1]
     except Exception:conn.rollback();raise
     finally:conn.close()
@@ -961,22 +1107,25 @@ def mobile_dashboard(employee_id: int | None = None, dealer_id: int | None = Non
             dealer_rows = [{"id":int(r[0]),"code":r[1],"name":r[2],"level":r[3],"employee":r[4],
                             "lastVisit":r[5].isoformat(timespec="minutes") if r[5] else None}
                            for r in cur.fetchall()]
+        for dealer in dealer_rows:
+            dealer["locations"]=dealer_locations(dealer["id"])
         cur.execute("""WITH latest AS (
-            SELECT v.DealerId,p.ProductId,p.DisplayQuantity,
-                   ROW_NUMBER() OVER(PARTITION BY v.DealerId,p.ProductId ORDER BY v.ReportDateTime DESC,v.StoreVisitId DESC) rn
+            SELECT v.DealerId,v.DealerLocationId,p.ProductId,p.DisplayQuantity,
+                   ROW_NUMBER() OVER(PARTITION BY v.DealerLocationId,p.ProductId ORDER BY v.ReportDateTime DESC,v.StoreVisitId DESC) rn
               FROM dbo.StoreVisit v JOIN dbo.StoreVisitProductDetail p ON p.StoreVisitId=v.StoreVisitId
               LEFT JOIN dbo.DealerAssignmentHistory a ON a.DealerId=v.DealerId AND a.EndDateTime IS NULL
              WHERE v.RecordStatus='ACTIVE' AND v.ReportDateTime>=DATEFROMPARTS(YEAR(SYSDATETIME()),MONTH(SYSDATETIME()),1)
                AND (%s IS NULL OR v.DealerId=%s) AND (%s IS NULL OR a.EmployeeId=%s)
         )
-        SELECT l.DealerId,d.DealerCode,d.DealerName,l.ProductId,p.ProductCode,l.DisplayQuantity
+        SELECT l.DealerId,d.DealerCode,d.DealerName,l.DealerLocationId,loc.LocationName,l.ProductId,p.ProductCode,l.DisplayQuantity
           FROM latest l JOIN dbo.Dealer d ON d.DealerId=l.DealerId JOIN dbo.Product p ON p.ProductId=l.ProductId
+          JOIN dbo.DealerLocation loc ON loc.DealerLocationId=l.DealerLocationId
           LEFT JOIN dbo.DealerProductDisplayPhoto photo ON photo.DataMonth=CONVERT(char(6),SYSDATETIME(),112)
-            AND photo.DealerId=l.DealerId AND photo.ProductId=l.ProductId AND photo.RecordStatus='ACTIVE'
+            AND photo.DealerLocationId=l.DealerLocationId AND photo.ProductId=l.ProductId AND photo.RecordStatus='ACTIVE'
          WHERE l.rn=1 AND l.DisplayQuantity>0 AND photo.DisplayPhotoId IS NULL
          ORDER BY d.DealerName,p.ProductCode""",(dealer_id,dealer_id,employee_id,employee_id))
-        pending_photos=[{"dealerId":int(r[0]),"dealerCode":r[1],"dealer":r[2],"productId":int(r[3]),
-                         "productCode":r[4],"displayQuantity":int(r[5])} for r in cur.fetchall()]
+        pending_photos=[{"dealerId":int(r[0]),"dealerCode":r[1],"dealer":r[2],"locationId":int(r[3]),
+                         "location":r[4],"productId":int(r[5]),"productCode":r[6],"displayQuantity":int(r[7])} for r in cur.fetchall()]
         if dealer_ids is not None:
             dealer_rows = [row for row in dealer_rows if row["id"] in dealer_ids]
             pending_photos = [row for row in pending_photos if row["dealerId"] in dealer_ids]
@@ -1008,7 +1157,7 @@ def dealer_summary(dealer_id: int) -> dict[str, Any]:
                 "sellOutTotal":int(row[4]), "displayTotal":int(row[5])}
 
 
-def reportable_products(dealer_id: int, exclude_visit_id: int | None = None) -> list[dict[str, Any]]:
+def reportable_products(dealer_id: int, exclude_visit_id: int | None = None, location_id:int|None=None) -> list[dict[str, Any]]:
     """Products in the current server month's Official opening inventory."""
     sql = """
     WITH opening AS (
@@ -1040,23 +1189,24 @@ def reportable_products(dealer_id: int, exclude_visit_id: int | None = None) -> 
       LEFT JOIN incoming i ON i.ProductId=o.ProductId LEFT JOIN outgoing s ON s.ProductId=o.ProductId
       OUTER APPLY (SELECT TOP 1 pd.DisplayQuantity
           FROM dbo.StoreVisitProductDetail pd JOIN dbo.StoreVisit v ON v.StoreVisitId=pd.StoreVisitId
-          WHERE v.DealerId=%s AND pd.ProductId=o.ProductId AND v.RecordStatus='ACTIVE'
+          WHERE v.DealerId=%s AND (%s IS NULL OR v.DealerLocationId=%s) AND pd.ProductId=o.ProductId AND v.RecordStatus='ACTIVE'
             AND v.ReportDateTime>=DATEFROMPARTS(YEAR(SYSDATETIME()),MONTH(SYSDATETIME()),1)
             AND v.ReportDateTime<=SYSDATETIME() AND pd.DisplayQuantity IS NOT NULL
           ORDER BY v.ReportDateTime DESC,v.StoreVisitId DESC) display
       OUTER APPLY (SELECT TOP 1 dp.DisplayPhotoId FROM dbo.DealerProductDisplayPhoto dp
           WHERE dp.DataMonth=CONVERT(char(6),SYSDATETIME(),112) AND dp.DealerId=%s
+            AND (%s IS NULL OR dp.DealerLocationId=%s)
             AND dp.ProductId=o.ProductId AND dp.RecordStatus='ACTIVE') photo
      ORDER BY p.ProductCode
     """
     with connect() as conn:
-        cur=conn.cursor();cur.execute(sql,(dealer_id,dealer_id,dealer_id,exclude_visit_id,exclude_visit_id,dealer_id,dealer_id));rows=cur.fetchall()
+        cur=conn.cursor();cur.execute(sql,(dealer_id,dealer_id,dealer_id,exclude_visit_id,exclude_visit_id,dealer_id,location_id,location_id,dealer_id,location_id,location_id));rows=cur.fetchall()
     return [{"id":int(r[0]),"code":r[1],"name":r[2],"category":r[3] or r[4],
              "availableQuantity":int(r[5]),"displayQuantity":int(r[6]) if r[6] is not None else None,
              "displayPhotoId":int(r[7]) if r[7] is not None else None} for r in rows]
 
 
-def save_display_photo(*, dealer_id:int, product_id:int, account_id:int, original_name:str,
+def save_display_photo(*, dealer_id:int, location_id:int, product_id:int, account_id:int, original_name:str,
                        original_path:str, thumbnail_path:str, original_size:int,
                        thumbnail_size:int, file_hash:str, captured_at:datetime) -> dict[str,Any]:
     """Activate one monthly dealer/product photo and retain any replaced photo as history."""
@@ -1068,17 +1218,18 @@ def save_display_photo(*, dealer_id:int, product_id:int, account_id:int, origina
         month=_one(cur,"SELECT CONVERT(char(6),SYSDATETIME(),112)")[0]
         if _one(cur,"SELECT 1 FROM dbo.Product WHERE ProductId=%s AND IsActive=1",(product_id,)) is None:
             raise LookupError("找不到可用的商品")
+        location_id=_location_id(cur,dealer_id,location_id)
         previous=_one(cur,"""SELECT DisplayPhotoId FROM dbo.DealerProductDisplayPhoto WITH (UPDLOCK,HOLDLOCK)
-                               WHERE DataMonth=%s AND DealerId=%s AND ProductId=%s AND RecordStatus='ACTIVE'""",
-                      (month,dealer_id,product_id))
+                               WHERE DataMonth=%s AND DealerLocationId=%s AND ProductId=%s AND RecordStatus='ACTIVE'""",
+                      (month,location_id,product_id))
         if previous:
             cur.execute("UPDATE dbo.DealerProductDisplayPhoto SET RecordStatus='SUPERSEDED' WHERE DisplayPhotoId=%s",(previous[0],))
         row=_one(cur,"""INSERT dbo.DealerProductDisplayPhoto
-            (DataMonth,DealerId,ProductId,OriginalFileName,OriginalFilePath,ThumbnailFilePath,
+            (DataMonth,DealerId,DealerLocationId,ProductId,OriginalFileName,OriginalFilePath,ThumbnailFilePath,
              OriginalFileSize,ThumbnailFileSize,FileHash,CapturedAt,UploadedByUserAccountId,ReplacedPhotoId)
             OUTPUT inserted.DisplayPhotoId,inserted.DataMonth,inserted.UploadedAt
-            VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
-            (month,dealer_id,product_id,original_name,original_path,thumbnail_path,original_size,
+            VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+            (month,dealer_id,location_id,product_id,original_name,original_path,thumbnail_path,original_size,
              thumbnail_size,file_hash,captured_at,account_id,previous[0] if previous else None))
         conn.commit();return {"id":int(row[0]),"month":row[1],"uploadedAt":row[2].isoformat(timespec="seconds")}
     except Exception:conn.rollback();raise
@@ -1096,20 +1247,28 @@ def display_photo_file(photo_id:int, variant:str, *, dealer_id:int|None=None) ->
             "capturedAt":row[4].isoformat(timespec="seconds")}
 
 
-def _validate_sell_out_inventory(cur, dealer_id: int, details: list[dict[str, Any]],
-                                 exclude_visit_id: int | None = None) -> None:
-    """Reject a visit when its sell-out exceeds the current month's available stock."""
+def _sell_out_warnings(cur, dealer_id: int, details: list[dict[str, Any]],
+                       exclude_visit_id: int | None = None) -> list[dict[str,Any]]:
+    """Return typo-prevention warnings; SaleOut is an already completed sale and is never blocked."""
     requested = {int(item["productId"]): _optional_quantity(item,"sellOutQuantity","實銷")
                  for item in details if item.get("sellOutQuantity") not in (None, "")}
     if not requested:
-        return
+        return []
     stock = {item["id"]:item for item in reportable_products_for_cursor(cur,dealer_id,exclude_visit_id)}
+    warnings=[]
     for product_id, sell in requested.items():
         product = stock.get(product_id)
         available = product["availableQuantity"] if product else 0
         if sell is not None and sell > available:
             code = product["code"] if product else str(product_id)
-            raise ValueError(f"{code}：實銷 {sell} 超過目前總庫存 {available}，請修正後再送出")
+            warnings.append({"productId":product_id,"productCode":code,"sellOutQuantity":sell,
+                             "availableQuantity":available})
+    return warnings
+
+
+def sell_out_warnings(dealer_id:int, details:list[dict[str,Any]], exclude_visit_id:int|None=None) -> list[dict[str,Any]]:
+    with connect() as conn:
+        return _sell_out_warnings(conn.cursor(),dealer_id,details,exclude_visit_id)
 
 
 def reportable_products_for_cursor(cur, dealer_id: int, exclude_visit_id: int | None = None) -> list[dict[str, Any]]:
@@ -1136,9 +1295,10 @@ def visits(*, employee_id: int | None = None, dealer_id: int | None = None,
            v.ReportDateTime,v.RecordStatus,v.CreatedByUserAccountId,
            owner.EmployeeName,COALESCE(writerE.EmployeeName,writerD.DealerName),
            COUNT(pd.StoreVisitProductDetailId),COALESCE(SUM(pd.SellOutQuantity),0),
-           COALESCE(SUM(pd.DisplayQuantity),0),v.UpdatedAt
+           COALESCE(SUM(pd.DisplayQuantity),0),v.UpdatedAt,l.DealerLocationId,l.LocationName
       FROM dbo.StoreVisit v
       JOIN dbo.Dealer d ON d.DealerId=v.DealerId
+      JOIN dbo.DealerLocation l ON l.DealerLocationId=v.DealerLocationId
       LEFT JOIN dbo.DealerAssignmentHistory a ON a.DealerAssignmentId=v.DealerAssignmentId
       LEFT JOIN dbo.Employee owner ON owner.EmployeeId=a.EmployeeId
       JOIN dbo.UserAccount ua ON ua.UserAccountId=v.CreatedByUserAccountId
@@ -1151,7 +1311,7 @@ def visits(*, employee_id: int | None = None, dealer_id: int | None = None,
     """ + scoped + """
      GROUP BY v.StoreVisitId,v.DealerId,d.DealerCode,d.DealerName,v.EntrySourceType,
               v.ReportDateTime,v.RecordStatus,v.CreatedByUserAccountId,owner.EmployeeName,
-              writerE.EmployeeName,writerD.DealerName,v.UpdatedAt
+              writerE.EmployeeName,writerD.DealerName,v.UpdatedAt,l.DealerLocationId,l.LocationName
      ORDER BY v.ReportDateTime DESC
     """
     with connect() as conn:
@@ -1170,6 +1330,7 @@ def visits(*, employee_id: int | None = None, dealer_id: int | None = None,
                        "responsibleEmployee":r[8] or "未指派","createdBy":r[9] or "—",
                        "detailCount":int(r[10]),"sellOutTotal":int(r[11]),"displayTotal":int(r[12]),
                        "updatedAt":r[13].isoformat(timespec="seconds") if r[13] else None,
+                       "locationId":int(r[14]),"location":r[15],
                        "editableUntil":deadline.isoformat(timespec="minutes"),"canEdit":can_edit,
                        "remainingMinutes":max(0,int((deadline-now).total_seconds()//60))})
     return result
@@ -1180,8 +1341,9 @@ def visit_detail(visit_id: int) -> dict[str, Any] | None:
         cur=conn.cursor();row=_one(cur,"""
             SELECT v.StoreVisitId,v.DealerId,d.DealerCode,d.DealerName,v.EntrySourceType,v.ReportDateTime,
                    v.RecordStatus,v.CreatedByUserAccountId,owner.EmployeeName,
-                   COALESCE(writerE.EmployeeName,writerD.DealerName),v.UpdatedAt
+                   COALESCE(writerE.EmployeeName,writerD.DealerName),v.UpdatedAt,l.DealerLocationId,l.LocationName
               FROM dbo.StoreVisit v JOIN dbo.Dealer d ON d.DealerId=v.DealerId
+              JOIN dbo.DealerLocation l ON l.DealerLocationId=v.DealerLocationId
               LEFT JOIN dbo.DealerAssignmentHistory a ON a.DealerAssignmentId=v.DealerAssignmentId
               LEFT JOIN dbo.Employee owner ON owner.EmployeeId=a.EmployeeId
               JOIN dbo.UserAccount ua ON ua.UserAccountId=v.CreatedByUserAccountId
@@ -1200,20 +1362,20 @@ def visit_detail(visit_id: int) -> dict[str, Any] | None:
             "entrySourceType":row[4],"reportDateTime":row[5].isoformat(timespec="minutes"),
             "recordStatus":row[6],"createdByUserAccountId":int(row[7]),"responsibleEmployee":row[8] or "未指派",
             "createdBy":row[9] or "—","updatedAt":row[10].isoformat(timespec="seconds") if row[10] else None,
+            "locationId":int(row[11]),"location":row[12],
             "editableUntil":deadline.isoformat(timespec="minutes"),"details":details}
 
 
 def update_visit(visit_id: int, details: list[dict[str, Any]], *, account_id: int, account_type: str) -> None:
     conn=connect()
     try:
-        cur=conn.cursor();row=_one(cur,"SELECT EntrySourceType,CreatedByUserAccountId,ReportDateTime,RecordStatus FROM dbo.StoreVisit WHERE StoreVisitId=%s",(visit_id,))
+        cur=conn.cursor();row=_one(cur,"SELECT EntrySourceType,CreatedByUserAccountId,ReportDateTime,RecordStatus,DealerId,DealerLocationId FROM dbo.StoreVisit WHERE StoreVisitId=%s",(visit_id,))
         if row is None:raise LookupError("找不到巡店回報")
         if row[3] != 'ACTIVE' or _one(cur,"SELECT CASE WHEN SYSDATETIME()<DATEADD(hour,72,%s) THEN 1 ELSE 0 END",(row[2],))[0] != 1:
             raise PermissionError("此筆回報已超過 72 小時修改期限或已作廢")
         if account_type=='EMPLOYEE' and row[0] != 'EMPLOYEE':raise PermissionError("業務帳號不可修改經銷商自行回報")
         if account_type=='DEALER' and int(row[1]) != account_id:raise PermissionError("只能修改由自己的帳號建立的回報")
-        dealer_id=int(_one(cur,"SELECT DealerId FROM dbo.StoreVisit WHERE StoreVisitId=%s",(visit_id,))[0])
-        _validate_sell_out_inventory(cur,dealer_id,details,visit_id)
+        dealer_id,location_id=int(row[4]),int(row[5])
         cur.execute("DELETE dbo.StoreVisitProductDetail WHERE StoreVisitId=%s",(visit_id,))
         for item in details:
             sell=_optional_quantity(item,'sellOutQuantity','實銷')
@@ -1223,9 +1385,9 @@ def update_visit(visit_id: int, details: list[dict[str, Any]], *, account_id: in
                            VALUES(%s,%s,%s,%s,%s)""",(visit_id,int(item['productId']),sell,item.get('sellOutDate') if sell else None,display))
             if item.get('displayPhotoId'):
                 cur.execute("""UPDATE dbo.DealerProductDisplayPhoto SET SourceStoreVisitId=COALESCE(SourceStoreVisitId,%s)
-                               WHERE DisplayPhotoId=%s AND DealerId=%s AND ProductId=%s
+                               WHERE DisplayPhotoId=%s AND DealerId=%s AND DealerLocationId=%s AND ProductId=%s
                                  AND DataMonth=CONVERT(char(6),SYSDATETIME(),112) AND RecordStatus='ACTIVE'""",
-                            (visit_id,int(item['displayPhotoId']),dealer_id,int(item['productId'])))
+                            (visit_id,int(item['displayPhotoId']),dealer_id,location_id,int(item['productId'])))
         cur.execute("UPDATE dbo.StoreVisit SET UpdatedAt=SYSDATETIME(),UpdatedByUserAccountId=%s WHERE StoreVisitId=%s",(account_id,visit_id))
         conn.commit()
     except Exception:conn.rollback();raise
@@ -1240,16 +1402,19 @@ def task_detail(task_id: int, dealer_ids: set[int] | frozenset[int] | None = Non
         cur=conn.cursor();cur.execute("""
             SELECT e.TaskExecutionId,d.DealerId,d.DealerCode,d.DealerName,emp.EmployeeName,
                    COALESCE(e.SubmittedAt,(SELECT MIN(p.UploadedAt) FROM dbo.VisitTaskPhoto p WHERE p.TaskExecutionId=e.TaskExecutionId)),
-                   e.ExecutionNote,CASE WHEN t.SampleTaskExecutionId=e.TaskExecutionId THEN 1 ELSE 0 END
+                   e.ExecutionNote,CASE WHEN t.SampleTaskExecutionId=e.TaskExecutionId THEN 1 ELSE 0 END,
+                   l.DealerLocationId,l.LocationName,l.StreetAddress
               FROM dbo.VisitTaskExecution e JOIN dbo.VisitTask t ON t.VisitTaskId=e.VisitTaskId
               JOIN dbo.Dealer d ON d.DealerId=e.DealerId JOIN dbo.Employee emp ON emp.EmployeeId=e.ResponsibleEmployeeId
+              JOIN dbo.DealerLocation l ON l.DealerLocationId=e.DealerLocationId
              WHERE e.VisitTaskId=%s""" + scoped + " ORDER BY e.SubmittedAt DESC,d.DealerName",
             (task_id, *(sorted(dealer_ids) if dealer_ids is not None else ())));executions=[]
         for r in cur.fetchall():
             cur.execute("SELECT TaskPhotoId,PhotoDescription,StoredFileName,StoredFilePath,SortOrder,SampleTaskPhotoId FROM dbo.VisitTaskPhoto WHERE TaskExecutionId=%s ORDER BY SortOrder,TaskPhotoId",(r[0],))
             photos=[{"id":int(p[0]),"description":p[1] or "照片","fileName":p[2],"filePath":p[3],"sortOrder":int(p[4]),"samplePhotoId":int(p[5]) if p[5] else None} for p in cur.fetchall()]
             executions.append({"executionId":int(r[0]),"dealerId":int(r[1]),"dealerCode":r[2],"dealer":r[3],"employee":r[4],
-                               "submittedAt":r[5].isoformat(timespec="minutes") if r[5] else None,"note":r[6],"isSample":bool(r[7]),"photos":photos})
+                               "submittedAt":r[5].isoformat(timespec="minutes") if r[5] else None,"note":r[6],"isSample":bool(r[7]),"photos":photos,
+                               "locationId":int(r[8]),"location":r[9],"locationAddress":r[10] or ""})
     return {**task,"executions":executions}
 
 
@@ -1261,10 +1426,11 @@ def report_details(limit: int = 1000, dealer_ids: set[int] | frozenset[int] | No
     SELECT TOP (%s) v.StoreVisitId,v.ReportDateTime,d.DealerName,v.EntrySourceType,
            owner.EmployeeName,COALESCE(writerE.EmployeeName,writerD.DealerName),
            p.ProductCode,p.ProductName,pd.SellOutQuantity,pd.SellOutDate,pd.DisplayQuantity,
-           v.RecordStatus,DATEADD(hour,72,v.ReportDateTime)
+           v.RecordStatus,DATEADD(hour,72,v.ReportDateTime),l.LocationName,l.DealerLocationId
       FROM dbo.StoreVisitProductDetail pd
       JOIN dbo.StoreVisit v ON v.StoreVisitId=pd.StoreVisitId
       JOIN dbo.Dealer d ON d.DealerId=v.DealerId
+      JOIN dbo.DealerLocation l ON l.DealerLocationId=v.DealerLocationId
       JOIN dbo.Product p ON p.ProductId=pd.ProductId
       LEFT JOIN dbo.DealerAssignmentHistory a ON a.DealerAssignmentId=v.DealerAssignmentId
       LEFT JOIN dbo.Employee owner ON owner.EmployeeId=a.EmployeeId
@@ -1279,7 +1445,8 @@ def report_details(limit: int = 1000, dealer_ids: set[int] | frozenset[int] | No
     return [{"visitId":int(r[0]),"code":f"RPT-{r[1]:%y%m%d}-{int(r[0]):03d}","reportDateTime":r[1].isoformat(timespec="minutes"),
              "dealer":r[2],"entrySourceType":r[3],"responsibleEmployee":r[4] or "未指派","createdBy":r[5] or "—",
              "productCode":r[6],"productName":r[7],"sellOutQuantity":r[8],"sellOutDate":r[9].isoformat() if r[9] else None,
-             "displayQuantity":r[10],"recordStatus":r[11],"editableUntil":r[12].isoformat(timespec="minutes")} for r in rows]
+             "displayQuantity":r[10],"recordStatus":r[11],"editableUntil":r[12].isoformat(timespec="minutes"),
+             "location":r[13],"locationId":int(r[14])} for r in rows]
 
 
 def task_execution_dealer_id(execution_id: int) -> int | None:

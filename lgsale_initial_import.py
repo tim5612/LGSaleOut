@@ -22,6 +22,7 @@ LEVELS = frozenset(("一般店", "DC店", "專售店", "AC店", "批店", "失�
 OPTIONAL = ("shortName", "level", "contactName", "mobilePhone", "companyPhone", "postalCode", "streetAddress")
 DEALER_FIELDS = ("org", "code", "name", "owner", *OPTIONAL)
 STAFF_FIELDS = ("org", "number", "name")
+STAFF_OPTIONAL = frozenset(("number",))
 LIMITS = {"code": 30, "name": 150, "shortName": 150, "contactName": 100,
           "mobilePhone": 30, "companyPhone": 30, "postalCode": 20, "streetAddress": 500}
 LABELS = {"code": "TWCode", "name": "經銷商名稱", "owner": "負責業務", "shortName": "經銷商簡稱",
@@ -107,7 +108,8 @@ def validate_mapping(mapping, sheets):
             raise ValueError("欄位對應格式無效")
         for key in fields:
             index = selected.get(key)
-            if index is None and kind == "dealer" and key in OPTIONAL:
+            if index is None and ((kind == "dealer" and key in OPTIONAL) or
+                                  (kind == "staff" and key in STAFF_OPTIONAL)):
                 continue
             if type(index) is not int or index < 0 or index >= sheet.max_column:
                 raise ValueError(f"{kind} 的 {key} 尚未選擇有效來源欄位")
@@ -161,9 +163,12 @@ def review_source(dealers, staff, org, hire_date):
     by_name = defaultdict(set)
     for row in staff_rows:
         number, name = row.get("number", ""), row.get("name", "")
-        if not number or not name or len(number) > 30 or len(name) > 100:
-            errors.append(f"業務工作表第 {row['row']} 列缺少員工編號或姓名，或內容過長")
+        if not name or len(number) > 30 or len(name) > 100:
+            errors.append(f"業務工作表第 {row['row']} 列缺少姓名，或欄位內容過長")
             continue
+        if not number:
+            number = "AUTO-" + hashlib.sha256(f"{org}\0{name}".encode()).hexdigest()[:20].upper()
+            row = {**row, "number": number}
         by_number[number.casefold()].append(row)
         by_name[name].add(number.casefold())
     employees = []
@@ -204,7 +209,8 @@ def review_source(dealers, staff, org, hire_date):
         if not owner or len(by_name.get(owner, ())) != 1:
             errors.append(f"TWCode {rows[0]['code']} 的負責業務 {owner or '空白'} 無法唯一對應本處所業務")
         result_dealers.append({"row": rows[0]["row"], "sourceRows": [r["row"] for r in rows],
-                               **values, "employeeNo": next(iter(by_name[owner])) if len(by_name.get(owner, ())) == 1 else ""})
+                               **values, "area": org,
+                               "employeeNo": next(iter(by_name[owner])) if len(by_name.get(owner, ())) == 1 else ""})
     return {"employees": employees, "dealers": result_dealers, "errors": errors,
             "sourceRows": len(dealer_rows)}
 
@@ -446,9 +452,10 @@ def commit():
             cur.execute("SELECT EmployeeNo,EmployeeId FROM dbo.Employee")
             employee_ids = {r[0].casefold(): r[1] for r in cur.fetchall()}
             for dealer in organization["dealers"]:
-                cur.execute("""INSERT dbo.Dealer(DealerCode,DealerName,ShortName,ContactName,MobilePhone,CompanyPhone,PostalCode,StreetAddress)
-                    OUTPUT inserted.DealerId VALUES(%s,%s,%s,%s,%s,%s,%s,%s)""",
-                    (dealer["code"], dealer["name"], *(dealer.get(key) or None for key in ("shortName", "contactName", "mobilePhone", "companyPhone", "postalCode", "streetAddress"))))
+                cur.execute("""INSERT dbo.Dealer(DealerCode,DealerName,Area,ShortName,ContactName,MobilePhone,CompanyPhone,PostalCode,StreetAddress)
+                    OUTPUT inserted.DealerId VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                    (dealer["code"], dealer["name"], org,
+                     *(dealer.get(key) or None for key in ("shortName", "contactName", "mobilePhone", "companyPhone", "postalCode", "streetAddress"))))
                 dealer_id = cur.fetchone()[0]
                 cur.execute("INSERT dbo.DealerAssignmentHistory(DealerId,EmployeeId,StartDateTime,ChangeReason,CreatedByEmployeeId) VALUES(%s,%s,%s,N'初始化匯入',%s)",
                             (dealer_id, employee_ids[dealer["employeeNo"]], now, actor))

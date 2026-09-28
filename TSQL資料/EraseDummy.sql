@@ -59,6 +59,8 @@ BEGIN TRY
     DELETE FROM dbo.EmployeePositionHistory;
 
     DELETE FROM dbo.Product;
+    IF OBJECT_ID(N'dbo.DealerLocation',N'U') IS NOT NULL
+        EXEC(N'DELETE FROM dbo.DealerLocation;');
     DELETE FROM dbo.Dealer;
     DELETE FROM dbo.OrganizationUnit;
     DELETE FROM dbo.Employee;

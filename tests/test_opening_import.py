@@ -17,6 +17,106 @@ def state():
 
 
 class ReviewTests(unittest.TestCase):
+    def test_missing_employee_is_allowed_only_in_historical_mode(self):
+        with tempfile.TemporaryDirectory() as temp:
+            book=openpyxl.Workbook();sheet=book.active;sheet.title='工作表1';sheet.append(o.OPENING_HEADERS)
+            sheet.append(['202603','富基(Costco)','TW019257A1','富基電通股份有限公司','TV','OLED 70吋↓','OLED65B5PTA',72,None,'TW005141富基(Costco)','MMCS'])
+            path=Path(temp)/'2603.xlsx';book.save(path);book.close()
+            rows,parse_errors=o.parse_workbook(path)
+        self.assertEqual(parse_errors,[]);self.assertEqual(rows[0]['employee'],'')
+        s=state();s['dealers']=[[1,'TW019257A1','富基電通股份有限公司']];s['products']=[];s['employees']=[]
+        historical=o.build_review(rows,parse_errors,s,'2026-03',import_mode='historical')
+        self.assertEqual(historical['errors'],[]);self.assertEqual(len(historical['importRows']),1)
+        standard=o.build_review(rows,parse_errors,s,'2026-03',import_mode='standard')
+        self.assertEqual(standard['errors'],['第 2 列缺少業務姓名；一般期初匯入必須填寫，或改用歷史庫存模式'])
+
+    def test_historical_mode_skips_people_and_pairings_but_keeps_products_and_inventory(self):
+        row={**source()[0],'employee':'不在主檔的歷史業務','product':'NEW-PRODUCT'}
+        s=state();s['products']=[];s['employees']=[]
+        review=o.build_review([row],[],s,'2026-09',import_mode='historical')
+        self.assertFalse(review['errors'])
+        self.assertEqual(review['employees'],[])
+        self.assertEqual(review['assignments'],[])
+        self.assertEqual([product['code'] for product in review['products']],['NEW-PRODUCT'])
+        self.assertEqual(review['importRows'][0]['quantity'],-1)
+        self.assertEqual(review['exclusions'],[])
+        self.assertIn('歷史庫存模式：已略過業務主檔與經銷商配對',review['notices'])
+
+    def test_historical_mode_combines_duplicate_inventory_split_between_old_employees(self):
+        with tempfile.TemporaryDirectory() as temp:
+            book=openpyxl.Workbook();sheet=book.active;sheet.title='工作表1';sheet.append(o.OPENING_HEADERS)
+            sheet.append(['202609','A','TW1','測試店','AC','RAC','P1',3,'舊業務 A','TW1A','CE'])
+            sheet.append(['202609','B','TW1','測試店','AC','RAC','P1',4,'舊業務 B','TW1B','CE'])
+            file=Path(temp)/'2609.xlsx';book.save(file)
+            rows,errors=o.parse_workbook(file)
+            self.assertEqual(errors,[]);self.assertEqual(rows[0]['quantity'],7)
+            historical=o.build_review(rows,[],state(),'2026-09',import_mode='historical')
+            standard=o.build_review(rows,[],state(),'2026-09')
+            self.assertFalse(historical['errors'])
+            self.assertTrue(any('檔案業務不同' in error for error in standard['errors']))
+
+    def test_import_mode_is_part_of_preview_proof(self):
+        s=state()
+        standard=o.build_review(source(),[],s,'2026-09')['proof']
+        historical=o.build_review(source(),[],s,'2026-09',import_mode='historical')['proof']
+        self.assertNotEqual(standard,historical)
+
+    def test_missing_dealer_is_skipped_and_never_treated_as_new_master_data(self):
+        s=state();s['dealers']=[]
+        review=o.build_review(source(),[],s,'2026-09')
+        self.assertFalse(review['errors'])
+        self.assertEqual(review['dealers'][0]['status'],'略過（主檔無此 TW CODE）')
+        self.assertEqual(review['changes'],dict(inserted=0,corrected=0,skipped=1,skippedDealerRows=1))
+        self.assertEqual(review['assignments'],[])
+        self.assertEqual(review['employees'],[])
+        self.assertEqual(review['products'],[])
+
+    def test_unmatched_tongsheng_does_not_create_employee_product_or_assignment(self):
+        row=dict(row=8,code='TW219209A1',dealer='統勝電器有限公司',category1='AC',category2='RAC',product='ONLY-TONGSHENG',display=0,quantity=3,excluded=False,employee='沈勇良')
+        review=o.build_review([row],[],state(),'2026-09')
+        self.assertFalse(review['errors'])
+        self.assertEqual(review['changes']['skippedDealerRows'],1)
+        self.assertEqual(review['employees'],[])
+        self.assertEqual(review['products'],[])
+        self.assertEqual(review['assignments'],[])
+
+    def test_same_current_employee_needs_no_employee_or_assignment_but_product_is_added(self):
+        s=state();s['products']=[];s['assignments']=[[1,1,2,datetime(2020,1,1),None]]
+        review=o.build_review(source(),[],s,'2026-09')
+        self.assertFalse(review['errors'])
+        self.assertEqual(review['employees'],[])
+        self.assertEqual(review['assignments'],[])
+        self.assertEqual([product['code'] for product in review['products']],['P1'])
+
+    def test_different_current_employee_creates_missing_employee_and_pairing_after_confirmation(self):
+        row={**source()[0],'employee':'新業務'}
+        s=state();s['assignments']=[[1,1,2,datetime(2020,1,1),None]]
+        edits={'新業務':dict(number='E9',hireDate='2026-08-01',orgId='1',position='SALES')}
+        action={'TW1':{'action':'transfer','effectiveAt':'2026-09-01T00:00'}}
+        review=o.build_review([row],[],s,'2026-09',edits,action)
+        self.assertFalse(review['errors'])
+        self.assertEqual([employee['name'] for employee in review['employees']],['新業務'])
+        self.assertEqual([(item['code'],item['employee'],item['status']) for item in review['assignments']],[('TW1','新業務','移轉')])
+
+    def test_year_selection_and_filename_months_are_not_fixed_to_2026(self):
+        self.assertEqual(o.month_date('2025-10'),datetime(2025,10,1))
+        self.assertEqual(o.month_date('2027-01'),datetime(2027,1,1))
+        self.assertEqual(o.filename_month('2601.xlsx',opening_format=True),'2026-01')
+        self.assertEqual(o.filename_month('2512.xlsx',opening_format=True),'2025-12')
+        self.assertEqual(o.filename_month('202608期末.xlsx'),'2026-09')
+
+    def test_opening_inventory_layout_is_supported_and_month_is_checked(self):
+        with tempfile.TemporaryDirectory() as temp:
+            book=openpyxl.Workbook();sheet=book.active;sheet.title='工作表1';sheet.append(o.OPENING_HEADERS)
+            sheet.append(['202601','ONLINE','TW1','測試店','AC','RAC','P1',3,'測試業務','TW1ONLINE','CE'])
+            sheet.append(['202601','ONLINE','XXX','網路店','HE','TV','P2',4,'測試業務','TW2ONLINE','HE'])
+            file=Path(temp)/'2601.xlsx';book.save(file)
+            rows,errors=o.parse_workbook(file)
+            self.assertEqual(errors,[])
+            self.assertEqual([(r['code'],r['quantity'],r['sourceMonth']) for r in rows],[('TW1',3,'202601'),('TW2',4,'202601')])
+            review=o.build_review(rows,[],state(),'2026-02')
+            self.assertTrue(any('檔案年月為 202601' in error for error in review['errors']))
+
     def test_import_lock_skips_sql_server_non_row_results(self):
         cur=MagicMock()
         type(cur).description=PropertyMock(side_effect=[None,None,('LockResult',)])
@@ -99,6 +199,18 @@ class ReviewTests(unittest.TestCase):
         s=state();s['employees'][0][4]=date(2026,8,31)
         self.assertTrue(o.build_review(source(),[],s,'2026-09')['errors'])
 
+    def test_same_employee_assignment_later_in_month_is_reused(self):
+        s=state();s['assignments']=[[1,1,2,datetime(2026,9,19,10,10,51),None]]
+        review=o.build_review(source(),[],s,'2026-09')
+        self.assertFalse(review['errors']);self.assertEqual(review['assignments'],[])
+        self.assertIn('1 家經銷商在本月稍後已有相同業務配對，本次沿用主檔且不新增配對',review['notices'])
+
+    def test_different_employee_assignment_later_in_month_has_clear_error(self):
+        s=state();s['employees'].append([3,'E3','後續業務',date(2020,1,1),None])
+        s['assignments']=[[1,1,3,datetime(2026,9,19,10,10,51),None]]
+        review=o.build_review(source(),[],s,'2026-09')
+        self.assertEqual(review['errors'],['TW1 在期初日尚無有效配對；主檔自 2026-09-19 10:10 起由「後續業務」負責，檔案業務為「測試業務」，請先確認配對期間'])
+
     def test_new_employee_requires_complete_data_and_unique_number(self):
         s=state();s['employees']=[]
         self.assertEqual(len(o.build_review(source(),[],s,'2026-09')['errors']),3)
@@ -136,6 +248,37 @@ class EndpointTests(unittest.TestCase):
             session['user']=dict(id=1,type='EMPLOYEE',employeeId=2,name='測試')
             session['opening_csrf']='test-csrf'
         self.headers={'X-Opening-CSRF':'test-csrf'}
+
+    def test_context_returns_opening_history(self):
+        conn=MagicMock();cur=conn.cursor.return_value
+        cur.fetchall.return_value=[(31,'2510.xlsx',datetime(2025,11,2,9,30),17590,17400,'202510')]
+        with patch.object(o.db,'connect',return_value=conn):
+            response=self.client.get('/api/opening-import/context')
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.json['history'],[dict(batchId=31,fileName='2510.xlsx',importedAt='2025-11-02 09:30:00',sourceRows=17590,rows=17400,month='2025-10')])
+        self.assertEqual(response.headers['Cache-Control'],'no-store');conn.close.assert_called_once()
+
+    def test_batch_rows_returns_insertions_and_corrections(self):
+        conn=MagicMock();cur=conn.cursor.return_value
+        cur.fetchone.return_value=(31,2)
+        cur.fetchall.return_value=[
+            ('INSERT',101,6,'TW1','測試店','P1','產品一',8,None),
+            ('CORRECTION',202,9,'TW2','第二店','P2','產品二',5,3),
+        ]
+        with patch.object(o.db,'connect',return_value=conn):
+            response=self.client.get('/api/opening-import/batches/31/rows?page=1')
+        self.assertEqual(response.status_code,200);self.assertEqual(response.json['total'],2)
+        self.assertEqual(response.json['rows'][0]['action'],'INSERT')
+        self.assertIsNone(response.json['rows'][0]['previousQuantity'])
+        self.assertEqual(response.json['rows'][1]['previousQuantity'],3)
+        self.assertEqual(cur.execute.call_args_list[1].args[1],(31,31,0,50))
+        conn.close.assert_called_once()
+
+    def test_batch_rows_rejects_unknown_batch(self):
+        conn=MagicMock();conn.cursor.return_value.fetchone.return_value=None
+        with patch.object(o.db,'connect',return_value=conn):
+            response=self.client.get('/api/opening-import/batches/999/rows')
+        self.assertEqual(response.status_code,404);self.assertIn('找不到',response.json['error'])
 
     def test_csrf_and_dealer_access(self):
         self.assertEqual(self.client.post('/api/opening-import/commit',json={}).status_code,403)

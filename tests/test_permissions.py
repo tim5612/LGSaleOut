@@ -69,6 +69,16 @@ class PermissionPolicyTests(unittest.TestCase):
         self.assertFalse(result.can("reports.edit"))
         self.assertTrue(result.has_dealer(2))
 
+    def test_designer_can_execute_mobile_tasks(self):
+        principal = {"accountType": "EMPLOYEE", "employeeId": 11,
+                     "dealerId": None, "position": "ADMIN", "orgId": 3,
+                     "designer": True}
+        with patch.object(permissions.db, "permission_principal", return_value=principal), \
+             patch.object(permissions.db, "permission_rules", return_value=({}, {})), \
+             patch.object(permissions.db, "permission_dealer_ids", return_value={1, 2}):
+            result = permissions.resolve({"id": 7, "type": "EMPLOYEE"})
+        self.assertTrue(result.can("mobile.tasks.execute"))
+
 
 class PermissionRouteTests(unittest.TestCase):
     def setUp(self):
@@ -159,6 +169,70 @@ class PermissionRouteTests(unittest.TestCase):
             self.assertEqual(self.client.post("/api/tasks", json=payload).status_code, 201)
             create.assert_called_once()
             self.assertEqual(create.call_args.kwargs["creator_id"], 11)
+
+    def test_task_scopes_use_selected_date_and_server_scope(self):
+        manager = replace(access("MANAGER", dealer_ids=(4, 8)),
+                          capabilities=permissions.effective_capabilities(
+                              "MANAGER", {}, {"tasks.create": True}))
+        expected = [{"orgUnitId": None, "name": "全部有效經銷商",
+                     "dealerCount": 2, "executionCount": 2}]
+        with patch.object(LGSale.permissions, "resolve", return_value=manager), \
+             patch.object(LGSale.db, "task_scopes", return_value=expected) as scopes:
+            response = self.client.get("/api/task-scopes?validFrom=2026-09-28")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json, expected)
+        scopes.assert_called_once_with("2026-09-28", frozenset({4, 8}))
+
+    def test_task_creation_passes_real_organization_scope(self):
+        manager = replace(access("MANAGER", dealer_ids=(4, 8)),
+                          capabilities=permissions.effective_capabilities(
+                              "MANAGER", {}, {"tasks.create": True}))
+        payload = {"title": "新任務", "instruction": "拍照", "validFrom": "2026-09-28",
+                   "dueDate": "2026-10-05", "orgUnitId": "26"}
+        with patch.object(LGSale.permissions, "resolve", return_value=manager), \
+             patch.object(LGSale.db, "create_task", return_value={"id": 10}) as create:
+            response = self.client.post("/api/tasks", json=payload)
+        self.assertEqual(response.status_code, 201)
+        sent = create.call_args.args[0]
+        self.assertEqual(sent["orgUnitId"], 26)
+        self.assertEqual(sent["dealerIds"], [4, 8])
+
+    def test_designer_can_edit_task_owned_by_another_employee(self):
+        designer = replace(access("ADMIN", designer=True, dealer_ids=(4,)),
+                           capabilities=frozenset(permissions.ROLE_DEFAULTS["ADMIN"] |
+                                                  {"mobile.tasks.execute"}))
+        task = {"executionId": 20, "responsibleEmployeeId": 99, "canEdit": True}
+        with patch.object(LGSale.permissions, "resolve", return_value=designer), \
+             patch.object(LGSale.db, "photo_tasks", return_value=[task.copy()]):
+            response = self.client.get("/api/photo-tasks")
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json[0]["canEdit"])
+
+    def test_designer_completion_preserves_actual_executor(self):
+        designer = replace(access("ADMIN", designer=True, dealer_ids=(4,)),
+                           capabilities=frozenset(permissions.ROLE_DEFAULTS["ADMIN"] |
+                                                  {"mobile.tasks.execute"}))
+        completed_at = datetime(2026, 9, 28, 15, 30)
+        with patch.object(LGSale.permissions, "resolve", return_value=designer), \
+             patch.object(LGSale.db, "task_execution_dealer_id", return_value=4), \
+             patch.object(LGSale.db, "complete_execution", return_value=completed_at) as complete:
+            response = self.client.post("/api/task-executions/20/complete",
+                                        json={"photoCount": 0, "executionNote": "代為確認"})
+        self.assertEqual(response.status_code, 200)
+        complete.assert_called_once_with(20, "代為確認", 11, True)
+
+    def test_designer_can_save_completed_task_photo_descriptions(self):
+        designer = replace(access("ADMIN", designer=True, dealer_ids=(4,)),
+                           capabilities=frozenset(permissions.ROLE_DEFAULTS["ADMIN"] |
+                                                  {"mobile.tasks.execute"}))
+        photos = [{"photoId": 31, "description": "更新後說明"}]
+        with patch.object(LGSale.permissions, "resolve", return_value=designer), \
+             patch.object(LGSale.db, "task_execution_dealer_id", return_value=4), \
+             patch.object(LGSale.db, "update_execution_photo_descriptions") as update:
+            response = self.client.put("/api/task-executions/20/photo-descriptions",
+                                       json={"photos": photos})
+        self.assertEqual(response.status_code, 200)
+        update.assert_called_once_with(20, photos, 11, True)
 
     def test_every_application_route_has_a_policy(self):
         public = {"static", "health", "login_page", "register_page",

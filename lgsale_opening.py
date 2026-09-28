@@ -19,6 +19,7 @@ BASE = Path(__file__).resolve().parent
 STORE = BASE / 'uploads' / 'opening_inventory'
 bp = Blueprint('opening', __name__)
 HEADERS = ['TW CODE', '簡稱', '產品別', '產品別2', '型號', '陳列', '期末', '不計', '業務員']
+OPENING_HEADERS = ['年月', '營銷處', 'TW CODE', '經銷商', '產品', '產品別', '型號', '期初庫存', '業務員', '公式', '部門']
 MAX_FILE = 15 * 1024 * 1024
 
 
@@ -29,7 +30,23 @@ def digest(value):
 def month_date(value):
     if not isinstance(value, str) or not re.fullmatch(r'\d{4}-\d{2}', value):
         raise ValueError('請選擇有效的期初月份')
-    return datetime.strptime(value + '-01', '%Y-%m-%d')
+    parsed=datetime.strptime(value + '-01', '%Y-%m-%d')
+    if not 2000 <= parsed.year <= 2100:
+        raise ValueError('期初年度必須介於 2000 至 2100 年')
+    return parsed
+
+
+def filename_month(filename, opening_format=False):
+    """Suggest YYYY-MM from a YYYYMM/YYMM source filename."""
+    match=re.search(r'(?<!\d)(20\d{2})(0[1-9]|1[0-2])(?!\d)',filename)
+    if match:
+        year,month=map(int,match.groups())
+    else:
+        match=re.search(r'(?<!\d)(\d{2})(0[1-9]|1[0-2])(?!\d)',filename)
+        if not match:return ''
+        short_year,month=map(int,match.groups());year=2000+short_year
+    if opening_format:return f'{year:04d}-{month:02d}'
+    return f'{year+(month==12):04d}-{month%12+1:02d}'
 
 
 def acquire_import_lock(cur):
@@ -54,21 +71,29 @@ def parse_workbook(path):
     except (BadZipFile, KeyError, OSError) as exc:
         raise ValueError('無法讀取檔案，請上傳有效的 .xlsx') from exc
     try:
-        if '期末' not in book.sheetnames:
-            raise ValueError('找不到「期末」工作表')
-        sheet = book['期末']
+        opening_format=False
+        if '期末' in book.sheetnames:
+            sheet=book['期末']
+        else:
+            sheet=next((candidate for candidate in book.worksheets
+                        if [candidate.cell(1,column).value for column in range(1,12)]==OPENING_HEADERS),None)
+            if sheet is None:
+                raise ValueError('找不到「期末」工作表或期初庫存欄位')
+            opening_format=True
         if sheet.max_row > 50000 or sheet.max_column > 100:
             raise ValueError('工作表範圍過大；最多支援 50,000 列、100 欄')
-        rows, errors, seen = [], [], set()
+        rows, errors, seen = [], [], {}
         header = False
         footer = False
-        for number,cells in enumerate(sheet.iter_rows(max_col=9),1):
+        max_columns=11 if opening_format else 9
+        expected_headers=OPENING_HEADERS if opening_format else HEADERS
+        for number,cells in enumerate(sheet.iter_rows(max_col=max_columns),1):
             values = [c.value.strip() if isinstance(c.value, str) else c.value for c in cells]
             if not header:
-                if values == HEADERS:
+                if values == expected_headers:
                     header = True
                 elif number > 20:
-                    raise ValueError('前 20 列找不到預期的九個欄位標題')
+                    raise ValueError('前 20 列找不到預期的期末或期初庫存欄位標題')
                 continue
             if not any(v is not None and v != '' for v in values):
                 continue
@@ -80,9 +105,25 @@ def parse_workbook(path):
                 continue
             if any(c.data_type in ('f', 'e') for c in cells):
                 errors.append(f'第 {number} 列含公式或 Excel 錯誤，請先轉為確認過的值');continue
-            a,b,c,d,e,f,g,h,i = values
-            if not all(isinstance(v,str) and v for v in (a,b,c,d,e,i)):
-                errors.append(f'第 {number} 列的代碼、名稱、分類、型號或業務姓名缺漏');continue
+            source_month=None
+            code_derived=False
+            if opening_format:
+                source_month,_,a,b,c,d,e,g,i,derived_code,_=values
+                f=0;h=0;source_month=str(source_month).strip()
+                if not re.fullmatch(r'20\d{4}',source_month):
+                    errors.append(f'第 {number} 列的年月必須為 YYYYMM');continue
+                if a=='XXX':
+                    fallback=re.match(r'(TW\d+)',derived_code or '') if isinstance(derived_code,str) else None
+                    if fallback is None:
+                        errors.append(f'第 {number} 列 TW CODE 為 XXX，且「公式」欄沒有可用的替代代碼');continue
+                    a=fallback.group(1);code_derived=True
+            else:
+                a,b,c,d,e,f,g,h,i = values
+            if not all(isinstance(v,str) and v for v in (a,b,c,d,e)):
+                errors.append(f'第 {number} 列的代碼、名稱、分類或型號缺漏');continue
+            i='' if i in (None,'') else i
+            if not isinstance(i,str):
+                errors.append(f'第 {number} 列的業務姓名格式無效');continue
             if len(a)>30 or not a.isascii() or len(b)>150 or len(e)>50 or not e.isascii() or len(c)>100 or len(d)>100 or len(i)>100:
                 errors.append(f'第 {number} 列文字長度或代碼格式超出主檔限制');continue
             a,e=a.upper(),e.upper()
@@ -93,9 +134,17 @@ def parse_workbook(path):
                 errors.append(f'第 {number} 列「不計」僅接受 0 或「不計」');continue
             key=(a.casefold(),e.casefold())
             if key in seen:
-                errors.append(f'第 {number} 列的 TW CODE＋型號重複');continue
-            seen.add(key)
-            rows.append(dict(row=number,code=a,dealer=b,category1=c,category2=d,product=e,display=int(f),quantity=int(g),excluded=h=='不計',employee=i))
+                if not opening_format:
+                    errors.append(f'第 {number} 列的 TW CODE＋型號重複');continue
+                existing=seen[key]
+                existing['quantity']+=int(g)
+                if (existing['dealer'],existing['category1'],existing['category2'],existing['sourceMonth']) != (b,c,d,source_month):
+                    errors.append(f'第 {number} 列 {a}／{e} 與第 {existing["row"]} 列重複，但經銷商或產品分類不同');continue
+                if existing['employee']!=i:
+                    existing.setdefault('alternateEmployees',[]).append(dict(row=number,employee=i))
+                continue
+            item=dict(row=number,code=a,dealer=b,category1=c,category2=d,product=e,display=int(f),quantity=int(g),excluded=h=='不計',employee=i,sourceMonth=source_month,derivedCode=code_derived)
+            rows.append(item);seen[key]=item
         if not header or not rows:
             errors.append('沒有可匯入的明細')
         return rows, errors
@@ -131,11 +180,24 @@ def snapshot(cur, month):
     return result
 
 
-def build_review(rows, parse_errors, state, month, edits=None, assignment_actions=None, decisions=None):
+def build_review(rows, parse_errors, state, month, edits=None, assignment_actions=None, decisions=None, import_mode='standard'):
     edits = edits or {}; assignment_actions=assignment_actions or {}
+    if import_mode not in ('standard','historical'):raise ValueError('匯入模式無效')
     effective=month_date(month); errors=list(parse_errors); notices=[]
+    source_months=sorted({r.get('sourceMonth') for r in rows if r.get('sourceMonth')})
+    if source_months and source_months != [month.replace('-','')]:
+        errors.append(f'檔案年月為 {" / ".join(source_months)}，與選擇的期初月份 {month.replace("-","")} 不同')
+    derived_dealers={(r['code'],r['dealer']) for r in rows if r.get('derivedCode')}
+    if derived_dealers:
+        notices.append(f'{len(derived_dealers)} 家經銷商的 TW CODE 為 XXX，已使用「公式」欄 TW 數字代碼')
     decisions=decisions or {}
     source_rows=rows
+    if import_mode=='standard':
+        for row in source_rows:
+            if not row['employee']:
+                errors.append(f'第 {row["row"]} 列缺少業務姓名；一般期初匯入必須填寫，或改用歷史庫存模式')
+            for alternate in row.get('alternateEmployees',[]):
+                errors.append(f'第 {alternate["row"]} 列 {row["code"]}／{row["product"]} 與第 {row["row"]} 列的檔案業務不同')
     existing_by_key=defaultdict(list)
     for old in state['existing']:existing_by_key[(old[0].casefold(),old[1].casefold())].append(old)
     duplicates=[];corrections=[];new_rows=[];selected_rows=[]
@@ -154,16 +216,27 @@ def build_review(rows, parse_errors, state, month, edits=None, assignment_action
             corrections.append(item);selected_rows.append(row)
     rows=selected_rows
     dm={r[1].casefold():r for r in state['dealers']};pm={r[1].casefold():r for r in state['products']}
+    unmatched=defaultdict(list)
+    for row in rows:
+        if row['code'].casefold() not in dm:unmatched[row['code']].append(row)
+    dealers=[dict(code=code,name=items[0]['dealer'],employee=items[0]['employee'],status='略過（主檔無此 TW CODE）',dealerCodes=[code],rowCount=len(items)) for code,items in sorted(unmatched.items())]
+    skipped_dealer_rows=sum(len(items) for items in unmatched.values())
+    if skipped_dealer_rows:
+        notices.append(f'{len(dealers)} 家經銷商、{skipped_dealer_rows} 筆庫存因 TW CODE 不在主檔而略過；不會新增經銷商')
+    rows=[row for row in rows if row['code'].casefold() in dm]
+    new_rows=[row for row in new_rows if row['code'].casefold() in dm]
+    people_rows=[row for row in rows if row['employee']] if import_mode=='standard' else []
+    if import_mode=='historical':notices.append('歷史庫存模式：已略過業務主檔與經銷商配對')
     em=defaultdict(list)
     for e in state['employees']:em[e[2]].append(e)
     employees_by_id={r[0]:r for r in state['employees']}
     grouped=defaultdict(list)
-    for row in rows:grouped[row['code']].append(row)
-    dealers=[];employees=[];products=[];assignments=[];conflicts=[]
-    new_em={};employee_ids={};new_dm={};new_pm={}
+    for row in people_rows:grouped[row['code']].append(row)
+    employees=[];products=[];assignments=[];conflicts=[]
+    new_em={};employee_ids={};new_pm={}
     employee_numbers={r[1].casefold() for r in state['employees']}
     input_numbers=set()
-    for name in sorted({r['employee'] for r in rows}):
+    for name in sorted({r['employee'] for r in people_rows}):
         matches=em[name]
         if len(matches)>1:
             errors.append(f'業務「{name}」有同名主檔，請先至員工主檔改名區分');continue
@@ -190,16 +263,16 @@ def build_review(rows, parse_errors, state, month, edits=None, assignment_action
             errors.append(f'新業務「{name}」請選擇所屬處所');valid=False
         if position not in ('SALES','DIRECTOR','MANAGER'):
             errors.append(f'新業務「{name}」職級無效');valid=False
-        item=dict(name=name,number=no,hireDate=hire,orgId=org,position=position,status='新增' if valid else '需修正',dealerCodes=sorted({r['code'] for r in rows if r['employee']==name}))
+        item=dict(name=name,number=no,hireDate=hire,orgId=org,position=position,status='新增' if valid else '需修正',dealerCodes=sorted({r['code'] for r in people_rows if r['employee']==name}))
         employees.append(item);new_em[name]=item
+    reused_later_assignments=[]
+    next_month=(effective.replace(day=28)+timedelta(days=4)).replace(day=1)
     for code,items in grouped.items():
         first=items[0];match=dm.get(code.casefold())
         owners={i['employee'] for i in items}
         if len(owners)!=1:
             errors.append(f'{code} 同一經銷商有不同業務姓名');continue
         name=first['employee'];eid=employee_ids.get(name)
-        if not match:
-            item=dict(code=code,name=first['dealer'],employee=name,status='新增',dealerCodes=[code]);dealers.append(item);new_dm[code]=item
         histories=sorted([h for h in state['assignments'] if match and h[1]==match[0]],key=lambda h:(h[3],h[0]))
         active=[h for h in histories if h[3]<=effective and (h[4] is None or h[4]>effective)]
         if len(active)>1:
@@ -212,7 +285,7 @@ def build_review(rows, parse_errors, state, month, edits=None, assignment_action
                 start_text=raw_action.get('effectiveAt',effective.strftime('%Y-%m-%dT%H:%M')) if isinstance(raw_action,dict) else effective.strftime('%Y-%m-%dT%H:%M')
                 try:
                     transfer_at=datetime.fromisoformat(start_text)
-                    if transfer_at < effective or transfer_at >= (effective.replace(day=28)+timedelta(days=4)).replace(day=1):raise ValueError()
+                    if transfer_at < effective or transfer_at >= next_month:raise ValueError()
                 except (TypeError,ValueError):
                     transfer_at=effective;errors.append(f'{code} 請填寫期初月份內的有效移轉時間')
                 covering=[h for h in histories if h[3]<=transfer_at and (h[4] is None or h[4]>transfer_at)]
@@ -239,9 +312,15 @@ def build_review(rows, parse_errors, state, month, edits=None, assignment_action
                             oldAssignmentId=covering[0][0],oldEnd=covering[0][4].isoformat(sep=' ',timespec='seconds') if covering[0][4] else None,
                             action=action,status='補登歷史' if action=='bridge' else '移轉',dealerCodes=[code]))
             continue
-        if any(h[3]>effective for h in histories):
-            errors.append(f'{code} 已有期初日之後的配對，請先處理歷史期間');continue
+        later=next((h for h in histories if h[3]>effective),None)
+        if later:
+            later_employee=employees_by_id.get(later[2]);later_name=later_employee[2] if later_employee else str(later[2])
+            if later[3]<next_month and later_name==name:
+                reused_later_assignments.append(code);continue
+            errors.append(f'{code} 在期初日尚無有效配對；主檔自 {later[3].isoformat(sep=" ",timespec="minutes")} 起由「{later_name}」負責，檔案業務為「{name}」，請先確認配對期間');continue
         assignments.append(dict(code=code,name=first['dealer'],employee=name,current='未指派',start=month+'-01 00:00:00',end=None,oldAssignmentId=None,oldEnd=None,action='create',status='新增',dealerCodes=[code]))
+    if reused_later_assignments:
+        notices.append(f'{len(reused_later_assignments)} 家經銷商在本月稍後已有相同業務配對，本次沿用主檔且不新增配對')
     source_products=defaultdict(list)
     for row in rows:source_products[row['product']].append(row)
     for code,items in source_products.items():
@@ -255,17 +334,20 @@ def build_review(rows, parse_errors, state, month, edits=None, assignment_action
         item=dict(code=code,name=code,category1=first['category1'],category2=first['category2'],status='新增',dealerCodes=sorted({i['code'] for i in items}))
         products.append(item);new_pm[code]=item
     exclusions=[]
-    for code in sorted({r['product'] for r in rows if r['excluded']}):
+    exclusion_rows=rows if import_mode=='standard' else []
+    for code in sorted({r['product'] for r in exclusion_rows if r['excluded']}):
         existing=[e for e in state.get('exclusions',[]) if e[0].casefold()==code.casefold() and e[1]==month.replace('-','')]
         if existing and any(e[2] is not None or e[3]!='PSIRemove' for e in existing):
             errors.append(f'{code} 同月份已有不同的全通路排除設定，請先確認排除名單')
         exclusions.append(dict(code=code,scope='ALL',reason='PSIRemove',fromMonth=month.replace('-',''),toMonth=None,status='沿用' if existing else '新增'))
     if not state['schemaReady']:errors.append('資料庫尚未允許負庫存，請先由管理員完成限制調整')
     summary=dict(rows=len(source_rows),quantity=sum(r['quantity'] for r in source_rows),display=sum(r['display'] for r in source_rows),excluded=sum(r['excluded'] for r in source_rows))
-    proof=digest(dict(state=state,month=month,rows=source_rows,edits=edits,assignmentActions=assignment_actions,decisions=decisions))
+    proof=digest(dict(state=state,month=month,rows=source_rows,edits=edits,assignmentActions=assignment_actions,decisions=decisions,importMode=import_mode))
+    changes=dict(inserted=len(new_rows),corrected=len(corrections),skipped=sum(x['decision']=='keep' for x in duplicates)+skipped_dealer_rows)
+    if skipped_dealer_rows:changes['skippedDealerRows']=skipped_dealer_rows
     return dict(rows=source_rows,importRows=new_rows,corrections=corrections,duplicates=duplicates,
-        changes=dict(inserted=len(new_rows),corrected=len(corrections),skipped=sum(x['decision']=='keep' for x in duplicates)),
-        dealers=dealers,employees=employees,products=products,assignments=assignments,exclusions=exclusions,conflicts=conflicts,errors=errors,notices=notices,summary=summary,month=month,proof=proof,orgs=[dict(id=o[0],name=o[1]) for o in state['orgs']],dealerOptions=[dict(code=c,name=n) for c,n in sorted({(x['code'],x['dealer']) for x in source_rows})])
+        changes=changes,
+        dealers=dealers,employees=employees,products=products,assignments=assignments,exclusions=exclusions,conflicts=conflicts,errors=errors,notices=notices,summary=summary,month=month,importMode=import_mode,proof=proof,orgs=[dict(id=o[0],name=o[1]) for o in state['orgs']],dealerOptions=[dict(code=c,name=n) for c,n in sorted({(x['code'],x['dealer']) for x in source_rows})])
 
 
 def load_upload(token):
@@ -308,7 +390,57 @@ def page():return send_from_directory(BASE,'LGSale_OpeningImport.html')
 @bp.get('/api/opening-import/context')
 def context():
     session.setdefault('opening_csrf',secrets.token_hex(32))
-    response=jsonify(csrf=session['opening_csrf'],name=session['user']['name']);response.headers['Cache-Control']='no-store';return response
+    conn=db.connect()
+    try:
+        cur=conn.cursor()
+        cur.execute("""SELECT TOP (20) ImportBatchId,OriginalFileName,ImportedAt,TotalRowCount,SuccessRowCount,DataMonth
+                       FROM dbo.ImportBatch
+                       WHERE ImportType='OPENING_INVENTORY' AND ImportStatus='Official'
+                       ORDER BY ImportBatchId DESC""")
+        history=[dict(batchId=r[0],fileName=r[1],importedAt=r[2].isoformat(sep=' ') if r[2] else '',
+                      sourceRows=r[3],rows=r[4],month=f'{str(r[5])[:4]}-{str(r[5])[4:6]}' if r[5] else '') for r in cur.fetchall()]
+        response=jsonify(csrf=session['opening_csrf'],name=session['user']['name'],history=history)
+        response.headers['Cache-Control']='no-store';return response
+    finally:conn.close()
+
+
+@bp.get('/api/opening-import/batches/<int:batch_id>/rows')
+def batch_rows(batch_id):
+    requested_page=request.args.get('page','1')
+    if not requested_page.isdecimal() or not 1<=int(requested_page)<=100000:raise ValueError('頁碼無效')
+    requested_page=int(requested_page);size=50
+    conn=db.connect()
+    try:
+        cur=conn.cursor()
+        cur.execute("""SELECT ImportBatchId,SuccessRowCount FROM dbo.ImportBatch
+                       WHERE ImportBatchId=%s AND ImportType='OPENING_INVENTORY' AND ImportStatus='Official'""",(batch_id,))
+        batch=cur.fetchone()
+        if not batch:return jsonify(error='找不到此期初匯入批次'),404
+        cur.execute("""SELECT EntryType,EntryId,SourceRowNumber,DealerCode,DealerName,ProductCode,ProductName,Quantity,PreviousQuantity
+                       FROM (
+                         SELECT 'INSERT' EntryType,i.OpeningInventoryDetailId EntryId,i.SourceRowNumber,
+                                d.DealerCode,d.DealerName,p.ProductCode,p.ProductName,i.OpeningQuantity Quantity,
+                                CAST(NULL AS int) PreviousQuantity
+                         FROM dbo.MonthlyOpeningInventoryDetail i
+                         JOIN dbo.Dealer d ON d.DealerId=i.DealerId
+                         JOIN dbo.Product p ON p.ProductId=i.ProductId
+                         WHERE i.ImportBatchId=%s
+                         UNION ALL
+                         SELECT 'CORRECTION',c.CorrectionId,c.SourceRowNumber,
+                                d.DealerCode,d.DealerName,p.ProductCode,p.ProductName,c.NewQuantity,c.PreviousQuantity
+                         FROM dbo.OpeningInventoryCorrection c
+                         JOIN dbo.MonthlyOpeningInventoryDetail i ON i.OpeningInventoryDetailId=c.OpeningInventoryDetailId
+                         JOIN dbo.Dealer d ON d.DealerId=i.DealerId
+                         JOIN dbo.Product p ON p.ProductId=i.ProductId
+                         WHERE c.ImportBatchId=%s
+                       ) detail
+                       ORDER BY SourceRowNumber,EntryType,EntryId
+                       OFFSET %s ROWS FETCH NEXT %s ROWS ONLY""",(batch_id,batch_id,(requested_page-1)*size,size))
+        rows=[dict(action=r[0],id=r[1],sourceRow=r[2],dealerCode=r[3],dealerName=r[4],productCode=r[5],
+                   productName=r[6],quantity=r[7],previousQuantity=r[8]) for r in cur.fetchall()]
+        response=jsonify(batchId=batch_id,total=batch[1],page=requested_page,pageSize=size,rows=rows)
+        response.headers['Cache-Control']='no-store';return response
+    finally:conn.close()
 
 
 @bp.post('/api/opening-import/upload')
@@ -326,9 +458,12 @@ def upload():
     filename=file.filename.replace('\\','/').split('/')[-1][:260]
     meta=dict(owner=session['user']['id'],name=filename,hash=hashlib.sha256(raw).hexdigest(),size=len(raw),created=datetime.now().isoformat())
     (STORE/(token+'.json')).write_text(json.dumps(meta,ensure_ascii=False),encoding='utf-8')
-    found=re.search(r'(20\d{2})(0[1-9]|1[0-2])',filename);suggested=''
-    if found:
-        year,month=map(int,found.groups());suggested=f'{year+(month==12):04d}-{month%12+1:02d}'
+    opening_format=bool(rows and rows[0].get('sourceMonth'))
+    suggested=filename_month(filename,opening_format)
+    if opening_format:
+        source_months={row['sourceMonth'] for row in rows}
+        if len(source_months)==1:
+            source_month=next(iter(source_months));suggested=f'{source_month[:4]}-{source_month[4:]}'
     return jsonify(token=token,name=filename,suggestedMonth=suggested,parseErrors=errors,rowCount=len(rows))
 
 
@@ -340,7 +475,9 @@ def get_review(payload,cur):
     if not isinstance(assignment_actions,dict) or any(not isinstance(k,str) or not isinstance(v,dict) or v.get('action','') not in ('','retain','transfer','bridge') or not isinstance(v.get('effectiveAt',''),str) for k,v in assignment_actions.items()):raise ValueError('配對處理選項格式無效')
     decisions=payload.get('decisions',{})
     if not isinstance(decisions,dict) or any(v not in ('','keep','replace') for v in decisions.values()):raise ValueError('重複資料處理選項無效')
-    review=build_review(rows,errors,snapshot(cur,month),month,edits,assignment_actions,decisions)
+    import_mode=payload.get('importMode','standard')
+    if import_mode not in ('standard','historical'):raise ValueError('匯入模式無效')
+    review=build_review(rows,errors,snapshot(cur,month),month,edits,assignment_actions,decisions,import_mode)
     return review,meta,path
 
 
@@ -357,6 +494,8 @@ def preview():
 def commit():
     payload=request.get_json() or {}
     if payload.get('confirmed') is not True:raise ValueError('請先確認本批資料')
+    import_mode=payload.get('importMode','standard')
+    if import_mode not in ('standard','historical'):raise ValueError('匯入模式無效')
     meta,path=load_upload(payload.get('token'))
     conn=db.connect()
     try:
@@ -366,20 +505,18 @@ def commit():
         cur.execute("SELECT ImportBatchId,SuccessRowCount,DataMonth FROM dbo.ImportBatch WHERE StoredFilePath=%s AND ImportStatus='Official'",(str(path),))
         completed=cur.fetchone()
         if completed:
-            conn.rollback();return jsonify(batchId=completed[0],rows=completed[1],month=completed[2],alreadyImported=True)
+            conn.rollback();return jsonify(batchId=completed[0],rows=completed[1],month=completed[2],importMode=import_mode,alreadyImported=True)
         review,meta,path=get_review(payload,cur)
         if review['proof']!=payload.get('proof'):raise ValueError('資料或主檔已變動，請重新比對並確認')
         if review['errors']:raise ValueError('尚有問題未處理：'+'；'.join(review['errors'][:8]))
         if not review['importRows'] and not review['corrections']:
             conn.rollback()
-            return jsonify(noChanges=True,**review['summary'],**review['changes'])
+            return jsonify(noChanges=True,importMode=review['importMode'],**review['summary'],**review['changes'])
         actor=int(session['user']['employeeId']);effective=month_date(review['month']);reason='期初庫存匯入建立'
         for e in review['employees']:
             cur.execute('INSERT dbo.Employee(EmployeeNo,EmployeeName,HireDate) OUTPUT inserted.EmployeeId VALUES(%s,%s,%s)',(e['number'],e['name'],e['hireDate']));eid=cur.fetchone()[0]
             cur.execute('INSERT dbo.EmployeePositionHistory(EmployeeId,PositionLevel,StartDateTime,ChangeReason,CreatedByEmployeeId) VALUES(%s,%s,%s,%s,%s)',(eid,e['position'],e['hireDate'],reason,actor))
             cur.execute('INSERT dbo.EmployeeOrgAssignmentHistory(EmployeeId,OrgUnitId,StartDateTime,ChangeReason,CreatedByEmployeeId) VALUES(%s,%s,%s,%s,%s)',(eid,int(e['orgId']),e['hireDate'],reason,actor))
-        for item in review['dealers']:
-            cur.execute('INSERT dbo.Dealer(DealerCode,DealerName) VALUES(%s,%s)',(item['code'],item['name']))
         for item in review['products']:
             cur.execute('INSERT dbo.Product(ProductCode,ProductName,CategoryLevel1,CategoryLevel2) VALUES(%s,%s,%s,%s)',(item['code'],item['name'],item['category1'],item['category2']))
         cur.execute('SELECT DealerCode,DealerId FROM dbo.Dealer');dm={r[0].casefold():r[1] for r in cur.fetchall()}
@@ -407,7 +544,7 @@ def commit():
         cur.execute('SELECT COUNT(*),SUM(CAST(OpeningQuantity AS bigint)) FROM dbo.MonthlyOpeningInventoryDetail WHERE ImportBatchId=%s',(batch,));control=cur.fetchone();s=review['summary']
         if (control[0],control[1] or 0)!=(len(review['importRows']),sum(x['quantity'] for x in review['importRows'])):raise ValueError('匯入數量核對失敗，整批回滾')
         conn.commit()
-        return jsonify(batchId=batch,**s,**review['changes'],exclusionsCreated=sum(x['status']=='新增' for x in review['exclusions']),created={key:len(review[key]) for key in ('dealers','employees','products','assignments')})
+        return jsonify(batchId=batch,importMode=review['importMode'],**s,**review['changes'],exclusionsCreated=sum(x['status']=='新增' for x in review['exclusions']),created={key:len(review[key]) for key in ('employees','products','assignments')},dealersCreated=0)
     except Exception:
         conn.rollback();raise
     finally:conn.close()

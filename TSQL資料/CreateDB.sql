@@ -220,6 +220,36 @@ CREATE INDEX IX_DealerLevelHistory_DealerPeriod
     ON dbo.DealerLevelHistory (DealerId, StartDateTime, EndDateTime);
 GO
 
+CREATE TABLE dbo.DealerLocation
+(
+    DealerLocationId bigint IDENTITY(1,1) NOT NULL,
+    DealerId bigint NOT NULL,
+    LocationName nvarchar(150) NOT NULL,
+    StreetAddress nvarchar(500) NULL,
+    ContactName nvarchar(100) NULL,
+    Phone nvarchar(30) NULL,
+    IsPrimary bit NOT NULL CONSTRAINT DF_DealerLocation_IsPrimary DEFAULT (0),
+    IsActive bit NOT NULL CONSTRAINT DF_DealerLocation_IsActive DEFAULT (1),
+    CreatedAt datetime2(0) NOT NULL CONSTRAINT DF_DealerLocation_CreatedAt DEFAULT (sysdatetime()),
+    UpdatedAt datetime2(0) NULL,
+    CONSTRAINT PK_DealerLocation PRIMARY KEY CLUSTERED (DealerLocationId),
+    CONSTRAINT UQ_DealerLocation_LocationDealer UNIQUE (DealerLocationId,DealerId),
+    CONSTRAINT FK_DealerLocation_Dealer FOREIGN KEY (DealerId) REFERENCES dbo.Dealer(DealerId)
+);
+GO
+CREATE UNIQUE INDEX UX_DealerLocation_Primary ON dbo.DealerLocation(DealerId) WHERE IsPrimary=1;
+CREATE INDEX IX_DealerLocation_DealerActive ON dbo.DealerLocation(DealerId,IsActive,DealerLocationId);
+GO
+
+CREATE TRIGGER dbo.TR_Dealer_CreatePrimaryLocation ON dbo.Dealer AFTER INSERT AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT dbo.DealerLocation(DealerId,LocationName,StreetAddress,ContactName,Phone,IsPrimary,IsActive)
+    SELECT i.DealerId,i.DealerName,i.StreetAddress,i.ContactName,COALESCE(i.CompanyPhone,i.MobilePhone),1,1
+    FROM inserted i;
+END;
+GO
+
 CREATE TABLE dbo.DealerAssignmentHistory
 (
     DealerAssignmentId  bigint IDENTITY(1,1) NOT NULL,
@@ -636,6 +666,7 @@ CREATE TABLE dbo.StoreVisit
 (
     StoreVisitId              bigint IDENTITY(1,1) NOT NULL,
     DealerId                 bigint NOT NULL,
+    DealerLocationId         bigint NOT NULL,
     DealerAssignmentId       bigint NULL,
     EntrySourceType          varchar(20) NOT NULL,
     ReportDateTime           datetime2(0) NOT NULL
@@ -651,6 +682,8 @@ CREATE TABLE dbo.StoreVisit
     CONSTRAINT PK_StoreVisit PRIMARY KEY CLUSTERED (StoreVisitId),
     CONSTRAINT FK_StoreVisit_Dealer
         FOREIGN KEY (DealerId) REFERENCES dbo.Dealer (DealerId),
+    CONSTRAINT FK_StoreVisit_DealerLocation
+        FOREIGN KEY (DealerLocationId,DealerId) REFERENCES dbo.DealerLocation (DealerLocationId,DealerId),
     CONSTRAINT FK_StoreVisit_DealerAssignment
         FOREIGN KEY (DealerAssignmentId)
         REFERENCES dbo.DealerAssignmentHistory (DealerAssignmentId),
@@ -675,6 +708,8 @@ GO
 
 CREATE INDEX IX_StoreVisit_DealerReportDate
     ON dbo.StoreVisit (DealerId, ReportDateTime DESC);
+GO
+CREATE INDEX IX_StoreVisit_LocationReportDate ON dbo.StoreVisit (DealerLocationId,ReportDateTime DESC);
 GO
 
 CREATE TABLE dbo.StoreVisitProductDetail
@@ -721,6 +756,7 @@ CREATE TABLE dbo.DealerProductDisplayPhoto
     DisplayPhotoId          bigint IDENTITY(1,1) NOT NULL,
     DataMonth               char(6) NOT NULL,
     DealerId                bigint NOT NULL,
+    DealerLocationId        bigint NOT NULL,
     ProductId               bigint NOT NULL,
     SourceStoreVisitId      bigint NULL,
     OriginalFileName        nvarchar(260) NOT NULL,
@@ -737,6 +773,7 @@ CREATE TABLE dbo.DealerProductDisplayPhoto
     OriginalDeletedAt       datetime2(0) NULL,
     CONSTRAINT PK_DealerProductDisplayPhoto PRIMARY KEY CLUSTERED (DisplayPhotoId),
     CONSTRAINT FK_DealerProductDisplayPhoto_Dealer FOREIGN KEY (DealerId) REFERENCES dbo.Dealer (DealerId),
+    CONSTRAINT FK_DealerProductDisplayPhoto_DealerLocation FOREIGN KEY (DealerLocationId,DealerId) REFERENCES dbo.DealerLocation (DealerLocationId,DealerId),
     CONSTRAINT FK_DealerProductDisplayPhoto_Product FOREIGN KEY (ProductId) REFERENCES dbo.Product (ProductId),
     CONSTRAINT FK_DealerProductDisplayPhoto_StoreVisit FOREIGN KEY (SourceStoreVisitId) REFERENCES dbo.StoreVisit (StoreVisitId),
     CONSTRAINT FK_DealerProductDisplayPhoto_UploadedBy FOREIGN KEY (UploadedByUserAccountId) REFERENCES dbo.UserAccount (UserAccountId),
@@ -747,8 +784,8 @@ CREATE TABLE dbo.DealerProductDisplayPhoto
     CONSTRAINT CK_DealerProductDisplayPhoto_NotSelf CHECK (ReplacedPhotoId IS NULL OR ReplacedPhotoId <> DisplayPhotoId)
 );
 GO
-CREATE UNIQUE INDEX UX_DealerProductDisplayPhoto_Current ON dbo.DealerProductDisplayPhoto (DataMonth,DealerId,ProductId) WHERE RecordStatus='ACTIVE';
-CREATE INDEX IX_DealerProductDisplayPhoto_Psi ON dbo.DealerProductDisplayPhoto (DataMonth,DealerId,ProductId,RecordStatus) INCLUDE (ThumbnailFilePath,CapturedAt,UploadedByUserAccountId);
+CREATE UNIQUE INDEX UX_DealerProductDisplayPhoto_Current ON dbo.DealerProductDisplayPhoto (DataMonth,DealerLocationId,ProductId) WHERE RecordStatus='ACTIVE';
+CREATE INDEX IX_DealerProductDisplayPhoto_Psi ON dbo.DealerProductDisplayPhoto (DataMonth,DealerId,ProductId,DealerLocationId,RecordStatus) INCLUDE (ThumbnailFilePath,CapturedAt,UploadedByUserAccountId);
 GO
 
 /* =========================================================
@@ -762,6 +799,10 @@ CREATE TABLE dbo.VisitTask
     Instruction                  nvarchar(max) NOT NULL,
     ValidFrom                    date NOT NULL,
     DueDate                      date NOT NULL,
+    ScopeOrgUnitId               bigint NULL,
+    ScopeNameSnapshot            nvarchar(100) NOT NULL,
+    ScopeDealerCount             int NOT NULL,
+    ScopeExecutionCount          int NOT NULL,
     RecordStatus                 varchar(20) NOT NULL
         CONSTRAINT DF_VisitTask_RecordStatus DEFAULT ('ACTIVE'),
     SampleTaskExecutionId        bigint NULL,
@@ -779,6 +820,8 @@ CREATE TABLE dbo.VisitTask
         REFERENCES dbo.Employee (EmployeeId),
     CONSTRAINT FK_VisitTask_CreatedByEmployee
         FOREIGN KEY (CreatedByEmployeeId) REFERENCES dbo.Employee (EmployeeId),
+    CONSTRAINT FK_VisitTask_ScopeOrganization
+        FOREIGN KEY (ScopeOrgUnitId) REFERENCES dbo.OrganizationUnit (OrgUnitId),
     CONSTRAINT FK_VisitTask_UpdatedByEmployee
         FOREIGN KEY (UpdatedByEmployeeId) REFERENCES dbo.Employee (EmployeeId),
     CONSTRAINT UQ_VisitTask_VisitTask_SampleExecution
@@ -802,7 +845,9 @@ CREATE TABLE dbo.VisitTask
                 AND SampleApprovedByEmployeeId IS NOT NULL
                 AND SampleTaskExecutionId IS NOT NULL
             )
-        )
+        ),
+    CONSTRAINT CK_VisitTask_ScopeCounts
+        CHECK (ScopeDealerCount>=0 AND ScopeExecutionCount>=ScopeDealerCount)
 );
 GO
 
@@ -816,6 +861,7 @@ CREATE TABLE dbo.VisitTaskExecution
     TaskExecutionId          bigint IDENTITY(1,1) NOT NULL,
     VisitTaskId             bigint NOT NULL,
     DealerId                bigint NOT NULL,
+    DealerLocationId        bigint NOT NULL,
     ResponsibleEmployeeId   bigint NOT NULL,
     CompletedByEmployeeId   bigint NULL,
     ExecutionNote           nvarchar(max) NULL,
@@ -827,12 +873,14 @@ CREATE TABLE dbo.VisitTaskExecution
         PRIMARY KEY CLUSTERED (TaskExecutionId),
     CONSTRAINT UQ_VisitTaskExecution_TaskExecution
         UNIQUE (VisitTaskId, TaskExecutionId),
-    CONSTRAINT UQ_VisitTaskExecution_TaskDealer
-        UNIQUE (VisitTaskId, DealerId),
+    CONSTRAINT UQ_VisitTaskExecution_TaskLocation
+        UNIQUE (VisitTaskId, DealerLocationId),
     CONSTRAINT FK_VisitTaskExecution_VisitTask
         FOREIGN KEY (VisitTaskId) REFERENCES dbo.VisitTask (VisitTaskId),
     CONSTRAINT FK_VisitTaskExecution_Dealer
         FOREIGN KEY (DealerId) REFERENCES dbo.Dealer (DealerId),
+    CONSTRAINT FK_VisitTaskExecution_DealerLocation
+        FOREIGN KEY (DealerLocationId,DealerId) REFERENCES dbo.DealerLocation (DealerLocationId,DealerId),
     CONSTRAINT FK_VisitTaskExecution_ResponsibleEmployee
         FOREIGN KEY (ResponsibleEmployeeId) REFERENCES dbo.Employee (EmployeeId),
     CONSTRAINT FK_VisitTaskExecution_CompletedByEmployee
