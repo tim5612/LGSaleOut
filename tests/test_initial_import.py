@@ -1,7 +1,44 @@
 import openpyxl
+from datetime import datetime
+from pathlib import Path
+import unittest
 
-from lgsale_initial_import import (cross_organization_conflicts, organization_candidates,
+from lgsale_initial_import import (assign_auto_employee_numbers, cross_organization_conflicts,
+                                   first_result_row, next_monthly_code, organization_candidates,
                                    selected_organizations, source_data, review_source)
+
+
+class InitialImportSqlRegressionTests(unittest.TestCase):
+    def test_dealer_insert_supports_enabled_after_insert_trigger(self):
+        source = (Path(__file__).resolve().parents[1] / "lgsale_initial_import.py").read_text(encoding="utf-8")
+        statement = source[source.index("INSERT dbo.Dealer("):source.index("dealer_id = first_result_row")]
+        self.assertNotIn("OUTPUT inserted.DealerId", statement)
+        self.assertIn("SELECT CAST(SCOPE_IDENTITY() AS bigint)", statement)
+
+    def test_short_monthly_codes(self):
+        self.assertEqual(next_monthly_code(["260901", "260902"], "2609", 2), "260903")
+        sources = [{"employees": [{"number": "AUTO-X", "autoNumber": True}],
+                    "dealers": [{"employeeNo": "auto-x"}]}]
+        assign_auto_employee_numbers(sources, ["E2609001"], datetime(2026, 9, 30))
+        self.assertEqual(sources[0]["employees"][0]["number"], "E2609002")
+        self.assertEqual(sources[0]["dealers"][0]["employeeNo"], "e2609002")
+
+    def test_dealer_identity_advances_to_select_result(self):
+        class Cursor:
+            description = None
+
+            def __init__(self):
+                self.advanced = False
+
+            def nextset(self):
+                self.description = (("DealerId",),)
+                self.advanced = True
+                return True
+
+            def fetchone(self):
+                return (123,) if self.advanced else None
+
+        self.assertEqual(first_result_row(Cursor(), "missing"), (123,))
 
 
 def sample_workbook(tmp_path, conflict=False):

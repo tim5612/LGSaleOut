@@ -5,3 +5,12 @@ https://lgdeva.superb-supplies.com.tw/mobile
 https://lgdeva.superb-supplies.com.tw/photo
 
 https://lgdeva.superb-supplies.com.tw/login/employee
+
+
+
+
+現在看來都很棒，請將今天的修正更新到 
+【整合式人員經銷商庫存巡店資料庫設計規格.MD】
+
+別台開發機應注意事項，請更新到
+【三機部署與更新說明.MD】

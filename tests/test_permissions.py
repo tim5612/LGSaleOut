@@ -1,6 +1,7 @@
 import unittest
 from dataclasses import replace
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import patch
 
 import LGSale
@@ -181,7 +182,7 @@ class PermissionRouteTests(unittest.TestCase):
             response = self.client.get("/api/task-scopes?validFrom=2026-09-28")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json, expected)
-        scopes.assert_called_once_with("2026-09-28", frozenset({4, 8}))
+        scopes.assert_called_once_with("2026-09-28", frozenset({4, 8}), None)
 
     def test_task_creation_passes_real_organization_scope(self):
         manager = replace(access("MANAGER", dealer_ids=(4, 8)),
@@ -195,7 +196,73 @@ class PermissionRouteTests(unittest.TestCase):
         self.assertEqual(response.status_code, 201)
         sent = create.call_args.args[0]
         self.assertEqual(sent["orgUnitId"], 26)
+        self.assertIsNone(sent["dealerLevel"])
         self.assertEqual(sent["dealerIds"], [4, 8])
+
+    def test_task_creation_combines_organization_and_dealer_level(self):
+        manager = replace(access("MANAGER", dealer_ids=(4, 8)),
+                          capabilities=permissions.effective_capabilities(
+                              "MANAGER", {}, {"tasks.create": True}))
+        payload = {"title": "DC 店任務", "instruction": "拍照", "validFrom": "2026-09-28",
+                   "dueDate": "2026-10-05", "orgUnitId": "26", "dealerLevel": "DC店"}
+        with patch.object(LGSale.permissions, "resolve", return_value=manager), \
+             patch.object(LGSale.db, "create_task", return_value={"id": 10}) as create:
+            response = self.client.post("/api/tasks", json=payload)
+        self.assertEqual(response.status_code, 201)
+        sent = create.call_args.args[0]
+        self.assertEqual(sent["orgUnitId"], 26)
+        self.assertEqual(sent["dealerLevel"], "DC店")
+
+    def test_task_scope_route_filters_by_dealer_level(self):
+        manager = replace(access("MANAGER", dealer_ids=(4, 8)),
+                          capabilities=permissions.effective_capabilities(
+                              "MANAGER", {}, {"tasks.create": True}))
+        with patch.object(LGSale.permissions, "resolve", return_value=manager), \
+             patch.object(LGSale.db, "task_scopes", return_value=[]) as scopes:
+            response = self.client.get("/api/task-scopes?validFrom=2026-09-28&dealerLevel=失聯店")
+        self.assertEqual(response.status_code, 200)
+        scopes.assert_called_once_with("2026-09-28", frozenset({4, 8}), "失聯店")
+
+    def test_task_create_page_offers_all_official_dealer_levels(self):
+        source = (Path(__file__).resolve().parents[1] / "LGSale_UI_Desktop.html").read_text(encoding="utf-8")
+        for level in ("一般店", "DC店", "專售店", "AC店", "批店", "失聯店"):
+            self.assertIn(f'<option value="{level}">{level}</option>', source)
+
+    def test_manager_can_update_existing_task_schedule(self):
+        manager = access("MANAGER", dealer_ids=(4, 8))
+        detail = {"id": 12, "validFrom": "2026-10-01", "dueDate": "2026-10-15"}
+        with patch.object(LGSale.permissions, "resolve", return_value=manager), \
+             patch.object(LGSale.db, "task_detail", return_value=detail) as get_detail, \
+             patch.object(LGSale.db, "update_task_schedule") as update:
+            response = self.client.put("/api/tasks/12/schedule",
+                                       json={"validFrom": "2026-10-01", "dueDate": "2026-10-15"})
+        self.assertEqual(response.status_code, 200)
+        update.assert_called_once_with(12, "2026-10-01", "2026-10-15", 11)
+        self.assertEqual(get_detail.call_count, 2)
+
+    def test_sales_cannot_update_task_schedule(self):
+        with patch.object(LGSale.permissions, "resolve", return_value=access("SALES")):
+            response = self.client.put("/api/tasks/12/schedule",
+                                       json={"validFrom": "2026-10-01", "dueDate": "2026-10-15"})
+        self.assertEqual(response.status_code, 403)
+
+    def test_task_schedule_rejects_due_date_before_start(self):
+        manager = access("MANAGER")
+        with patch.object(LGSale.permissions, "resolve", return_value=manager), \
+             patch.object(LGSale.db, "task_detail", return_value={"id": 12}), \
+             patch.object(LGSale.db, "update_task_schedule") as update:
+            response = self.client.put("/api/tasks/12/schedule",
+                                       json={"validFrom": "2026-10-15", "dueDate": "2026-10-01"})
+        self.assertEqual(response.status_code, 400)
+        update.assert_not_called()
+
+    def test_task_page_has_schedule_presets_for_create_and_edit(self):
+        source = (Path(__file__).resolve().parents[1] / "LGSale_UI_Desktop.html").read_text(encoding="utf-8")
+        for target in ("create", "detail"):
+            block_start = source.index(f'data-duration-target="{target}"')
+            block = source[block_start:block_start + 650]
+            for days in (7, 14, 21, 30):
+                self.assertIn(f'data-days="{days}"', block)
 
     def test_designer_can_edit_task_owned_by_another_employee(self):
         designer = replace(access("ADMIN", designer=True, dealer_ids=(4,)),
@@ -234,8 +301,15 @@ class PermissionRouteTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         update.assert_called_once_with(20, photos, 11, True)
 
+    def test_mobile_completion_button_does_not_trust_stale_client_edit_flag(self):
+        source = (Path(__file__).resolve().parents[1] / "LGSale_UI_PHOTO.html").read_text(encoding="utf-8")
+        render_slots = source[source.index("function renderSlots()"):
+                              source.index("function choosePhoto")]
+        self.assertIn("$('#complete').disabled=!slots.length||uploading", render_slots)
+        self.assertNotIn("$('#complete').disabled=!current.canEdit", render_slots)
+
     def test_every_application_route_has_a_policy(self):
-        public = {"static", "health", "login_page", "register_page",
+        public = {"static", "health", "login_page", "register_page", "auth_register_status",
                   "auth_register_options", "auth_register_verify", "auth_login_options",
                   "auth_login_verify", "desktop_approve_page", "desktop_approval_start",
                   "desktop_approval_info", "desktop_approval_status", "desktop_approval_qr",

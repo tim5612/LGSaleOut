@@ -195,6 +195,13 @@ def registration_invitation_is_valid(token: str) -> bool:
     return db.passkey_invitation(hashlib.sha256(token.encode()).digest()) is not None
 
 
+def registration_invitation_status(token: str) -> dict[str, Any]:
+    if not token:
+        return {"status": "INVALID"}
+    result = db.passkey_invitation_status(hashlib.sha256(token.encode()).digest())
+    return result or {"status": "INVALID"}
+
+
 def finish_registration(credential: dict[str, Any], device_name: str) -> dict[str, Any]:
     state = _take_challenge("registration")
     verified = verify_registration_response(

@@ -18,7 +18,7 @@
 1. 停止該機器的 LGSale 應用程式，暫停測試操作。SQL Server 保持執行。
 2. 在 SSMS 開啟並執行 `EraseDummy.sql`。結果會顯示每張表剩餘筆數，應全部為 0。
 3. 在 `TSQL資料` 執行 `清除初始化圖片.cmd`，先核對列出的本機檔案；確認要刪除後執行 `清除初始化圖片.cmd -Apply`。只刪除 `uploads/task_photos`、`uploads/display_photos` 內的檔案，保留目錄、Excel 及其他上傳檔。此步須在清空 SQL 成功且應用程式已停止後執行。
-4. 開啟 `建立初始測試帳戶.sql`，核對或修改員工編號、姓名、到職日、處所及員工職級；目前預設為 `T0001／王正文／內湖／MANAGER`。執行一次即可，不需要手動指定 ID。`MANAGER` 是員工職級，**Designer 另由同一交易寫入 `PermissionDesigner`**；結果格的 `IsDesigner` 必須為 `1`。`Employee` 不為空或 `PermissionDesigner` 表不存在時，腳本會停止並回滾。
+4. 開啟 `建立初始測試帳戶.sql`，核對或修改員工編號、姓名、到職日、處所及員工職級；目前預設為 `E2609001／王正文／260901 台北營銷處／MANAGER`。執行一次即可，不需要手動指定 ID。`MANAGER` 是員工職級，**Designer 另由同一交易寫入 `PermissionDesigner`**；結果格的 `IsDesigner` 必須為 `1`。`Employee` 不為空或 `PermissionDesigner` 表不存在時，腳本會停止並回滾。
 5. 啟動該機器的 LGSale 與既有 Cloudflare Tunnel，確認手機能開啟本台的 HTTPS 登入頁。
 6. 開啟 `產生初始Passkey註冊連結.sql`，員工編號須與上一步相同，`@Origin` 填入**這台電腦** `.env.local` 的 `LGSALEOUT_ORIGIN`。例如目前 LGDevA 使用 `https://lgdeva.superb-supplies.com.tw`；其他兩台請讀自己的設定，不套用此網址。
 7. 執行 SQL，從 SSMS 結果格複製 `RegistrationUrl`，在 iPhone 的 Safari 開啟。連結包含註冊權限，只交給自己的測試手機，不貼入共用文件或 Git。

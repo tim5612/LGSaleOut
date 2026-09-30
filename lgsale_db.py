@@ -34,6 +34,36 @@ def passkey_invitation(token_hash: bytes) -> dict[str, Any] | None:
             "accountLabel": f"{row[2]}:{row[3]}", "displayName": row[4]}
 
 
+def passkey_invitation_status(token_hash: bytes) -> dict[str, Any] | None:
+    """Return an invitation's lifecycle state, including completed invitations."""
+    sql = """
+    SELECT a.AccountType,COALESCE(e.EmployeeNo,d.DealerCode),
+           COALESCE(e.EmployeeName,d.DealerName),i.ExpiresAt,i.UsedAt,i.RevokedAt,
+           a.IsLoginEnabled,a.AccountStatus
+      FROM dbo.PasskeyRegistrationInvitation i
+      JOIN dbo.UserAccount a ON a.UserAccountId=i.UserAccountId
+      LEFT JOIN dbo.Employee e ON e.EmployeeId=a.EmployeeId
+      LEFT JOIN dbo.Dealer d ON d.DealerId=a.DealerId
+     WHERE i.TokenHash=%s
+    """
+    with connect() as conn:
+        row = _one(conn.cursor(), sql, (pytds.Binary(token_hash),))
+    if row is None:
+        return None
+    if not row[6] or row[7] != "ACTIVE":
+        status = "DISABLED"
+    elif row[4] is not None:
+        status = "USED"
+    elif row[5] is not None:
+        status = "REVOKED"
+    elif row[3] <= datetime.now():
+        status = "EXPIRED"
+    else:
+        status = "VALID"
+    return {"status": status, "accountType": row[0], "ownerRef": row[1],
+            "displayName": row[2], "expiresAt": row[3].isoformat(timespec="seconds")}
+
+
 def passkey_credentials(user_account_id: int) -> list[dict[str, Any]]:
     with connect() as conn:
         cur = conn.cursor()
@@ -537,10 +567,16 @@ def tasks(dealer_ids: set[int] | frozenset[int] | None = None) -> list[dict[str,
     return result
 
 
-def task_scopes(valid_from: str, dealer_ids: set[int] | frozenset[int] | None = None) -> list[dict[str, Any]]:
+def task_scopes(valid_from: str, dealer_ids: set[int] | frozenset[int] | None = None,
+                dealer_level: str | None = None) -> list[dict[str, Any]]:
     if dealer_ids is not None and not dealer_ids:
         return []
     dealer_scope = " AND a.DealerId IN (" + ",".join("%s" for _ in dealer_ids) + ")" if dealer_ids is not None else ""
+    level_scope = """ AND EXISTS(
+        SELECT 1 FROM dbo.DealerLevelHistory dl
+         WHERE dl.DealerId=a.DealerId AND dl.DealerStatus=%s
+           AND dl.StartDateTime<DATEADD(day,1,CAST(%s AS date))
+           AND (dl.EndDateTime IS NULL OR dl.EndDateTime>=CAST(%s AS date)))""" if dealer_level else ""
     sql = """SELECT o.OrgUnitId,o.OrgUnitName,COUNT(DISTINCT a.DealerId),COUNT(DISTINCT l.DealerLocationId)
       FROM dbo.OrganizationUnit o
       JOIN dbo.EmployeeOrgAssignmentHistory h ON h.OrgUnitId=o.OrgUnitId
@@ -553,10 +589,11 @@ def task_scopes(valid_from: str, dealer_ids: set[int] | frozenset[int] | None = 
        AND a.StartDateTime<DATEADD(day,1,CAST(%s AS date))
        AND (a.EndDateTime IS NULL OR a.EndDateTime>=CAST(%s AS date))
       JOIN dbo.DealerLocation l ON l.DealerId=a.DealerId AND l.IsActive=1
-     WHERE o.IsActive=1""" + dealer_scope + """
+     WHERE o.IsActive=1""" + dealer_scope + level_scope + """
      GROUP BY o.OrgUnitId,o.OrgUnitName
      ORDER BY o.OrgUnitId"""
-    params = (valid_from,) * 6 + tuple(sorted(dealer_ids) if dealer_ids is not None else ())
+    params = ((valid_from,) * 6 + tuple(sorted(dealer_ids) if dealer_ids is not None else ()) +
+              ((dealer_level, valid_from, valid_from) if dealer_level else ()))
     with connect() as conn:
         cur = conn.cursor(); cur.execute(sql, params)
         rows = [{"orgUnitId": int(r[0]), "name": r[1], "dealerCount": int(r[2]),
@@ -578,6 +615,12 @@ def create_task(data: dict[str, Any], creator_id: int | None = None) -> dict[str
         scoped = " AND a.DealerId IN (" + ",".join("%s" for _ in dealer_ids) + ")" if dealer_ids is not None else ""
         org_id = data.get("orgUnitId")
         org_scoped = " AND h.OrgUnitId=%s" if org_id is not None else ""
+        dealer_level = data.get("dealerLevel")
+        level_scoped = """ AND EXISTS(
+            SELECT 1 FROM dbo.DealerLevelHistory dl
+             WHERE dl.DealerId=a.DealerId AND dl.DealerStatus=%s
+               AND dl.StartDateTime<DATEADD(day,1,CAST(%s AS date))
+               AND (dl.EndDateTime IS NULL OR dl.EndDateTime>=CAST(%s AS date)))""" if dealer_level else ""
         cur.execute("""WITH selected AS (
             SELECT DISTINCT a.DealerId,a.EmployeeId
               FROM dbo.DealerAssignmentHistory a
@@ -588,12 +631,14 @@ def create_task(data: dict[str, Any], creator_id: int | None = None) -> dict[str
                AND h.StartDateTime<DATEADD(day,1,CAST(%s AS date))
                AND (h.EndDateTime IS NULL OR h.EndDateTime>=CAST(%s AS date))
              WHERE a.StartDateTime<DATEADD(day,1,CAST(%s AS date))
-               AND (a.EndDateTime IS NULL OR a.EndDateTime>=CAST(%s AS date))""" + scoped + org_scoped + """
+               AND (a.EndDateTime IS NULL OR a.EndDateTime>=CAST(%s AS date))""" + scoped + org_scoped + level_scoped + """
         )
             SELECT s.DealerId,s.EmployeeId,l.DealerLocationId
               FROM selected s JOIN dbo.DealerLocation l ON l.DealerId=s.DealerId AND l.IsActive=1
              ORDER BY s.DealerId,l.IsPrimary DESC,l.DealerLocationId""",
-            (data["validFrom"],) * 6 + tuple(dealer_ids or ()) + ((int(org_id),) if org_id is not None else ()))
+            ((data["validFrom"],) * 6 + tuple(dealer_ids or ()) +
+             ((int(org_id),) if org_id is not None else ()) +
+             ((dealer_level, data["validFrom"], data["validFrom"]) if dealer_level else ())))
         assignments = cur.fetchall()
         if not assignments:
             raise ValueError("所選執行範圍目前沒有有效的經銷商店點")
@@ -604,6 +649,8 @@ def create_task(data: dict[str, Any], creator_id: int | None = None) -> dict[str
             scope_row=_one(cur,"SELECT OrgUnitName FROM dbo.OrganizationUnit WHERE OrgUnitId=%s AND IsActive=1",(int(org_id),))
             if scope_row is None:raise ValueError("找不到有效的執行處別")
             scope_name=scope_row[0]
+        if dealer_level:
+            scope_name += "／" + dealer_level if org_id is not None else "全部處別／" + dealer_level
         row = _one(cur, """
             INSERT dbo.VisitTask(TaskTitle,Instruction,ValidFrom,DueDate,ScopeOrgUnitId,ScopeNameSnapshot,
                                   ScopeDealerCount,ScopeExecutionCount,RecordStatus,CreatedByEmployeeId)
@@ -634,6 +681,25 @@ def toggle_task(task_id: int, creator_id: int | None = None) -> bool:
              WHERE VisitTaskId=%s
         """, (creator_id, task_id))
         changed = cur.rowcount > 0; conn.commit(); return changed
+    except Exception:
+        conn.rollback(); raise
+    finally:
+        conn.close()
+
+
+def update_task_schedule(task_id: int, valid_from: str, due_date: str,
+                         employee_id: int | None = None) -> None:
+    conn = connect()
+    try:
+        cur = conn.cursor()
+        cur.execute("""UPDATE dbo.VisitTask
+                          SET ValidFrom=%s,DueDate=%s,
+                              UpdatedByEmployeeId=%s,UpdatedAt=SYSDATETIME()
+                        WHERE VisitTaskId=%s""",
+                    (valid_from, due_date, employee_id, task_id))
+        if cur.rowcount != 1:
+            raise LookupError("找不到任務")
+        conn.commit()
     except Exception:
         conn.rollback(); raise
     finally:

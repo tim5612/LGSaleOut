@@ -31,6 +31,41 @@ LABELS = {"code": "TWCode", "name": "經銷商名稱", "owner": "負責業務", 
 bp = Blueprint("initial_import", __name__)
 
 
+def next_monthly_code(existing_codes, prefix, digits):
+    pattern = re.compile(re.escape(prefix) + rf"(\d{{{digits}}})\Z", re.IGNORECASE)
+    used = [int(match.group(1)) for code in existing_codes if (match := pattern.fullmatch(str(code)))]
+    sequence = max(used, default=0) + 1
+    if sequence >= 10 ** digits:
+        raise ValueError(f"{prefix} 的 {digits} 碼流水號已用完")
+    return f"{prefix}{sequence:0{digits}d}"
+
+
+def assign_auto_employee_numbers(sources, existing_numbers, at=None):
+    prefix = "E" + (at or datetime.now()).strftime("%y%m")
+    allocated = list(existing_numbers)
+    for source in sources:
+        replacements = {}
+        for person in source["employees"]:
+            if not person.pop("autoNumber", False):
+                continue
+            old_number = person["number"].casefold()
+            person["number"] = next_monthly_code(allocated, prefix, 3)
+            allocated.append(person["number"])
+            replacements[old_number] = person["number"].casefold()
+        for dealer in source["dealers"]:
+            dealer["employeeNo"] = replacements.get(dealer["employeeNo"], dealer["employeeNo"])
+
+
+def first_result_row(cur, error_message):
+    while cur.description is None:
+        if not cur.nextset():
+            raise RuntimeError(error_message)
+    row = cur.fetchone()
+    if row is None:
+        raise RuntimeError(error_message)
+    return row
+
+
 def cell(value):
     if value is None:
         return ""
@@ -166,9 +201,11 @@ def review_source(dealers, staff, org, hire_date):
         if not name or len(number) > 30 or len(name) > 100:
             errors.append(f"業務工作表第 {row['row']} 列缺少姓名，或欄位內容過長")
             continue
-        if not number:
+        auto_number = not number
+        if auto_number:
             number = "AUTO-" + hashlib.sha256(f"{org}\0{name}".encode()).hexdigest()[:20].upper()
             row = {**row, "number": number}
+        row = {**row, "autoNumber": auto_number}
         by_number[number.casefold()].append(row)
         by_name[name].add(number.casefold())
     employees = []
@@ -177,7 +214,8 @@ def review_source(dealers, staff, org, hire_date):
         if len(names) > 1:
             errors.append(f"業務員編號 {number} 對應多個姓名：" + "、".join(sorted(names)))
         employees.append({"row": rows[0]["row"], "number": rows[0]["number"],
-                          "name": rows[0]["name"], "org": org, "hireDate": hire_date})
+                          "name": rows[0]["name"], "org": org, "hireDate": hire_date,
+                          "autoNumber": rows[0]["autoNumber"]})
     for name, numbers in by_name.items():
         if len(numbers) > 1:
             errors.append(f"業務員姓名 {name} 對應多個編號，請在 Excel 修正")
@@ -282,10 +320,10 @@ def get_batch_review(payload, cur):
     if not isinstance(selected, list) or not selected:
         raise ValueError("請先選擇並建立處所")
     dealers, staff, _ = source_data(path, payload.get("mapping"))
-    reviews = []
-    for org in selected:
-        source = review_source(dealers, staff, org, payload.get("hireDate", ""))
-        reviews.append(review_database(cur, source, org))
+    sources = [review_source(dealers, staff, org, payload.get("hireDate", "")) for org in selected]
+    cur.execute("SELECT EmployeeNo FROM dbo.Employee")
+    assign_auto_employee_numbers(sources, [row[0] for row in cur.fetchall()])
+    reviews = [review_database(cur, source, org) for source, org in zip(sources, selected)]
     cross_organization_conflicts(reviews)
     errors = [f"{review['organization']['name']}：{error}"
               for review in reviews for error in review["errors"]]
@@ -380,6 +418,9 @@ def commit_organizations():
         if cur.fetchone()[0] < 0:
             raise ValueError("另一筆初始化匯入正在執行")
         result = []
+        cur.execute("SELECT OrgUnitCode FROM dbo.OrganizationUnit")
+        organization_codes = [row[0] for row in cur.fetchall()]
+        organization_prefix = datetime.now().strftime("%y%m")
         for name in selected:
             cur.execute("SELECT OrgUnitId,IsActive FROM dbo.OrganizationUnit WHERE OrgUnitName=%s", (name,))
             existing = cur.fetchall()
@@ -388,8 +429,9 @@ def commit_organizations():
             if existing and not existing[0][1]:
                 raise ValueError(f"處所 {name} 已停用，不能作為初始化匯入目標")
             if not existing:
-                code = "ORG-" + hashlib.sha256(name.encode()).hexdigest()[:16].upper()
+                code = next_monthly_code(organization_codes, organization_prefix, 2)
                 cur.execute("INSERT dbo.OrganizationUnit(OrgUnitCode,OrgUnitName,IsActive) VALUES(%s,%s,1)", (code, name))
+                organization_codes.append(code)
             result.append({"name": name, "action": "已存在" if existing else "新增"})
         conn.commit()
     except Exception:
@@ -453,10 +495,11 @@ def commit():
             employee_ids = {r[0].casefold(): r[1] for r in cur.fetchall()}
             for dealer in organization["dealers"]:
                 cur.execute("""INSERT dbo.Dealer(DealerCode,DealerName,Area,ShortName,ContactName,MobilePhone,CompanyPhone,PostalCode,StreetAddress)
-                    OUTPUT inserted.DealerId VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)""",
+                    VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s);
+                    SELECT CAST(SCOPE_IDENTITY() AS bigint);""",
                     (dealer["code"], dealer["name"], org,
                      *(dealer.get(key) or None for key in ("shortName", "contactName", "mobilePhone", "companyPhone", "postalCode", "streetAddress"))))
-                dealer_id = cur.fetchone()[0]
+                dealer_id = first_result_row(cur, "新增經銷商後無法取得 DealerId")[0]
                 cur.execute("INSERT dbo.DealerAssignmentHistory(DealerId,EmployeeId,StartDateTime,ChangeReason,CreatedByEmployeeId) VALUES(%s,%s,%s,N'初始化匯入',%s)",
                             (dealer_id, employee_ids[dealer["employeeNo"]], now, actor))
                 if dealer.get("level"):

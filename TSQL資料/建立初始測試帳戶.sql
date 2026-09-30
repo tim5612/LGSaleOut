@@ -8,11 +8,11 @@ SET NOCOUNT ON;
 SET XACT_ABORT ON;
 
 -- 可修改：每台可以使用相同員工編號，但資料各自獨立。
-DECLARE @EmployeeNo nvarchar(30) = N'T0001';
+DECLARE @EmployeeNo nvarchar(30) = N'E2609001';
 DECLARE @EmployeeName nvarchar(100) = N'王正文';
 DECLARE @HireDate date = '2026-01-01';
-DECLARE @OrgUnitCode varchar(30) = 'TEST';
-DECLARE @OrgUnitName nvarchar(100) = N'內湖';
+DECLARE @OrgUnitCode varchar(30) = '260901';
+DECLARE @OrgUnitName nvarchar(100) = N'台北營銷處';
 DECLARE @PositionLevel varchar(30) = 'MANAGER'; -- 員工職級：SALES／DIRECTOR／MANAGER／ADMIN；Designer 另由 PermissionDesigner 指定
 
 BEGIN TRY

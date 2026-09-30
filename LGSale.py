@@ -64,6 +64,7 @@ ENDPOINT_CAPABILITIES = {
     "mobile_locked_page": (),
     "tasks": ("tasks.view",), "task_scopes": ("tasks.create",), "create_task": ("tasks.create",),
     "toggle_task": ("tasks.toggle",), "task_detail": ("tasks.view",),
+    "update_task_schedule": ("tasks.view",),
     "update_task_photos": ("tasks.photos.manage",),
     "dealers": ("dealers.view", "mobile.reports.view", "mobile.tasks.view"),
     "create_dealer": ("dealers.manage",), "update_dealer": ("dealers.manage",),
@@ -119,7 +120,7 @@ ENDPOINT_CAPABILITIES = {
     "permission_update": ("permissions.manage",),
     "display_photo_setting": ("mobile.reports.view",),
     "display_photo_setting_update": ("permissions.manage",),
-    "menu_script": (),
+    "menu_script": (), "onboarding_script": (),
     "desktop_approval_approve": (),
 }
 
@@ -127,7 +128,7 @@ ENDPOINT_CAPABILITIES = {
 @app.before_request
 def require_login():
     public = request.endpoint in {
-        "health", "login_page", "register_page", "auth_register_options",
+        "health", "login_page", "register_page", "auth_register_status", "auth_register_options",
         "auth_register_verify", "auth_login_options", "auth_login_verify",
         "desktop_approve_page", "desktop_approval_start", "desktop_approval_info",
         "desktop_approval_status", "desktop_approval_qr",
@@ -178,6 +179,11 @@ def login_page(account_type: str):
 @app.get("/register")
 def register_page():
     return send_from_directory(BASE_DIR, "LGSale_Auth.html")
+
+
+@app.get("/api/auth/register/status")
+def auth_register_status():
+    return jsonify(auth.registration_invitation_status(str(request.args.get("token", ""))))
 
 
 @app.get("/desktop-approve")
@@ -278,6 +284,11 @@ def permissions_page():
 @app.get("/assets/menu.js")
 def menu_script():
     return send_from_directory(BASE_DIR, "lgsale_menu.js")
+
+
+@app.get("/assets/onboarding.js")
+def onboarding_script():
+    return send_from_directory(BASE_DIR, "lgsale_onboarding.js")
 
 
 @app.get("/api/permissions")
@@ -432,10 +443,7 @@ def mobile_page():
 
 @app.get("/mobile-locked")
 def mobile_locked_page():
-    return """<!doctype html><html lang='zh-Hant'><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>
-    <title>LGSale｜手機資料不開放</title><body style='font:16px/1.6 sans-serif;max-width:420px;margin:55px auto;padding:20px'>
-    <h1>手機資料不開放</h1><p>此帳號可使用 Passkey 掃碼授權桌機登入；手機端不顯示任務、實銷或陳列資料。</p>
-    <a href='/login/employee'>返回登入</a></body></html>"""
+    return send_from_directory(BASE_DIR, "LGSale_MobileLocked.html")
 
 
 @app.get("/dealer")
@@ -478,6 +486,10 @@ def create_task():
         payload["dealerIds"] = sorted(g.access.dealer_ids)
         raw_org_id = data.get("orgUnitId")
         payload["orgUnitId"] = int(raw_org_id) if raw_org_id not in (None, "", "ALL") else None
+        dealer_level = str(data.get("dealerLevel", "ALL")).strip()
+        if dealer_level not in {"ALL", "一般店", "DC店", "專售店", "AC店", "批店", "失聯店"}:
+            return jsonify(error="經銷商級別不正確"), 400
+        payload["dealerLevel"] = None if dealer_level == "ALL" else dealer_level
         return jsonify(db.create_task(payload, creator_id=g.access.employee_id)), 201
     except Exception as exc:
         return jsonify(error="任務建立失敗：" + str(exc)), 500
@@ -486,12 +498,16 @@ def create_task():
 @app.get("/api/task-scopes")
 def task_scopes():
     valid_from = request.args.get("validFrom", "").strip()
+    dealer_level = request.args.get("dealerLevel", "ALL").strip()
     try:
         datetime.strptime(valid_from, "%Y-%m-%d")
     except ValueError:
         return jsonify(error="開始執行日期格式不正確"), 400
+    if dealer_level not in {"ALL", "一般店", "DC店", "專售店", "AC店", "批店", "失聯店"}:
+        return jsonify(error="經銷商級別不正確"), 400
     try:
-        return jsonify(db.task_scopes(valid_from, g.access.dealer_ids))
+        return jsonify(db.task_scopes(valid_from, g.access.dealer_ids,
+                                      None if dealer_level == "ALL" else dealer_level))
     except Exception as exc:
         return jsonify(error="執行範圍查詢失敗：" + str(exc)), 503
 
@@ -509,6 +525,28 @@ def toggle_task(task_id: int):
         return jsonify(task)
     except Exception as exc:
         return jsonify(error="任務狀態更新失敗：" + str(exc)), 500
+
+
+@app.put("/api/tasks/<int:task_id>/schedule")
+def update_task_schedule(task_id: int):
+    if not g.access.designer and g.access.role not in {"MANAGER", "ADMIN"}:
+        return jsonify(error="只有經理、管理者或 Designer 可修改任務排程"), 403
+    if db.task_detail(task_id, g.access.dealer_ids) is None:
+        return jsonify(error="找不到可管理的任務"), 404
+    data = request.get_json(silent=True) or {}
+    valid_from, due_date = str(data.get("validFrom", "")).strip(), str(data.get("dueDate", "")).strip()
+    try:
+        start = datetime.strptime(valid_from, "%Y-%m-%d").date()
+        due = datetime.strptime(due_date, "%Y-%m-%d").date()
+    except ValueError:
+        return jsonify(error="開始日期與完成期限格式不正確"), 400
+    if due < start:
+        return jsonify(error="完成期限不得早於開始日期"), 400
+    try:
+        db.update_task_schedule(task_id, valid_from, due_date, g.access.employee_id)
+        return jsonify(db.task_detail(task_id, g.access.dealer_ids))
+    except Exception as exc:
+        return jsonify(error="任務排程更新失敗：" + str(exc)), 500
 
 
 @app.get("/api/tasks/<int:task_id>")
