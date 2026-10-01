@@ -62,7 +62,8 @@ ENDPOINT_CAPABILITIES = {
     "mobile_page": ("mobile.reports.view", "mobile.tasks.view"), "dealer_page": ("mobile.reports.view",),
     "photo_page": ("mobile.tasks.view",),
     "mobile_locked_page": (),
-    "tasks": ("tasks.view",), "task_scopes": ("tasks.create",), "create_task": ("tasks.create",),
+    "tasks": ("tasks.view",), "task_scopes": ("tasks.create",),
+    "task_filter_options": ("tasks.create",), "create_task": ("tasks.create",),
     "toggle_task": ("tasks.toggle",), "task_detail": ("tasks.view",),
     "update_task_schedule": ("tasks.view",),
     "update_task_photos": ("tasks.photos.manage",),
@@ -484,12 +485,24 @@ def create_task():
     try:
         payload = {**data, "title": str(data["title"]).strip(), "instruction": str(data["instruction"]).strip()}
         payload["dealerIds"] = sorted(g.access.dealer_ids)
-        raw_org_id = data.get("orgUnitId")
-        payload["orgUnitId"] = int(raw_org_id) if raw_org_id not in (None, "", "ALL") else None
-        dealer_level = str(data.get("dealerLevel", "ALL")).strip()
-        if dealer_level not in {"ALL", "一般店", "DC店", "專售店", "AC店", "批店", "失聯店"}:
+        raw_org_ids = data.get("orgUnitIds", [data.get("orgUnitId", "ALL")])
+        if not isinstance(raw_org_ids, list):
+            raw_org_ids = [raw_org_ids]
+        payload["orgUnitIds"] = [] if "ALL" in raw_org_ids else sorted({int(x) for x in raw_org_ids if x not in (None, "")})
+        payload["orgUnitId"] = payload["orgUnitIds"][0] if len(payload["orgUnitIds"]) == 1 else None
+        dealer_levels = data.get("dealerLevels", [data.get("dealerLevel", "ALL")])
+        if not isinstance(dealer_levels, list):
+            dealer_levels = [dealer_levels]
+        dealer_levels = [str(x).strip() for x in dealer_levels]
+        allowed_levels = {"一般店", "DC店", "專售店", "AC店", "批店", "失聯店"}
+        if any(x not in allowed_levels | {"ALL"} for x in dealer_levels):
             return jsonify(error="經銷商級別不正確"), 400
-        payload["dealerLevel"] = None if dealer_level == "ALL" else dealer_level
+        payload["dealerLevels"] = [] if "ALL" in dealer_levels else sorted(set(dealer_levels))
+        payload["dealerLevel"] = payload["dealerLevels"][0] if len(payload["dealerLevels"]) == 1 else None
+        raw_employee_ids = data.get("responsibleEmployeeIds", [])
+        if not isinstance(raw_employee_ids, list):
+            raw_employee_ids = [raw_employee_ids]
+        payload["responsibleEmployeeIds"] = [] if "ALL" in raw_employee_ids else sorted({int(x) for x in raw_employee_ids if x not in (None, "")})
         return jsonify(db.create_task(payload, creator_id=g.access.employee_id)), 201
     except Exception as exc:
         return jsonify(error="任務建立失敗：" + str(exc)), 500
@@ -498,18 +511,33 @@ def create_task():
 @app.get("/api/task-scopes")
 def task_scopes():
     valid_from = request.args.get("validFrom", "").strip()
-    dealer_level = request.args.get("dealerLevel", "ALL").strip()
+    dealer_levels = [x.strip() for raw in request.args.getlist("dealerLevel") for x in raw.split(",") if x.strip()] or ["ALL"]
     try:
         datetime.strptime(valid_from, "%Y-%m-%d")
     except ValueError:
         return jsonify(error="開始執行日期格式不正確"), 400
-    if dealer_level not in {"ALL", "一般店", "DC店", "專售店", "AC店", "批店", "失聯店"}:
+    allowed_levels = {"一般店", "DC店", "專售店", "AC店", "批店", "失聯店"}
+    if any(x not in allowed_levels | {"ALL"} for x in dealer_levels):
         return jsonify(error="經銷商級別不正確"), 400
+    employee_ids = [int(x) for raw in request.args.getlist("responsibleEmployeeId") for x in raw.split(",") if x.strip() and x != "ALL"]
     try:
-        return jsonify(db.task_scopes(valid_from, g.access.dealer_ids,
-                                      None if dealer_level == "ALL" else dealer_level))
+        level_filter = None if "ALL" in dealer_levels else (dealer_levels[0] if len(dealer_levels) == 1 else dealer_levels)
+        args = (valid_from, g.access.dealer_ids, level_filter)
+        return jsonify(db.task_scopes(*args, employee_ids) if employee_ids else db.task_scopes(*args))
     except Exception as exc:
         return jsonify(error="執行範圍查詢失敗：" + str(exc)), 503
+
+
+@app.get("/api/task-filter-options")
+def task_filter_options():
+    valid_from = request.args.get("validFrom", "").strip()
+    try:
+        datetime.strptime(valid_from, "%Y-%m-%d")
+        return jsonify(db.task_filter_options(valid_from, g.access.dealer_ids))
+    except ValueError:
+        return jsonify(error="開始執行日期格式不正確"), 400
+    except Exception as exc:
+        return jsonify(error="負責業務查詢失敗：" + str(exc)), 503
 
 
 @app.post("/api/tasks/<int:task_id>/toggle")

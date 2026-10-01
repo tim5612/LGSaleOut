@@ -34,6 +34,10 @@ class PasskeyOnboardingTests(unittest.TestCase):
         self.assertIn("歡迎使用 LGSale 電腦版", source)
         self.assertIn("？ 使用說明", source)
         self.assertIn("mobile.tasks.view", source)
+        self.assertIn("複製手機版連結", source)
+        self.assertIn("複製電腦版連結", source)
+        self.assertIn('copyUrl(event.currentTarget, "/mobile"', source)
+        self.assertIn('copyUrl(event.currentTarget, "/"', source)
 
     def test_mobile_locked_page_explains_successful_login_and_desktop_qr(self):
         source = (Path(__file__).resolve().parents[1] / "LGSale_MobileLocked.html").read_text(encoding="utf-8")

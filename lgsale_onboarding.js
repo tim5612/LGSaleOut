@@ -8,6 +8,7 @@
     .lg-guide-top{display:flex;justify-content:space-between;align-items:center;color:#667085;font-size:13px}.lg-guide-skip{border:0;background:none;color:#1769aa;font:inherit;font-weight:700}
     .lg-guide-icon{width:72px;height:72px;margin:24px auto 18px;border-radius:50%;display:grid;place-items:center;background:#eaf4fb;color:#1769aa;font-size:30px;font-weight:800}
     .lg-guide h2{text-align:center;margin:0 0 10px;font-size:24px}.lg-guide-copy{min-height:145px;color:#475467}.lg-guide-copy p{margin:7px 0}.lg-guide-copy ul{padding-left:22px}
+    .lg-guide-links{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}.lg-guide-links button{border:1px solid #7aaed3;border-radius:9px;padding:11px 8px;background:#f3f8fc;color:#155b8f;font-weight:700}.lg-guide-links button.copied{border-color:#18864b;background:#edf9f2;color:#126b3c}
     .lg-guide-actions{display:grid;grid-template-columns:1fr 1.7fr;gap:10px;margin-top:20px}.lg-guide-actions button{border:1px solid #1769aa;border-radius:9px;padding:12px;background:#fff;color:#1769aa;font-weight:700}.lg-guide-actions .primary{background:#1769aa;color:#fff}
     .lg-guide-dots{text-align:center;color:#98a2b3;letter-spacing:5px;margin-top:16px}.lg-guide-dots b{color:#1769aa}
   `;
@@ -26,11 +27,33 @@
     ["下次可用手機授權", "⌘", "<p>在登入頁點「使用 iPhone 掃碼授權桌機」，再用手機掃描 QR Code 並確認，不需要把一次性註冊網址傳到電腦。</p>"]
   ];
 
+  const loginUrl = destination => {
+    const url = new URL("/login/employee", location.origin);
+    url.searchParams.set("next", destination);
+    return url.href;
+  };
+
+  async function copyUrl(button, destination, label) {
+    const url = loginUrl(destination);
+    try {
+      await navigator.clipboard.writeText(url);
+      const original = button.textContent;
+      button.textContent = `${label}已複製`;
+      button.classList.add("copied");
+      window.setTimeout(() => {
+        button.textContent = original;
+        button.classList.remove("copied");
+      }, 2200);
+    } catch {
+      window.prompt(`請複製${label}`, url);
+    }
+  }
+
   function showGuide(cards, storageKey, start = 0) {
     let index = start;
     const backdrop = document.createElement("div");
     backdrop.className = "lg-guide-backdrop";
-    backdrop.innerHTML = `<section class="lg-guide" role="dialog" aria-modal="true"><div class="lg-guide-top"><span class="lg-guide-count"></span><button class="lg-guide-skip">略過</button></div><div class="lg-guide-icon"></div><h2></h2><div class="lg-guide-copy"></div><div class="lg-guide-actions"><button class="lg-guide-prev">上一步</button><button class="lg-guide-next primary">下一步</button></div><div class="lg-guide-dots"></div></section>`;
+    backdrop.innerHTML = `<section class="lg-guide" role="dialog" aria-modal="true"><div class="lg-guide-top"><span class="lg-guide-count"></span><button class="lg-guide-skip">略過</button></div><div class="lg-guide-icon"></div><h2></h2><div class="lg-guide-copy"></div><div class="lg-guide-links"><button class="lg-copy-mobile">複製手機版連結</button><button class="lg-copy-desktop">複製電腦版連結</button></div><div class="lg-guide-actions"><button class="lg-guide-prev">上一步</button><button class="lg-guide-next primary">下一步</button></div><div class="lg-guide-dots"></div></section>`;
     document.body.appendChild(backdrop);
     const finish = () => { localStorage.setItem(storageKey, "1"); backdrop.remove(); };
     const render = () => {
@@ -44,6 +67,8 @@
       backdrop.querySelector(".lg-guide-dots").innerHTML = cards.map((_, i) => i === index ? "<b>●</b>" : "○").join(" ");
     };
     backdrop.querySelector(".lg-guide-skip").onclick = finish;
+    backdrop.querySelector(".lg-copy-mobile").onclick = event => copyUrl(event.currentTarget, "/mobile", "手機版連結");
+    backdrop.querySelector(".lg-copy-desktop").onclick = event => copyUrl(event.currentTarget, "/", "電腦版連結");
     backdrop.querySelector(".lg-guide-prev").onclick = () => { if (index) { index--; render(); } };
     backdrop.querySelector(".lg-guide-next").onclick = () => { if (index === cards.length - 1) finish(); else { index++; render(); } };
     render();
@@ -56,7 +81,7 @@
     const cards = isMobile && hasMobileWork ? mobileSales : !isMobile ? desktopEmployee : null;
     if (!cards) return;
     const mode = isMobile ? "mobile" : "desktop";
-    const key = `lgsale-guide-v1-${me.id}-${mode}`;
+    const key = `lgsale-guide-v2-${me.id}-${mode}`;
     const help = document.createElement("button");
     help.className = "lg-help";
     help.textContent = "？ 使用說明";

@@ -568,32 +568,41 @@ def tasks(dealer_ids: set[int] | frozenset[int] | None = None) -> list[dict[str,
 
 
 def task_scopes(valid_from: str, dealer_ids: set[int] | frozenset[int] | None = None,
-                dealer_level: str | None = None) -> list[dict[str, Any]]:
+                dealer_level: str | list[str] | None = None,
+                responsible_employee_ids: list[int] | None = None) -> list[dict[str, Any]]:
     if dealer_ids is not None and not dealer_ids:
         return []
     dealer_scope = " AND a.DealerId IN (" + ",".join("%s" for _ in dealer_ids) + ")" if dealer_ids is not None else ""
+    levels = [dealer_level] if isinstance(dealer_level, str) else list(dealer_level or [])
     level_scope = """ AND EXISTS(
         SELECT 1 FROM dbo.DealerLevelHistory dl
-         WHERE dl.DealerId=a.DealerId AND dl.DealerStatus=%s
+         WHERE dl.DealerId=a.DealerId AND dl.DealerStatus IN (""" + ",".join("%s" for _ in levels) + """)
            AND dl.StartDateTime<DATEADD(day,1,CAST(%s AS date))
-           AND (dl.EndDateTime IS NULL OR dl.EndDateTime>=CAST(%s AS date)))""" if dealer_level else ""
-    sql = """SELECT o.OrgUnitId,o.OrgUnitName,COUNT(DISTINCT a.DealerId),COUNT(DISTINCT l.DealerLocationId)
+           AND (dl.EndDateTime IS NULL OR dl.EndDateTime>=CAST(%s AS date)))""" if levels else ""
+    employee_scope = " AND a.EmployeeId IN (" + ",".join("%s" for _ in responsible_employee_ids) + ")" if responsible_employee_ids else ""
+    sql = """WITH effective AS (
+        SELECT a.DealerId,a.EmployeeId,
+               ROW_NUMBER() OVER(PARTITION BY a.DealerId ORDER BY a.StartDateTime DESC,a.DealerAssignmentId DESC) AS rn
+          FROM dbo.DealerAssignmentHistory a
+          JOIN dbo.Employee e ON e.EmployeeId=a.EmployeeId
+           AND e.HireDate<=CAST(%s AS date)
+           AND (e.TerminationDate IS NULL OR e.TerminationDate>=CAST(%s AS date))
+         WHERE a.StartDateTime<DATEADD(day,1,CAST(%s AS date))
+           AND (a.EndDateTime IS NULL OR a.EndDateTime>=CAST(%s AS date))""" + dealer_scope + level_scope + """
+    )
+    SELECT o.OrgUnitId,o.OrgUnitName,COUNT(DISTINCT a.DealerId),COUNT(DISTINCT l.DealerLocationId)
       FROM dbo.OrganizationUnit o
       JOIN dbo.EmployeeOrgAssignmentHistory h ON h.OrgUnitId=o.OrgUnitId
        AND h.StartDateTime<DATEADD(day,1,CAST(%s AS date))
        AND (h.EndDateTime IS NULL OR h.EndDateTime>=CAST(%s AS date))
-      JOIN dbo.Employee e ON e.EmployeeId=h.EmployeeId
-       AND e.HireDate<=CAST(%s AS date)
-       AND (e.TerminationDate IS NULL OR e.TerminationDate>=CAST(%s AS date))
-      JOIN dbo.DealerAssignmentHistory a ON a.EmployeeId=e.EmployeeId
-       AND a.StartDateTime<DATEADD(day,1,CAST(%s AS date))
-       AND (a.EndDateTime IS NULL OR a.EndDateTime>=CAST(%s AS date))
+      JOIN effective a ON a.EmployeeId=h.EmployeeId AND a.rn=1""" + employee_scope + """
       JOIN dbo.DealerLocation l ON l.DealerId=a.DealerId AND l.IsActive=1
-     WHERE o.IsActive=1""" + dealer_scope + level_scope + """
+     WHERE o.IsActive=1
      GROUP BY o.OrgUnitId,o.OrgUnitName
      ORDER BY o.OrgUnitId"""
-    params = ((valid_from,) * 6 + tuple(sorted(dealer_ids) if dealer_ids is not None else ()) +
-              ((dealer_level, valid_from, valid_from) if dealer_level else ()))
+    params = ((valid_from,) * 4 + tuple(sorted(dealer_ids) if dealer_ids is not None else ()) +
+              tuple(levels) + ((valid_from, valid_from) if levels else ()) +
+              (valid_from, valid_from) + tuple(responsible_employee_ids or ()))
     with connect() as conn:
         cur = conn.cursor(); cur.execute(sql, params)
         rows = [{"orgUnitId": int(r[0]), "name": r[1], "dealerCount": int(r[2]),
@@ -605,6 +614,22 @@ def task_scopes(valid_from: str, dealer_ids: set[int] | frozenset[int] | None = 
     return rows
 
 
+def task_filter_options(valid_from: str, dealer_ids: set[int] | frozenset[int] | None = None) -> dict[str, Any]:
+    if dealer_ids is not None and not dealer_ids:
+        return {"employees": []}
+    dealer_scope = " AND a.DealerId IN (" + ",".join("%s" for _ in dealer_ids) + ")" if dealer_ids is not None else ""
+    sql = """SELECT DISTINCT e.EmployeeId,e.EmployeeNo,e.EmployeeName
+      FROM dbo.DealerAssignmentHistory a
+      JOIN dbo.Employee e ON e.EmployeeId=a.EmployeeId
+     WHERE a.StartDateTime<DATEADD(day,1,CAST(%s AS date))
+       AND (a.EndDateTime IS NULL OR a.EndDateTime>=CAST(%s AS date))
+       AND e.HireDate<=CAST(%s AS date)
+       AND (e.TerminationDate IS NULL OR e.TerminationDate>=CAST(%s AS date))""" + dealer_scope + " ORDER BY e.EmployeeName,e.EmployeeId"
+    with connect() as conn:
+        cur = conn.cursor(); cur.execute(sql, (valid_from,) * 4 + tuple(sorted(dealer_ids) if dealer_ids is not None else ()))
+        return {"employees": [{"id": int(r[0]), "number": r[1], "name": r[2]} for r in cur.fetchall()]}
+
+
 def create_task(data: dict[str, Any], creator_id: int | None = None) -> dict[str, Any]:
     conn = connect()
     try:
@@ -613,16 +638,19 @@ def create_task(data: dict[str, Any], creator_id: int | None = None) -> dict[str
         if dealer_ids is not None and not dealer_ids:
             raise ValueError("目前沒有可建立任務的經銷商")
         scoped = " AND a.DealerId IN (" + ",".join("%s" for _ in dealer_ids) + ")" if dealer_ids is not None else ""
-        org_id = data.get("orgUnitId")
-        org_scoped = " AND h.OrgUnitId=%s" if org_id is not None else ""
-        dealer_level = data.get("dealerLevel")
+        org_ids = list(data.get("orgUnitIds") or ([] if data.get("orgUnitId") is None else [data["orgUnitId"]]))
+        org_scoped = " AND h.OrgUnitId IN (" + ",".join("%s" for _ in org_ids) + ")" if org_ids else ""
+        dealer_levels = list(data.get("dealerLevels") or ([] if data.get("dealerLevel") is None else [data["dealerLevel"]]))
         level_scoped = """ AND EXISTS(
             SELECT 1 FROM dbo.DealerLevelHistory dl
-             WHERE dl.DealerId=a.DealerId AND dl.DealerStatus=%s
+             WHERE dl.DealerId=a.DealerId AND dl.DealerStatus IN (""" + ",".join("%s" for _ in dealer_levels) + """)
                AND dl.StartDateTime<DATEADD(day,1,CAST(%s AS date))
-               AND (dl.EndDateTime IS NULL OR dl.EndDateTime>=CAST(%s AS date)))""" if dealer_level else ""
-        cur.execute("""WITH selected AS (
-            SELECT DISTINCT a.DealerId,a.EmployeeId
+               AND (dl.EndDateTime IS NULL OR dl.EndDateTime>=CAST(%s AS date)))""" if dealer_levels else ""
+        responsible_ids = list(data.get("responsibleEmployeeIds") or [])
+        employee_scoped = " AND a.EmployeeId IN (" + ",".join("%s" for _ in responsible_ids) + ")" if responsible_ids else ""
+        cur.execute("""WITH ranked AS (
+            SELECT a.DealerId,a.EmployeeId,
+                   ROW_NUMBER() OVER(PARTITION BY a.DealerId ORDER BY a.StartDateTime DESC,a.DealerAssignmentId DESC) AS rn
               FROM dbo.DealerAssignmentHistory a
               JOIN dbo.Employee e ON e.EmployeeId=a.EmployeeId
                AND e.HireDate<=CAST(%s AS date)
@@ -632,32 +660,40 @@ def create_task(data: dict[str, Any], creator_id: int | None = None) -> dict[str
                AND (h.EndDateTime IS NULL OR h.EndDateTime>=CAST(%s AS date))
              WHERE a.StartDateTime<DATEADD(day,1,CAST(%s AS date))
                AND (a.EndDateTime IS NULL OR a.EndDateTime>=CAST(%s AS date))""" + scoped + org_scoped + level_scoped + """
+        ), selected AS (
+            SELECT a.DealerId,a.EmployeeId FROM ranked a WHERE a.rn=1""" + employee_scoped + """
         )
             SELECT s.DealerId,s.EmployeeId,l.DealerLocationId
               FROM selected s JOIN dbo.DealerLocation l ON l.DealerId=s.DealerId AND l.IsActive=1
              ORDER BY s.DealerId,l.IsPrimary DESC,l.DealerLocationId""",
             ((data["validFrom"],) * 6 + tuple(dealer_ids or ()) +
-             ((int(org_id),) if org_id is not None else ()) +
-             ((dealer_level, data["validFrom"], data["validFrom"]) if dealer_level else ())))
+             tuple(int(x) for x in org_ids) + tuple(dealer_levels) +
+             ((data["validFrom"], data["validFrom"]) if dealer_levels else ()) + tuple(int(x) for x in responsible_ids)))
         assignments = cur.fetchall()
         if not assignments:
             raise ValueError("所選執行範圍目前沒有有效的經銷商店點")
         scope_dealer_count=len({int(r[0]) for r in assignments})
         scope_execution_count=len(assignments)
         scope_name="全部有效經銷商"
-        if org_id is not None:
-            scope_row=_one(cur,"SELECT OrgUnitName FROM dbo.OrganizationUnit WHERE OrgUnitId=%s AND IsActive=1",(int(org_id),))
-            if scope_row is None:raise ValueError("找不到有效的執行處別")
-            scope_name=scope_row[0]
-        if dealer_level:
-            scope_name += "／" + dealer_level if org_id is not None else "全部處別／" + dealer_level
+        if org_ids:
+            placeholders=",".join("%s" for _ in org_ids)
+            cur.execute("SELECT OrgUnitName FROM dbo.OrganizationUnit WHERE OrgUnitId IN ("+placeholders+") AND IsActive=1 ORDER BY OrgUnitId",tuple(int(x) for x in org_ids))
+            org_names=[r[0] for r in cur.fetchall()]
+            if len(org_names)!=len(set(org_ids)):raise ValueError("找不到有效的執行處別")
+            scope_name="、".join(org_names)
+        if dealer_levels:
+            scope_name += "／" + "、".join(dealer_levels)
+        if responsible_ids:
+            placeholders=",".join("%s" for _ in responsible_ids)
+            cur.execute("SELECT EmployeeName FROM dbo.Employee WHERE EmployeeId IN ("+placeholders+") ORDER BY EmployeeName",tuple(int(x) for x in responsible_ids))
+            scope_name += "／負責業務：" + "、".join(r[0] for r in cur.fetchall())
         row = _one(cur, """
             INSERT dbo.VisitTask(TaskTitle,Instruction,ValidFrom,DueDate,ScopeOrgUnitId,ScopeNameSnapshot,
                                   ScopeDealerCount,ScopeExecutionCount,RecordStatus,CreatedByEmployeeId)
             OUTPUT inserted.VisitTaskId,inserted.CreatedAt
             VALUES(%s,%s,%s,%s,%s,%s,%s,%s,'ACTIVE',%s)
         """, (data["title"],data["instruction"],data["validFrom"],data["dueDate"],
-              int(org_id) if org_id is not None else None,scope_name,scope_dealer_count,
+              int(org_ids[0]) if len(org_ids) == 1 else None,scope_name,scope_dealer_count,
               scope_execution_count,creator_id))
         task_id, created_at = int(row[0]), row[1]
         for dealer_id, employee_id, location_id in assignments:
