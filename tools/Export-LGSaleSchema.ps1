@@ -164,7 +164,7 @@ try {
     $outputDirectory = Split-Path -Parent $outputFullPath
     New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
 
-    $scriptLines = @($scripter.Script($urns.ToArray()))
+    $scriptBatches = @($scripter.Script($urns.ToArray()))
     Write-Host "[3/4] Writing schema-only SQL file..." -ForegroundColor Cyan
     $header = @(
         "/*",
@@ -175,7 +175,14 @@ try {
         "*/",
         ""
     )
-    [IO.File]::WriteAllLines($outputFullPath, @($header) + $scriptLines, [Text.UTF8Encoding]::new($true))
+    $outputLines = New-Object System.Collections.Generic.List[string]
+    foreach ($line in $header) { $outputLines.Add($line) }
+    foreach ($batch in $scriptBatches) {
+        $outputLines.Add($batch)
+        $outputLines.Add("GO")
+        $outputLines.Add("")
+    }
+    [IO.File]::WriteAllLines($outputFullPath, $outputLines, [Text.UTF8Encoding]::new($true))
 
     $scriptText = [IO.File]::ReadAllText($outputFullPath)
     $missingTriggers = @()
@@ -183,6 +190,11 @@ try {
         if ($scriptText.IndexOf($trigger.Name, [StringComparison]::OrdinalIgnoreCase) -lt 0) {
             $missingTriggers += "[$($trigger.Schema)].[$($trigger.Name)]"
         }
+    }
+
+    if ($scriptText -notmatch "(?im)^GO\s*\r?\n(?:\s*\r?\n)*CREATE\s+TRIGGER\s") {
+        Remove-Item -LiteralPath $outputFullPath -Force
+        throw "Export validation failed. CREATE TRIGGER is not isolated as the first statement in its batch."
     }
 
     if ($missingTriggers.Count -gt 0) {
